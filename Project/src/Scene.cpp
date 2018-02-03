@@ -2,7 +2,7 @@
 
 Scene::Scene()
 {
-  m_camera.setInitialMousePos(0,0);
+  m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setEye(0.0f, 0.0f, 0.0f);
 //  m_buffer = Buffer();
@@ -21,7 +21,7 @@ Scene::~Scene()
 
 void Scene::mouseClick(QMouseEvent * _event )
 {
-  m_camera.handleMouseClick(_event->pos().x(), _event->pos().y(), _event->type(), _event, 0);
+  m_camera.handleMouseClick(*_event);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

@@ -1,89 +1,95 @@
 #ifndef TRACKBALLCAMERA_H
 #define TRACKBALLCAMERA_H
 
-///**********************************PLEASE NOTICE*****************************************///
-///****************************************************************************************///
-///*																																										  *///
-///*	THIS CLASS BELONGS TO RICHARD SOUTHERN,                                             *///
-///*	MINOR CHANGES WERE MADE TO MAKE SURE THE CAMERA WORKED WITH SDL											*///
-///*  BUT IT SHOUDLN'T BE MARKED																												  *///
-///*	THE ORIGINAL FILE IS FROM A RENDERING WORKSHOP (TRACKBALL - 2/2/2017)               *///
-///*																																										  *///
-///****************************************************************************************///
-///****************************************************************************************///
+/// Modified from :-
+/// Richard Southern (02/02/2017). Trackball workshop.
+/// @note Changes were made to the interface of camera, mouse rotate and zoom are pure virtual.
+/// @note The case statements have been removed in favour of CameraStates which use double dispatch,
+/// based on the camera and cameras state, to act accordingly.
+/// @note The bug with zooming was fixed by updating the last mouse position.
+/// @note Rotation locking bug was fixed using a small epsilon before clamping.
 
 #include "Camera.h"
-#include <gtc/quaternion.hpp>
-#include <QEvent>
-#include <QResizeEvent>
-#include <QOpenGLWidget>
+#include <memory>
+#include "CameraStates.h"
 
 /**
  * @brief The TrackballCamera class
  */
 class TrackballCamera : public Camera
 {
-    typedef enum
-{
-        TRACKBALL_PASSIVE,
-        TRACKBALL_ROTATING,
-        TRACKBALL_ZOOMING
-    } TrackballState;
+
 public:
-    /// Construct our empty trackball (no destructor needed as we don't allocate dynamic memory)
-    TrackballCamera();
+  /// Construct our empty trackball (no destructor needed as we don't allocate dynamic memory)
+  TrackballCamera() = default;
 
-    /// Call this before you need to retrieve the matrices from the camera
-    virtual void update();
+  /// Default virtual destructor
+  ~TrackballCamera() override = default;
 
-    /// Mouse movement handler to look around
-    virtual void handleMouseMove(double /*mouseX*/, double /*mouseY*/);
+  /// Call this before you need to retrieve the matrices from the camera
+  virtual void update() override;
 
-    /// Mouse click handler
-    virtual void handleMouseClick(double /*mouseX*/, double /*mouseY*/, int /*button*/, QMouseEvent * /*action*/, int /*mods*/);
+  /// Mouse movement handler to look around
+  virtual void handleMouseMove(const float _mouseX, const float _mouseY) override;
 
-    /// Set the direction you're looking
-    void setTarget(const double& x, const double& y, const double& z) {m_target = glm::dvec3(x,y,z);}
+  /// Handle keypress / release events
+  virtual void handleKey(const int _glfwKey, const bool _isPress) override;
 
-    /// Set the position that our camera is
-		void setEye(const double& x, const double& y, const double& z)
-		{
-			m_eye = glm::dvec3(x,y,z);
+  /// Mouse click handler
+  virtual void handleMouseClick(const QMouseEvent &_action) override;
 
-//			m_V = glm::lookAt(glm::vec3(m_eye), glm::vec3(m_target), glm::vec3(0.0f,1.0f,0.0f));
+  /// Set the direction you're looking
+  void setTarget(const float _x, const float _y, const float _z) noexcept;
 
-		}
+  /// Set the position that our camera is
+  void setEye(const float _x, const float _y, float _z) noexcept;
 
-    /// Set the zoom by scaling the eye position
-    void setZoom(const double& zoom = 1.0) noexcept {m_zoom = zoom;}
+  /// Set the zoom by scaling the eye position
+  void setZoom(const float _zoom) noexcept;
 
-    /// Controller sensitivity
-    void setSensitivity(const double& sensitivity=0.01) noexcept {m_sensitivity = sensitivity;}
+  /// Controller sensitivity
+  void setSensitivity(const float sensitivity) noexcept;
 
-		glm::vec3 getEye() const { return m_eye; }
-		glm::mat4 getM_V() const { return m_V; }
-//		void setM_V( glm::mat4 _m_v ) { m_V = _m_v; }
+  /// Get the eye vector
+  glm::vec3 getEye() const noexcept;
+
+  /// Rotate based on the current mouse position and the mouse click position
+  virtual void mouseRotate(float _mouseX, float _mouseY) override;
+
+  /// Zoom based on the current mouse position and the position of the mouse click
+  virtual void mouseZoom(float, float _mouseY) override;
+
 private:
-    /// Rotate based on the current mouse position and the mouse click position
-    void mouseRotate(double /*xpos*/, double /*ypos*/);
+  void updateYawPitch();
 
-    /// Zoom based on the current mouse position and the position of the mouse click
-    void mouseZoom(double /*xpos*/, double /*ypos*/);
+private:
+  enum CAM_STATE
+  {
+    TRACKBALL_ZOOMING,
+    TRACKBALL_ROTATING,
+    TRACKBALL_PASSIVE
+  };
 
-    /// Keep track of our current trackball state
-    TrackballState m_state;
+  using statePtr = std::unique_ptr<CameraState>;
+  static const statePtr m_states[];
 
-    /// Store the yaw and pitch
-    double m_yaw, m_pitch, m_zoom, m_sensitivity;
+  /// Keep track of our current trackball state
+  CAM_STATE m_currentState = TRACKBALL_PASSIVE;
 
-    /// Store the target and position with this class
-    glm::dvec3 m_target, m_eye;
+  /// Store the yaw and pitch
+  float m_yaw = 0.0f;
+  float m_pitch = 0.0f;
+  float m_zoom = 1.0;
+  float m_sensitivity = 0.01f;
 
-    /// Store the last yaw and pitch so that the trackball stays put when the mouse is released
-    double m_lastYaw, m_lastPitch;
+  /// Store the target and position with this class
+  glm::vec3 m_target{0.0f, 0.0f, 0.0f};
+  glm::vec3 m_eye{0.0f, 0.0f, 0.0f};
 
-    /// Keep track of whether the matrices need to be rebuilt
-    bool m_dirty;
+  /// Store the last yaw and pitch so that the trackball stays put when the mouse is released
+  float m_lastYaw = 0.0f;
+  float m_lastPitch = 0.0f;
+
 };
 
 #endif // TRACKBALLCAMERA_H

@@ -12,7 +12,7 @@ GLWindow::GLWindow( QWidget *_parent ) : QOpenGLWidget( _parent )
   // set this widget to have the initial keyboard focus
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
   this->resize( _parent->size() );
-  m_camera.setInitialMousePos(0,0);
+  m_camera.setMousePos(0,0);
   m_camera.setTarget(0.0f, 0.0f, -2.0f);
   m_camera.setEye(0.0f, 0.0f, 0.0f);
   m_rotating = false;
@@ -74,9 +74,35 @@ void GLWindow::mouseMove(QMouseEvent * _event)
 
 void GLWindow::mouseClick(QMouseEvent * _event)
 {
-  m_camera.handleMouseClick(_event->pos().x(), _event->pos().y(), _event->type(), _event, 0);
+  m_camera.handleMouseClick(*_event);
 
   update();
+}
+
+void GLWindow::loadMesh()
+{
+  m_mesh->setBufferIndex(0);
+  m_amountVertexData = static_cast<GLsizeiptr>(m_mesh->getAmountVertexData() * sizeof(float));
+
+  // load vertices
+  glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+  glBufferData(GL_ARRAY_BUFFER, m_amountVertexData, nullptr, GL_STATIC_DRAW);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, static_cast<GLsizeiptr>(m_mesh->getAmountVertexData() * sizeof(float)), &m_mesh->getVertexData());
+
+  // pass vertices to shader
+  GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shader.getShaderProgram(), "VertexPosition"));
+  glEnableVertexAttribArray(pos);
+  glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+
+  // load normals
+  glBindBuffer(GL_ARRAY_BUFFER,	m_nbo );
+  glBufferData(GL_ARRAY_BUFFER, m_amountVertexData, nullptr, GL_STATIC_DRAW);
+  glBufferSubData( GL_ARRAY_BUFFER, 0, static_cast<GLsizeiptr>(m_mesh->getAmountVertexData() * sizeof(float)), &m_mesh->getNormalsData());
+
+  // pass normals to shader
+  GLuint n = static_cast<GLuint>(glGetAttribLocation(m_shader.getShaderProgram(), "VertexNormal"));
+  glEnableVertexAttribArray(n);
+  glVertexAttribPointer(n, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -84,38 +110,17 @@ void GLWindow::mouseClick(QMouseEvent * _event)
 void GLWindow::init()
 {
   std::string shadersAddress = "shaders/";
-  m_shader = Shader( "m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "simplefrag.glsl" );
+  m_shader = Shader("m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "simplefrag.glsl");
 
-  glLinkProgram( m_shader.getShaderProgram() );
-  glUseProgram( m_shader.getShaderProgram() );
+  glLinkProgram(m_shader.getShaderProgram());
+  glUseProgram(m_shader.getShaderProgram());
 
-  glGenVertexArrays( 1, &m_vao );
-  glBindVertexArray( m_vao );
-  glGenBuffers( 1, &m_vbo );
-  glGenBuffers( 1, &m_nbo );
+  glGenVertexArrays(1, &m_vao);
+  glBindVertexArray(m_vao);
+  glGenBuffers(1, &m_vbo);
+  glGenBuffers(1, &m_nbo);
 
-  m_mesh->setBufferIndex( 0 );
-  m_amountVertexData = m_mesh->getAmountVertexData();
-
-  // load vertices
-  glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-  glBufferData( GL_ARRAY_BUFFER, m_amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-  glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh->getAmountVertexData() * sizeof(float), &m_mesh->getVertexData() );
-
-  // pass vertices to shader
-  GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
-  glEnableVertexAttribArray( pos );
-  glVertexAttribPointer( pos, 3, GL_FLOAT, GL_FALSE, 0, 0 );
-
-  // load normals
-  glBindBuffer( GL_ARRAY_BUFFER,	m_nbo );
-  glBufferData( GL_ARRAY_BUFFER, m_amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-  glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh->getAmountVertexData() * sizeof(float), &m_mesh->getNormalsData() );
-
-  // pass normals to shader
-  GLint n = glGetAttribLocation( m_shader.getShaderProgram(), "VertexNormal" );
-  glEnableVertexAttribArray( n );
-  glVertexAttribPointer( n, 3, GL_FLOAT, GL_FALSE, 0, 0 );
+  loadMesh();
 
   // link matrices with shader locations
   m_MVAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MV" );
@@ -154,48 +159,20 @@ void GLWindow::renderScene()
   m_MVP = m_projection * m_camera.viewMatrix() * m_MV;
   glm::mat3 N = glm::mat3( glm::inverse( glm::transpose( m_MV ) ) );
 
-  glUniformMatrix4fv( m_MVPAddress, 1, GL_FALSE, glm::value_ptr( m_MVP ) );
-  glUniformMatrix4fv( m_MVAddress, 1, GL_FALSE, glm::value_ptr( m_MV ) );
+  glUniformMatrix4fv(m_MVPAddress, 1, GL_FALSE, glm::value_ptr(m_MVP));
+  glUniformMatrix4fv(m_MVAddress, 1, GL_FALSE, glm::value_ptr(m_MV));
 
-  glUniformMatrix3fv( m_NAddress, 1, GL_FALSE, glm::value_ptr( N ) );
+  glUniformMatrix3fv(m_NAddress, 1, GL_FALSE, glm::value_ptr( N));
 
-  glDrawArrays( GL_TRIANGLES, 0 , ( m_amountVertexData / 3 ) );
+  glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_amountVertexData) / 12);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
 
 void GLWindow::generateNewGeometry()
 {
-  static int count = 0;
-  ++count;
-
-  if ( count == m_meshes.size() )
-    count = 0;
-  m_mesh = &m_meshes[ count ];
-
-  m_amountVertexData = m_mesh->getAmountVertexData();
-
-  m_mesh->setBufferIndex( 0 );
-
-  // load vertices
-  glBindBuffer( GL_ARRAY_BUFFER, m_vbo );
-  glBufferData( GL_ARRAY_BUFFER, m_amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-  glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh->getAmountVertexData() * sizeof(float), &m_mesh->getVertexData() );
-
-  // pass vertices to shader
-  GLint pos = glGetAttribLocation( m_shader.getShaderProgram(), "VertexPosition" );
-  glEnableVertexAttribArray( pos );
-  glVertexAttribPointer( pos, 3, GL_FLOAT, GL_FALSE, 0, 0 );
-
-  // load normals
-  glBindBuffer( GL_ARRAY_BUFFER,	m_nbo );
-  glBufferData( GL_ARRAY_BUFFER, m_amountVertexData * sizeof(float), 0, GL_STATIC_DRAW );
-  glBufferSubData( GL_ARRAY_BUFFER, 0, m_mesh->getAmountVertexData() * sizeof(float), &m_mesh->getNormalsData() );
-
-
-  // pass normals to shader
-  GLint n = glGetAttribLocation( m_shader.getShaderProgram(), "VertexNormal" );
-  glEnableVertexAttribArray( n );
-  glVertexAttribPointer( n, 3, GL_FLOAT, GL_FALSE, 0, 0 );
-
+  static size_t count = 0;
+  count = (count + 1) % m_meshes.size();
+  m_mesh = &m_meshes[count];
+  loadMesh();
 }

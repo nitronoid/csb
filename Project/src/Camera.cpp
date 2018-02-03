@@ -1,34 +1,19 @@
 #include "Camera.h"
 
-/**
- *
- * This class was taken from a Rendering workshop
- * it belongs to Richard Southern
- *
- **/
-
-Camera::Camera() :
-    m_fovy(glm::pi<float>() * 0.25f),
-    m_zNear(1.0f),
-m_zFar(8.0f),
-    m_lastX(0.0),
-    m_lastY(0.0)
-{
-    resize(1, 1);
-}
+/// This gives the compiler a place to store the virtual table
+Camera::~Camera() = default;
 
 /**
  * @brief Camera::resize
  * @param width
  * @param height
  */
-void Camera::resize(int width, int height)
+void Camera::resize(const int _width, const int _height)
 {
-    m_windowWidth = width;
-    m_windowHeight = height;
-		m_aspect = (height == 0)?1.0f:( float( width ) / float( height ) );
+    m_windowWidth = _width;
+    m_windowHeight = _height;
+    m_aspect = (_height == 0)?1.0f:( float( _width ) / float( _height ) );
 }
-
 
 /**
  * @brief Camera::elapsedTime
@@ -36,10 +21,16 @@ void Camera::resize(int width, int height)
  */
 double Camera::elapsedTime()
 {
-    auto now = std::chrono::high_resolution_clock::now();
+    auto now = hr_clock::now();
     double ret_val = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastTime).count()  * 0.001;
     m_lastTime = now;
     return ret_val;
+}
+
+double Camera::toRads(const double degs) const
+{
+  static constexpr double radianRatio = 3.141592654 / 180.0;
+  return degs * radianRatio;
 }
 
 
@@ -50,6 +41,23 @@ double Camera::elapsedTime()
  */
 void Camera::update()
 {
-    m_V = glm::mat4(1.0f);
-		m_P = glm::perspective( m_fovy, m_aspect, m_zNear, m_zFar );
+    m_viewMatrix = glm::mat4(1.0f);
+    m_projectMatrix = glm::perspective( m_fovy, m_aspect, m_zNear, m_zFar );
+}
+
+
+void Camera::setMousePos( float mouseX, float mouseY )
+{
+  m_lastPos.x = mouseX;
+  m_lastPos.y = mouseY;
+}
+
+const glm::mat4& Camera::viewMatrix()
+{
+  return m_viewMatrix;
+}
+
+const glm::mat4& Camera::projMatrix()
+{
+  return m_projectMatrix;
 }

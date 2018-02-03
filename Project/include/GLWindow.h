@@ -19,7 +19,7 @@
 
 class GLWindow : public QOpenGLWidget
 {
-Q_OBJECT        // must include this if you use Qt signals/slots
+  Q_OBJECT        // must include this if you use Qt signals/slots
 public :
   /// @brief Constructor for GLWindow
   //----------------------------------------------------------------------------------------------------------------------
@@ -28,7 +28,7 @@ public :
   //----------------------------------------------------------------------------------------------------------------------
   GLWindow( QWidget *_parent );
 
-    /// @brief dtor
+  /// @brief dtor
   ~GLWindow();
   void mouseMove( QMouseEvent * _event );
   void mouseClick( QMouseEvent * _event );
@@ -36,12 +36,13 @@ public :
 public slots:
   void rotating( const bool _rotating ) { m_rotating = _rotating; }
   void init();
-    void generateNewGeometry();
+  void generateNewGeometry();
 protected:
   /// @brief  The following methods must be implimented in the sub class
   /// this is called when the window is created
   void initializeGL();
 
+  void loadMesh();
   /// @brief this is called whenever the window is re-sized
   /// @param[in] _w the width of the resized window
   /// @param[in] _h the height of the resized window
@@ -88,7 +89,7 @@ private :
   //----------------------------------------------------------------------------------------------------------------------
   Buffer m_buffer;
   //----------------------------------------------------------------------------------------------------------------------
-  int m_amountVertexData;
+  GLsizeiptr m_amountVertexData;
 };
 
 #endif

@@ -4,8 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui
-CONFIG += console c++11
+CONFIG += console c++14
 
 TEMPLATE = app
 TARGET = Project
@@ -15,7 +14,7 @@ QT += opengl \
       gui
 
 CONFIG += console \
-          c++11
+          c++14
 
 CONFIG -= app_bundle
 
@@ -29,10 +28,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
-INCLUDEPATH += $$PWD/include \
+INCLUDEPATH += \
+               /usr/local/include/glm/glm \
+               $$PWD/include \
                $$PWD/ui \
-               $$PWD/../glm \
                $$PWD/shaders
 
 HEADERS += include/MainWindow.h \
@@ -42,7 +41,8 @@ HEADERS += include/MainWindow.h \
            include/Shader.h \
            include/Mesh.h \
            include/Scene.h \
-           include/Buffer.h
+           include/Buffer.h \
+    include/CameraStates.h
 
 SOURCES += src/main.cpp \
            src/MainWindow.cpp \
@@ -52,7 +52,8 @@ SOURCES += src/main.cpp \
            src/Shader.cpp \
            src/Mesh.cpp \
            src/Scene.cpp \
-           src/Buffer.cpp
+           src/Buffer.cpp \
+    src/CameraStates.cpp
 
 OTHER_FILES += shaders/* \
                models/*
