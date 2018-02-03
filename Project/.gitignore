@@ -1,5 +1,0 @@
-*.o
-*.pro.user
-moc/*
-ui/*.h
-obj/*

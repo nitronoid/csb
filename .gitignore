@@ -2,4 +2,7 @@
 *.user
 moc/*
 obj/*
+ui/*.h
 *Makefile*
+.qmake.stash
+Project
