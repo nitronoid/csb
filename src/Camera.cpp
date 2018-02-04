@@ -34,7 +34,19 @@ glm::vec3 Camera::getEye() const noexcept
   return m_eye;
 }
 
+void Camera::setTarget(const float _x, const float _y, const float _z) noexcept
+{
+  m_target.x = _x;
+  m_target.y = _y;
+  m_target.z = _z;
+}
 
+void Camera::setEye(const float _x, const float _y, float _z) noexcept
+{
+  m_eye.x = _x;
+  m_eye.y = _y;
+  m_eye.z = _z;
+}
 
 /**
  * @brief Camera::update

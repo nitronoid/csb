@@ -17,8 +17,8 @@ uniform mat4 M;
 
 void main()
 {
-  WorldPos = vec3(M * vec4(inVert, 1.0f));
-  Normal = vec3(N * vec4(inNormal, 1.0f));
+  gl_Position = MVP * vec4(inVert, 1.0);
+  WorldPos = vec3(M * vec4(inVert, 1.0));
+  Normal = vec3(N * vec4(inNormal, 1.0));
   TexCoords = inUV;
-  gl_Position = MVP*vec4(inVert,1.0);
 }

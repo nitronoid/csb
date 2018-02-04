@@ -43,7 +43,7 @@ void GLWindow::initializeGL()
   m_mesh = & m_meshes[0];
 
   init();
-  m_matrix[MODEL_VIEW] = glm::translate( m_matrix[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f) );
+  m_matrix[MODEL_VIEW] = glm::translate(m_matrix[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ void GLWindow::renderScene()
   auto ao = glGetUniformLocation(shaderProg, "ao");
   glUniform1f(ao, 1.0f);
   auto camPos = glGetUniformLocation(shaderProg, "camPos");
-  glUniform3fv(camPos, 1, glm::value_ptr(m_camera->getEye()));
+  glUniform3fv(camPos, 1, glm::value_ptr(m_camera->getPosition()));
   auto exposure = glGetUniformLocation(shaderProg, "exposure");
   glUniform1f(exposure, 1.0f);
   auto roughness = glGetUniformLocation(shaderProg, "roughness");

@@ -38,12 +38,6 @@ public:
   /// Mouse click handler
   virtual void handleMouseClick(const QMouseEvent &io_action) override;
 
-  /// Set the direction you're looking
-  void setTarget(const float _x, const float _y, const float _z) noexcept;
-
-  /// Set the position that our camera is
-  void setEye(const float _x, const float _y, float _z) noexcept;
-
   /// Set the zoom by scaling the eye position
   void setZoom(const float _zoom) noexcept;
 
@@ -55,6 +49,9 @@ public:
 
   /// Zoom based on the current mouse position and the position of the mouse click
   virtual void mouseZoom(float, float _mouseY) override;
+
+  /// Get the eye vector
+  virtual glm::vec3 getPosition() const noexcept override;
 
 private:
   void updateYawPitch();

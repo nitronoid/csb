@@ -76,18 +76,12 @@ void TrackballCamera::mouseZoom(float, float _mouseY)
   m_zoom = glm::clamp(m_zoom, 0.0f, 10.0f);
 }
 
-void TrackballCamera::setTarget(const float _x, const float _y, const float _z) noexcept
+glm::vec3 TrackballCamera::getPosition() const noexcept
 {
-  m_target.x = _x;
-  m_target.y = _y;
-  m_target.z = _z;
-}
-
-void TrackballCamera::setEye(const float _x, const float _y, float _z) noexcept
-{
-  m_eye.x = _x;
-  m_eye.y = _y;
-  m_eye.z = _z;
+  // Now use lookat function to set the view matrix (assume y is up)
+  glm::mat3 r_yaw = glm::mat3_cast(glm::angleAxis(m_yaw, glm::vec3(0.0f, 1.0f, 0.0f)));
+  glm::mat3 r_pitch = glm::mat3_cast(glm::angleAxis(m_pitch, glm::vec3(1.0f, 0.0f, 0.0f)));
+  return m_target - (r_yaw * r_pitch * m_zoom *  (m_target - m_eye));
 }
 
 void TrackballCamera::setZoom(const float _zoom) noexcept
@@ -116,10 +110,5 @@ void TrackballCamera::update()
 {
   // Call base class to update perspective
   Camera::update();
-
-  // Now use lookat function to set the view matrix (assume y is up)
-  glm::mat3 r_yaw = glm::mat3_cast(glm::angleAxis(m_yaw, glm::vec3(0.0f, 1.0f, 0.0f)));
-  glm::mat3 r_pitch = glm::mat3_cast(glm::angleAxis(m_pitch, glm::vec3(1.0f, 0.0f, 0.0f)));
-  glm::vec3 eye = m_target - (r_yaw * r_pitch * m_zoom *  (m_target - m_eye));
-  m_viewMatrix = glm::lookAt(eye, m_target, glm::vec3(0.0f,1.0f,0.0f));
+  m_viewMatrix = glm::lookAt(getPosition(), m_target, glm::vec3(0.0f,1.0f,0.0f));
 }

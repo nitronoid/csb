@@ -5,7 +5,6 @@ layout (location =0) out vec4 fragColour;
 in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
-in mat3 TBN;
 
 // material parameters
 uniform vec3 albedo;
@@ -23,7 +22,7 @@ const vec3 lightPositions[4] = vec3[4](
       vec3( scale, height,  scale)
       );
 
-const float intensity = 300.f;
+const float intensity = 100.f;
 const vec3 lightColors[4] = vec3[4](
       vec3(intensity, intensity, intensity),
       vec3(intensity, intensity, intensity),
@@ -91,13 +90,13 @@ void main()
   vec3 Lo = vec3(0.0);
   for(int i = 0; i < 4; ++i)
   {
-    vec3 trans = vec3(0.0);
-    vec3 pos = lightPositions[i] + trans - WorldPos;
+    vec3 trans = vec3(0.0, 0.0, -2.0);
+    vec3 ray = lightPositions[i] - WorldPos + trans;
     // calculate per-light radiance
-    vec3 L = normalize(pos);
+    vec3 L = normalize(ray);
     vec3 H = normalize(V + L);
-    float distance = length(pos);
-    float attenuation = 1.0 / (distance * distance);
+    float dist = length(ray);
+    float attenuation = 1.0 / (dist * dist);
     vec3 radiance = lightColors[i] * attenuation;
 
     // Cook-Torrance BRDF

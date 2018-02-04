@@ -64,7 +64,16 @@ public:
   const glm::mat4 &projMatrix();
 
   /// Get the eye vector
+  virtual glm::vec3 getPosition() const noexcept = 0;
+
+  // Get the eye vector
   glm::vec3 getEye() const noexcept;
+
+  /// Set the direction you're looking
+  void setTarget(const float _x, const float _y, const float _z) noexcept;
+
+  /// Set the position that our camera is
+  void setEye(const float _x, const float _y, float _z) noexcept;
 
   /// Set the initial mouse position manually
   void setMousePos(float mouseX, float mouseY);
@@ -91,7 +100,7 @@ protected:
 
   /// Store the target and position with this class
   glm::vec3 m_target  = {0.0f, 0.0f, 0.0f};
-  glm::vec3 m_eye     = {0.0f, 0.0f, 0.0f};
+  glm::vec3 m_eye     = {0.0f, 0.0f, 1.0f};
 
   /// Keep track of the camera parameters
   float m_fovy              = glm::quarter_pi<float>();   //< Field of view in y
