@@ -15,21 +15,18 @@ class Buffer
 public:
 	enum class operation {r = 'r', u = 'u', l = 'l', d = 'd'};
 	enum BufferType { VERTEX, NORMAL, UV };
-  Buffer(); // makes sure that the compiler doesn't generate a default constructor
-	Buffer(const int _size, int _sizeOfData);
-  int append(const void * _address, int size, BufferType _type);
+  Buffer() = default;
+  void init(const GLuint _size, GLuint _sizeOfData);
+  GLuint append(const void * _address, GLuint size, BufferType _type);
 	void clear(const int _size, int _sizeOfData);
-  void reset(const int _size);
+  void reset(const GLuint _size, GLuint _sizeOfData);
+  GLuint dataSize() const noexcept;
 private:
-	GLuint m_vao;
-	GLuint m_vertexBuffer;
-	GLuint m_normalBuffer;
-	GLuint m_uvBuffer;
-	int m_vertex_index;
-	int m_normal_index;
-	int m_uv_index;
-	int m_sizeOfData;
-	std::vector<int> m_elements;
+  std::vector<GLuint> m_buffers   = {0,0,0};
+  std::vector<GLuint> m_bufferIds = {0,0,0};
+  GLuint m_vao;
+  GLuint m_sizeOfData;
+  std::vector<GLuint> m_elements;
 };
 
 #endif // BUFFER_H

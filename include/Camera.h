@@ -12,24 +12,10 @@
 ///****************************************************************************************///
 ///****************************************************************************************///
 
-// For basic stream output
-#include <iostream>
-
-// Used only for sin() and cos() functions
-#include <math.h>
-
-// Needed for matrix operations
 #include <glm.hpp>
-#include <mat4x4.hpp>
 #include <gtc/matrix_transform.hpp>
-
-// Used to maintain a timer
 #include <chrono>
-
-#include <QEvent>
-#include <QResizeEvent>
-#include <QOpenGLWidget>
-//#include <gtx/string_cast.hpp>
+#include <QMouseEvent>
 
 /**
  * @brief The Camera class
@@ -68,7 +54,7 @@ public:
   virtual void handleMouseMove(const float _mouseX, const float _mouseY) = 0;
 
   /// Mouse click handler
-  virtual void handleMouseClick(const QMouseEvent& _action) = 0;
+  virtual void handleMouseClick(const QMouseEvent& io_action) = 0;
 
   virtual void mouseRotate(float _mouseX, float _mouseY) = 0;
   virtual void mouseZoom(float, float _mouseY) = 0;
@@ -90,25 +76,25 @@ protected:
   glm::mat4 m_projectMatrix;
 
   /// Last mouse coordinates
-  glm::vec2 m_lastPos{0.0f, 0.0f};
-  float m_lastX = 0.0f;
-  float m_lastY = 0.0f;
+  glm::vec2 m_lastPos = {0.0f, 0.0f};
+  float m_lastX       = 0.0f;
+  float m_lastY       = 0.0f;
 
   /// Keep track of the camera dimensions
-  int m_windowWidth = 1;
-  int m_windowHeight = 1;
+  int m_windowWidth   = 1;
+  int m_windowHeight  = 1;
 
   /// Keep track of the camera parameters
-  float m_fovy = glm::pi<float>() * 0.25f;   //< Field of view in y
-  float m_aspect = 1.0f; //< Aspect ratio
-  float m_zNear = 1.0f;  //< Near clipping plane
-  float m_zFar = 8.0f;   //< Far clipping plane
+  float m_fovy              = glm::quarter_pi<float>();   //< Field of view in y
+  float m_aspectRatio       = 1.0f; //< Aspect ratio
+  float m_nearClippingPlane = 1.0f;  //< Near clipping plane
+  float m_farClippingPlane  = 8.0f;   //< Far clipping plane
 
 private:
   /// Return the elapsed time since this was last called
-  double elapsedTime();
+  float elapsedTime();
   /// A silly function to convert to radians (there are better ways to do this)
-  double toRads(const double degs) const;
+  float toRads(const float degs) const;
 
 };
 

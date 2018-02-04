@@ -36,7 +36,7 @@ public:
   virtual void handleKey(const int _glfwKey, const bool _isPress) override;
 
   /// Mouse click handler
-  virtual void handleMouseClick(const QMouseEvent &_action) override;
+  virtual void handleMouseClick(const QMouseEvent &io_action) override;
 
   /// Set the direction you're looking
   void setTarget(const float _x, const float _y, const float _z) noexcept;
@@ -65,9 +65,9 @@ private:
 private:
   enum CAM_STATE
   {
-    TRACKBALL_ZOOMING,
-    TRACKBALL_ROTATING,
-    TRACKBALL_PASSIVE
+    TRACKBALL_ZOOMING  = 0,
+    TRACKBALL_ROTATING = 1,
+    TRACKBALL_PASSIVE  = 2
   };
 
   using statePtr = std::unique_ptr<CameraState>;
@@ -77,18 +77,18 @@ private:
   CAM_STATE m_currentState = TRACKBALL_PASSIVE;
 
   /// Store the yaw and pitch
-  float m_yaw = 0.0f;
-  float m_pitch = 0.0f;
-  float m_zoom = 1.0;
+  float m_yaw         = 0.0f;
+  float m_pitch       = 0.0f;
+  float m_zoom        = 1.0;
   float m_sensitivity = 0.01f;
 
   /// Store the target and position with this class
-  glm::vec3 m_target{0.0f, 0.0f, 0.0f};
-  glm::vec3 m_eye{0.0f, 0.0f, 0.0f};
+  glm::vec3 m_target  = {0.0f, 0.0f, 0.0f};
+  glm::vec3 m_eye     = {0.0f, 0.0f, 0.0f};
 
   /// Store the last yaw and pitch so that the trackball stays put when the mouse is released
-  float m_lastYaw = 0.0f;
-  float m_lastPitch = 0.0f;
+  float m_lastYaw     = 0.0f;
+  float m_lastPitch   = 0.0f;
 
 };
 

@@ -1,5 +1,4 @@
 #include "GLWindow.h"
-
 #include <iostream>
 #include <QColorDialog>
 #include <QGLWidget>
@@ -7,16 +6,15 @@
 #include <QScreen>
 //----------------------------------------------------------------------------------------------------------------------
 
-GLWindow::GLWindow( QWidget *_parent ) : QOpenGLWidget( _parent )
+GLWindow::GLWindow(Camera* io_camera , QWidget *_parent) :
+  QOpenGLWidget(_parent),
+  m_camera(io_camera)
 {
   // set this widget to have the initial keyboard focus
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
   this->resize( _parent->size() );
-  m_camera.setMousePos(0,0);
-  m_camera.setTarget(0.0f, 0.0f, -2.0f);
-  m_camera.setEye(0.0f, 0.0f, 0.0f);
+  m_camera->setMousePos(0,0);
   m_rotating = false;
-
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -65,8 +63,7 @@ GLWindow::~GLWindow()
 
 void GLWindow::mouseMove(QMouseEvent * _event)
 {
-  m_camera.handleMouseMove( _event->pos().x(), _event->pos().y() );
-
+  m_camera->handleMouseMove( _event->pos().x(), _event->pos().y() );
   update();
 }
 
@@ -74,35 +71,26 @@ void GLWindow::mouseMove(QMouseEvent * _event)
 
 void GLWindow::mouseClick(QMouseEvent * _event)
 {
-  m_camera.handleMouseClick(*_event);
-
+  m_camera->handleMouseClick(*_event);
   update();
 }
 
 void GLWindow::loadMesh()
 {
   m_mesh->setBufferIndex(0);
-  m_amountVertexData = static_cast<GLsizeiptr>(m_mesh->getAmountVertexData() * sizeof(float));
 
-  // load vertices
-  glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-  glBufferData(GL_ARRAY_BUFFER, m_amountVertexData, nullptr, GL_STATIC_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, static_cast<GLsizeiptr>(m_mesh->getAmountVertexData() * sizeof(float)), &m_mesh->getVertexData());
-
-  // pass vertices to shader
-  GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shader.getShaderProgram(), "VertexPosition"));
-  glEnableVertexAttribArray(pos);
-  glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-  // load normals
-  glBindBuffer(GL_ARRAY_BUFFER,	m_nbo );
-  glBufferData(GL_ARRAY_BUFFER, m_amountVertexData, nullptr, GL_STATIC_DRAW);
-  glBufferSubData( GL_ARRAY_BUFFER, 0, static_cast<GLsizeiptr>(m_mesh->getAmountVertexData() * sizeof(float)), &m_mesh->getNormalsData());
-
-  // pass normals to shader
-  GLuint n = static_cast<GLuint>(glGetAttribLocation(m_shader.getShaderProgram(), "VertexNormal"));
-  glEnableVertexAttribArray(n);
-  glVertexAttribPointer(n, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+  static constexpr std::array<const char*, 4> shaderAttribs = {{"VertexPosition", "VertexNormal", "TexCoord"}};
+  const std::vector<const float*> meshData {
+    &m_mesh->getVertexData(), &m_mesh->getNormalsData(), &m_mesh->getUVsData()
+  };
+  using b = Buffer::BufferType;
+  for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
+  {
+    m_buffer.append(meshData[buff], sizeof(float), buff);
+    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shader.getShaderProgram(), shaderAttribs[buff]));
+    glEnableVertexAttribArray(pos);
+    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+  }
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -115,11 +103,7 @@ void GLWindow::init()
   glLinkProgram(m_shader.getShaderProgram());
   glUseProgram(m_shader.getShaderProgram());
 
-  glGenVertexArrays(1, &m_vao);
-  glBindVertexArray(m_vao);
-  glGenBuffers(1, &m_vbo);
-  glGenBuffers(1, &m_nbo);
-
+  m_buffer.init(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
   loadMesh();
 
   // link matrices with shader locations
@@ -135,9 +119,7 @@ void GLWindow::paintGL()
   glViewport( 0, 0, width(), height() );
   glClearColor( 1, 1, 1, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
   renderScene();
-
   update();
 }
 
@@ -149,22 +131,21 @@ void GLWindow::renderScene()
   glClearColor( 1, 1, 1, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
-  m_camera.update();
+  m_camera->update();
   m_projection = glm::perspective( glm::radians( 60.0f ),
                                    static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
   m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
 
   if ( m_rotating )
     m_MV = glm::rotate( m_MV, glm::radians( -1.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
-  m_MVP = m_projection * m_camera.viewMatrix() * m_MV;
+  m_MVP = m_projection * m_camera->viewMatrix() * m_MV;
   glm::mat3 N = glm::mat3( glm::inverse( glm::transpose( m_MV ) ) );
 
   glUniformMatrix4fv(m_MVPAddress, 1, GL_FALSE, glm::value_ptr(m_MVP));
   glUniformMatrix4fv(m_MVAddress, 1, GL_FALSE, glm::value_ptr(m_MV));
-
   glUniformMatrix3fv(m_NAddress, 1, GL_FALSE, glm::value_ptr( N));
 
-  glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_amountVertexData) / 12);
+  glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataSize() / 3);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -174,5 +155,6 @@ void GLWindow::generateNewGeometry()
   static size_t count = 0;
   count = (count + 1) % m_meshes.size();
   m_mesh = &m_meshes[count];
+  m_buffer.reset(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
   loadMesh();
 }

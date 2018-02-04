@@ -3,9 +3,7 @@
 
 
 #include "Shader.h"
-#include "TrackballCamera.h"
 #include "Mesh.h"
-
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <ext.hpp>
@@ -15,6 +13,7 @@
 #include <QEvent>
 #include <memory>
 #include "Buffer.h"
+#include "Camera.h"
 
 
 class GLWindow : public QOpenGLWidget
@@ -26,7 +25,7 @@ public :
   /// @brief Constructor for GLWindow
   /// @param [in] _parent the parent window to create the GL context in
   //----------------------------------------------------------------------------------------------------------------------
-  GLWindow( QWidget *_parent );
+  GLWindow(Camera* io_camera, QWidget *_parent);
 
   /// @brief dtor
   ~GLWindow();
@@ -83,13 +82,11 @@ private :
   //----------------------------------------------------------------------------------------------------------------------
   glm::mat4 m_MVP;
   //----------------------------------------------------------------------------------------------------------------------
-  TrackballCamera m_camera;
+  Camera* m_camera;
   //----------------------------------------------------------------------------------------------------------------------
   bool m_rotating;
   //----------------------------------------------------------------------------------------------------------------------
   Buffer m_buffer;
-  //----------------------------------------------------------------------------------------------------------------------
-  GLsizeiptr m_amountVertexData;
 };
 
 #endif

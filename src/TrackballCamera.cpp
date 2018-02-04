@@ -9,14 +9,14 @@ const TrackballCamera::statePtr TrackballCamera::m_states[] = {
   statePtr{new CameraPassive}
 };
 
-void TrackballCamera::handleMouseClick(const QMouseEvent &_action)
+void TrackballCamera::handleMouseClick(const QMouseEvent &io_action)
 {
-  auto mousePos = _action.pos();
+  auto mousePos = io_action.pos();
   setMousePos(mousePos.x(), mousePos.y());
   updateYawPitch();
   // Quick hack using some enum math, gives the same result without branching,
   // works as long as Qt don't change their enum values
-  m_currentState = static_cast<CAM_STATE>((_action.type() - 1) - (_action.buttons() - 1));
+  m_currentState = static_cast<CAM_STATE>((io_action.type() - 1) - (io_action.buttons() - 1));
   // The branching but guarenteed version
   //  if (_action.type() == QMouseEvent::MouseButtonPress)
   //  {

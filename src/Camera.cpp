@@ -10,26 +10,28 @@ Camera::~Camera() = default;
  */
 void Camera::resize(const int _width, const int _height)
 {
-    m_windowWidth = _width;
-    m_windowHeight = _height;
-    m_aspect = (_height == 0)?1.0f:( float( _width ) / float( _height ) );
+  m_windowWidth = _width;
+  m_windowHeight = _height;
+  m_aspectRatio = (_height == 0)? 1.0f : (float(_width)/float(_height));
 }
 
 /**
  * @brief Camera::elapsedTime
  * @return
  */
-double Camera::elapsedTime()
+float Camera::elapsedTime()
 {
-    auto now = hr_clock::now();
-    double ret_val = std::chrono::duration_cast<std::chrono::milliseconds>(now - m_lastTime).count()  * 0.001;
-    m_lastTime = now;
-    return ret_val;
+  // save some typing
+  using namespace std::chrono;
+  auto now = hr_clock::now();
+  float ret_val = duration_cast<milliseconds>(now - m_lastTime).count()  * 0.001f;
+  m_lastTime = now;
+  return ret_val;
 }
 
-double Camera::toRads(const double degs) const
+float Camera::toRads(const float degs) const
 {
-  static constexpr double radianRatio = 3.141592654 / 180.0;
+  static constexpr float radianRatio = 3.141592654f / 180.0f;
   return degs * radianRatio;
 }
 
@@ -41,8 +43,8 @@ double Camera::toRads(const double degs) const
  */
 void Camera::update()
 {
-    m_viewMatrix = glm::mat4(1.0f);
-    m_projectMatrix = glm::perspective( m_fovy, m_aspect, m_zNear, m_zFar );
+  m_viewMatrix = glm::mat4(1.0f);
+  m_projectMatrix = glm::perspective( m_fovy, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane);
 }
 
 

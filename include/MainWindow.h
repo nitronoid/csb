@@ -12,26 +12,22 @@
 
 #include <QMainWindow>
 #include "GLWindow.h"
-
-namespace Ui
-{
-  class MainWindow;
-}
+#include "ui_mainwindow.h"
 
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget * parent = 0);
-  ~MainWindow();
+  explicit MainWindow(Camera* io_camera, QWidget * parent = nullptr);
+  ~MainWindow() = default;
 
 private slots:
 
-
 private:
-  Ui::MainWindow *m_ui;
-  GLWindow * m_gl;
+  Ui::MainWindow m_ui;
+
+  GLWindow m_gl = {nullptr, this};
   void keyPressEvent(QKeyEvent * _event);
   void mouseMoveEvent(QMouseEvent * _event);
   void mousePressEvent(QMouseEvent *_event);

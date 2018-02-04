@@ -16,7 +16,7 @@ class Scene
 {
 public:
   Scene();
-  ~Scene();
+  ~Scene() = default;
   void mouseMove( QMouseEvent * event );
   void mouseClick( QMouseEvent * event );
   void Update();
