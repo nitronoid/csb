@@ -14,19 +14,17 @@ void TrackballCamera::handleMouseClick(const QMouseEvent &io_action)
   auto mousePos = io_action.pos();
   setMousePos(mousePos.x(), mousePos.y());
   updateYawPitch();
-  // Quick hack using some enum math, gives the same result without branching,
-  // works as long as Qt don't change their enum values
-  m_currentState = static_cast<CAM_STATE>((io_action.type() - 1) - (io_action.buttons() - 1));
-  // The branching but guarenteed version
-  //  if (_action.type() == QMouseEvent::MouseButtonPress)
-  //  {
-  //    if (_action.buttons() == Qt::LeftButton)
-  //      m_state = TRACKBALL_ROTATING;
-  //    else if (_action.buttons() == Qt::RightButton)
-  //      m_state = TRACKBALL_ZOOMING;
-  //  }
-  //  else if (_action.type() == QMouseEvent::MouseButtonRelease)
-  //    m_state = TRACKBALL_PASSIVE;
+  // Did a branchless version for fun using bool math
+  auto type = io_action.type();
+  auto button = io_action.buttons();
+  using ME = QMouseEvent;
+  int input = (type == ME::MouseButtonPress)
+      * (
+        ((button == Qt::LeftButton) * TRACKBALL_ROTATING)
+        + ((button == Qt::RightButton) * TRACKBALL_ZOOMING)
+        )
+      + (type == ME::MouseButtonRelease) * TRACKBALL_PASSIVE;
+  m_currentState = static_cast<CAM_STATE>(input);
 }
 
 void TrackballCamera::handleKey(const int _glfwKey, const bool _isPress)
