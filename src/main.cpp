@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
   // this will set the format for all widgets
   QSurfaceFormat::setDefaultFormat( format );
   // make an instance of the QApplication
-  QApplication a( argc, argv );
+  QApplication a(argc, argv);
 
   TrackballCamera cam;
   cam.setTarget(0.0f, 0.0f, -2.0f);

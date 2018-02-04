@@ -20,7 +20,7 @@ private:
 public:
 	Shader(std::string _name, std::string _vertexPath, std::string _fragmentPath);
 	Shader();
-	std::string getName() { return this -> m_name; }
+  std::string getName() { return this -> m_name; }
 	GLuint getShaderProgram() { return m_shaderProgram; }
 };
 

@@ -50,9 +50,6 @@ public:
   /// Controller sensitivity
   void setSensitivity(const float sensitivity) noexcept;
 
-  /// Get the eye vector
-  glm::vec3 getEye() const noexcept;
-
   /// Rotate based on the current mouse position and the mouse click position
   virtual void mouseRotate(float _mouseX, float _mouseY) override;
 
@@ -81,10 +78,6 @@ private:
   float m_pitch       = 0.0f;
   float m_zoom        = 1.0;
   float m_sensitivity = 0.01f;
-
-  /// Store the target and position with this class
-  glm::vec3 m_target  = {0.0f, 0.0f, 0.0f};
-  glm::vec3 m_eye     = {0.0f, 0.0f, 0.0f};
 
   /// Store the last yaw and pitch so that the trackball stays put when the mouse is released
   float m_lastYaw     = 0.0f;

@@ -100,11 +100,6 @@ void TrackballCamera::setSensitivity(const float sensitivity) noexcept
   m_sensitivity = sensitivity;
 }
 
-glm::vec3 TrackballCamera::getEye() const noexcept
-{
-  return m_eye;
-}
-
 void TrackballCamera::updateYawPitch()
 {
   m_lastYaw = m_yaw;

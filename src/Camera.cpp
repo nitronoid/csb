@@ -29,11 +29,11 @@ float Camera::elapsedTime()
   return ret_val;
 }
 
-float Camera::toRads(const float degs) const
+glm::vec3 Camera::getEye() const noexcept
 {
-  static constexpr float radianRatio = 3.141592654f / 180.0f;
-  return degs * radianRatio;
+  return m_eye;
 }
+
 
 
 /**
@@ -52,6 +52,17 @@ void Camera::setMousePos( float mouseX, float mouseY )
 {
   m_lastPos.x = mouseX;
   m_lastPos.y = mouseY;
+}
+
+
+void Camera::setFov(const float _fov)
+{
+  m_fovy = _fov;
+}
+
+void Camera::setAspectRatio(const float _ratio)
+{
+  m_aspectRatio = _ratio;
 }
 
 const glm::mat4& Camera::viewMatrix()

@@ -14,6 +14,7 @@ GLWindow::GLWindow(Camera* io_camera , QWidget *_parent) :
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
   this->resize( _parent->size() );
   m_camera->setMousePos(0,0);
+  //m_camera->setAspectRatio(static_cast<float>(width())/static_cast<float>(height()));
   m_rotating = false;
 }
 
@@ -22,7 +23,7 @@ GLWindow::GLWindow(Camera* io_camera , QWidget *_parent) :
 void GLWindow::initializeGL()
 {
 #ifdef linux
-  // this needs to be after the context creation, otherwise it GLEW will crash
+  // this needs to be after the context creation, otherwise GLEW will crash
   //std::cout <<"linux \n";
   glewExperimental = GL_TRUE;
   glewInit();
@@ -31,8 +32,8 @@ void GLWindow::initializeGL()
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_MULTISAMPLE );
   glEnable( GL_TEXTURE_2D );
-  glClearColor( 0.5f, 0.5f, 0.5f, 1.0f );
-  glViewport( 0, 0, devicePixelRatio(), devicePixelRatio() );
+  glClearColor(1, 1, 1, 1.0f);
+  glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
 
   m_meshes[0] = Mesh( "models/cube.obj", "cube" );
   m_meshes[1] = Mesh( "models/Face.obj", "Face" );
@@ -42,7 +43,7 @@ void GLWindow::initializeGL()
   m_mesh = & m_meshes[0];
 
   init();
-  m_MV = glm::translate( m_MV, glm::vec3(0.0f, 0.0f, -2.0f) );
+  m_matrix[MODEL_VIEW] = glm::translate( m_matrix[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f) );
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -79,7 +80,7 @@ void GLWindow::loadMesh()
 {
   m_mesh->setBufferIndex(0);
 
-  static constexpr std::array<const char*, 4> shaderAttribs = {{"VertexPosition", "VertexNormal", "TexCoord"}};
+  static constexpr std::array<const char*, 3> shaderAttribs = {{"inVert", "inNormal", "inUV"}};
   const std::vector<const float*> meshData {
     &m_mesh->getVertexData(), &m_mesh->getNormalsData(), &m_mesh->getUVsData()
   };
@@ -98,7 +99,7 @@ void GLWindow::loadMesh()
 void GLWindow::init()
 {
   std::string shadersAddress = "shaders/";
-  m_shader = Shader("m_shader", shadersAddress + "phong_vert.glsl", shadersAddress + "simplefrag.glsl");
+  m_shader = Shader("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
 
   glLinkProgram(m_shader.getShaderProgram());
   glUseProgram(m_shader.getShaderProgram());
@@ -106,10 +107,12 @@ void GLWindow::init()
   m_buffer.init(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
   loadMesh();
 
+  GLuint shaderProg = m_shader.getShaderProgram();
+
+  static constexpr std::array<const char*, 3> shaderUniforms = {{"M", "MVP", "N"}};
   // link matrices with shader locations
-  m_MVAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MV" );
-  m_MVPAddress = glGetUniformLocation( m_shader.getShaderProgram(), "MVP" );
-  m_NAddress = glGetUniformLocation( m_shader.getShaderProgram(), "N" );
+  for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
+    m_matrixAdress[matrixId] = glGetUniformLocation( shaderProg, shaderUniforms[matrixId]);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -127,23 +130,36 @@ void GLWindow::paintGL()
 
 void GLWindow::renderScene()
 {
-  glViewport( 0, 0, width()*devicePixelRatio(), height()*devicePixelRatio() ); //fix for retina screens
-  glClearColor( 1, 1, 1, 1.0f );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  glClearColor(1, 1, 1, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_camera->update();
-  m_projection = glm::perspective( glm::radians( 60.0f ),
-                                   static_cast<float>( width() ) / static_cast<float>( height() ), 0.1f, 100.0f );
-  m_view = glm::lookAt( glm::vec3( 0.0f, 0.0f, 5.0f ), glm::vec3( 0.0f, 0.0f, 0.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
 
   if ( m_rotating )
-    m_MV = glm::rotate( m_MV, glm::radians( -1.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
-  m_MVP = m_projection * m_camera->viewMatrix() * m_MV;
-  glm::mat3 N = glm::mat3( glm::inverse( glm::transpose( m_MV ) ) );
+    m_matrix[MODEL_VIEW] = glm::rotate( m_matrix[MODEL_VIEW], glm::radians( -1.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+  m_matrix[PROJECTION] = m_camera->projMatrix() * m_camera->viewMatrix() * m_matrix[MODEL_VIEW];
+  m_matrix[NORMAL] = glm::inverse(glm::transpose(m_matrix[MODEL_VIEW]));
 
-  glUniformMatrix4fv(m_MVPAddress, 1, GL_FALSE, glm::value_ptr(m_MVP));
-  glUniformMatrix4fv(m_MVAddress, 1, GL_FALSE, glm::value_ptr(m_MV));
-  glUniformMatrix3fv(m_NAddress, 1, GL_FALSE, glm::value_ptr( N));
+  GLuint shaderProg = m_shader.getShaderProgram();
+
+  auto albedo = glGetUniformLocation(shaderProg, "albedo");
+  glUniform3f(albedo, 0.5f, 0.0f, 0.0f);
+  auto ao = glGetUniformLocation(shaderProg, "ao");
+  glUniform1f(ao, 1.0f);
+  auto camPos = glGetUniformLocation(shaderProg, "camPos");
+  glUniform3fv(camPos, 1, glm::value_ptr(m_camera->getEye()));
+  auto exposure = glGetUniformLocation(shaderProg, "exposure");
+  glUniform1f(exposure, 1.0f);
+  auto roughness = glGetUniformLocation(shaderProg, "roughness");
+  glUniform1f(roughness, 0.5f);
+  auto metalic = glGetUniformLocation(shaderProg, "metallic");
+  glUniform1f(metalic, 1.0f);
+
+  // Send all our matrices to the GPU
+  for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
+  {
+    glUniformMatrix4fv(m_matrixAdress[matrixId], 1, GL_FALSE, glm::value_ptr(m_matrix[matrixId]));
+  }
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataSize() / 3);
 }

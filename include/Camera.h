@@ -63,13 +63,18 @@ public:
   const glm::mat4 &viewMatrix();
   const glm::mat4 &projMatrix();
 
+  /// Get the eye vector
+  glm::vec3 getEye() const noexcept;
+
   /// Set the initial mouse position manually
   void setMousePos(float mouseX, float mouseY);
+  void setFov(const float _fov);
+  void setAspectRatio(const float _ratio);
 
 protected:
   /// Keep track of the last time
   using hr_clock =  std::chrono::high_resolution_clock;
-  hr_clock::time_point m_lastTime =  hr_clock::now();
+  hr_clock::time_point m_lastTime = hr_clock::now();
 
   /// Our view and project matrices are stored with the camera and retrieved as needed
   glm::mat4 m_viewMatrix;
@@ -84,17 +89,19 @@ protected:
   int m_windowWidth   = 1;
   int m_windowHeight  = 1;
 
+  /// Store the target and position with this class
+  glm::vec3 m_target  = {0.0f, 0.0f, 0.0f};
+  glm::vec3 m_eye     = {0.0f, 0.0f, 0.0f};
+
   /// Keep track of the camera parameters
   float m_fovy              = glm::quarter_pi<float>();   //< Field of view in y
   float m_aspectRatio       = 1.0f; //< Aspect ratio
-  float m_nearClippingPlane = 1.0f;  //< Near clipping plane
-  float m_farClippingPlane  = 8.0f;   //< Far clipping plane
+  float m_nearClippingPlane = 0.1f;  //< Near clipping plane
+  float m_farClippingPlane  = 100.0f;   //< Far clipping plane
 
 private:
   /// Return the elapsed time since this was last called
   float elapsedTime();
-  /// A silly function to convert to radians (there are better ways to do this)
-  float toRads(const float degs) const;
 
 };
 
