@@ -140,26 +140,17 @@ void GLWindow::renderScene()
   m_matrix[PROJECTION] = m_camera->projMatrix() * m_camera->viewMatrix() * m_matrix[MODEL_VIEW];
   m_matrix[NORMAL] = glm::inverse(glm::transpose(m_matrix[MODEL_VIEW]));
 
-  GLuint shaderProg = m_shader.getShaderProgram();
-
-  auto albedo = glGetUniformLocation(shaderProg, "albedo");
-  glv::glUniform(albedo, 0.5f, 0.0f, 0.0f);
-  auto ao = glGetUniformLocation(shaderProg, "ao");
-  glv::glUniform(ao, 1.0f);
-  auto camPos = glGetUniformLocation(shaderProg, "camPos");
-  glUniform3fv(camPos, 1, glm::value_ptr(m_camera->getPosition()));
-  auto exposure = glGetUniformLocation(shaderProg, "exposure");
-  glv::glUniform(exposure, 1.0f);
-  auto roughness = glGetUniformLocation(shaderProg, "roughness");
-  glv::glUniform(roughness, 0.5f);
-  auto metalic = glGetUniformLocation(shaderProg, "metallic");
-  glv::glUniform(metalic, 1.0f);
+  m_shader.setUniform("camPos", m_camera->getPosition());
+  m_shader.setUniform("albedo", 0.5f, 0.0f, 0.0f);
+  m_shader.setUniform("ao", 1.0f);
+  m_shader.setUniform("exposure", 1.0f);
+  m_shader.setUniform("roughness", 0.5f);
+  m_shader.setUniform("metallic", 1.0f);
 
   // Send all our matrices to the GPU
   for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
   {
     glv::glUniform(m_matrixAdress[matrixId], m_matrix[matrixId]);
-//    glUniformMatrix4fv(m_matrixAdress[matrixId], 1, GL_FALSE, glm::value_ptr(m_matrix[matrixId]));
   }
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataSize() / 3);

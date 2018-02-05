@@ -52,6 +52,49 @@ std::string Shader::loadShaderFile(std::string _filename)
 }
 
 
+void Shader::setUniform(const char*_name, const float _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform1f(location, _v);
+}
+
+void Shader::setUniform(const char*_name, const float _v0, const float _v1)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform2f(location, _v0, _v1);
+}
+
+void Shader::setUniform(const char*_name, const float _v0, const float _v1, const float _v2)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform3f(location, _v0, _v1, _v2);
+}
+
+void Shader::setUniform(const char*_name, const float _v0, const float _v1, const float _v2, const float _v3)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform4f(location, _v0, _v1, _v2, _v3);
+}
+
+void Shader::setUniform(const char*_name, const glm::vec2 _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform2fv(location, 1, glm::value_ptr(_v));
+}
+
+void Shader::setUniform(const char*_name, const glm::vec3 _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform3fv(location, 1, glm::value_ptr(_v));
+}
+
+void Shader::setUniform(const char*_name, const glm::vec4 _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform4fv(location, 1, glm::value_ptr(_v));
+}
+
+
 void Shader::use()
 {
   glUseProgram(m_shaderProgram);

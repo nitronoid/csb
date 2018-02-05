@@ -59,7 +59,7 @@ void TrackballCamera::mouseRotate(float _mouseX, float _mouseY)
   // We use this to prevent flipping when half pi is exceeded
   // A small epsilon is required to prevent locking at the poles
   static constexpr float epsilon = 0.01f;
-  static constexpr float half_pi = glm::half_pi<float>() - epsilon;
+  static const float half_pi = glm::half_pi<float>() - epsilon;
   m_pitch = m_lastPitch + (m_lastPos.y - _mouseY)*m_sensitivity;
   m_pitch = glm::clamp(m_pitch, -half_pi, half_pi);
 }
