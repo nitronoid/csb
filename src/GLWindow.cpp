@@ -5,11 +5,13 @@
 #include <QImage>
 #include <QScreen>
 #include <openglvariadic.h>
+#include "materialpbr.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
 GLWindow::GLWindow(Camera* io_camera , QWidget *_parent) :
   QOpenGLWidget(_parent),
+  m_material(new MaterialPBR(io_camera)),
   m_camera(io_camera)
 {
   // set this widget to have the initial keyboard focus
@@ -45,7 +47,8 @@ void GLWindow::initializeGL()
   m_mesh = & m_meshes[0];
 
   init();
-  m_matrix[MODEL_VIEW] = glm::translate(m_matrix[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f));
+  auto modelView = m_material->modelViewMatrix();
+  *modelView = glm::translate(*modelView, glm::vec3(0.0f, 0.0f, -2.0f));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -90,7 +93,7 @@ void GLWindow::loadMesh()
   for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
   {
     m_buffer.append(meshData[buff], sizeof(float), buff);
-    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shader.getShaderProgram(), shaderAttribs[buff]));
+    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shaderProgram.getShaderProgram(), shaderAttribs[buff]));
     glEnableVertexAttribArray(pos);
     glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
   }
@@ -101,18 +104,11 @@ void GLWindow::loadMesh()
 void GLWindow::init()
 {
   std::string shadersAddress = "shaders/";
-  m_shader.init("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
-  m_shader.use();
-
+  m_shaderProgram.init("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
+  m_shaderProgram.use();
+  m_material->setup(&m_shaderProgram);
   m_buffer.init(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
   loadMesh();
-
-  GLuint shaderProg = m_shader.getShaderProgram();
-
-  static constexpr std::array<const char*, 3> shaderUniforms = {{"M", "MVP", "N"}};
-  // link matrices with shader locations
-  for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
-    m_matrixAdress[matrixId] = glGetUniformLocation( shaderProg, shaderUniforms[matrixId]);
 }
 
 //------------------------------------------------------------------------------------------------------------------------------
@@ -135,23 +131,10 @@ void GLWindow::renderScene()
 
   m_camera->update();
 
-  if ( m_rotating )
-    m_matrix[MODEL_VIEW] = glm::rotate( m_matrix[MODEL_VIEW], glm::radians( -1.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
-  m_matrix[PROJECTION] = m_camera->projMatrix() * m_camera->viewMatrix() * m_matrix[MODEL_VIEW];
-  m_matrix[NORMAL] = glm::inverse(glm::transpose(m_matrix[MODEL_VIEW]));
+  auto modelView = m_material->modelViewMatrix();
+  *modelView = glm::rotate(*modelView, glm::radians(-1.0f * m_rotating), glm::vec3(0.0f, 1.0f, 0.0f));
 
-  m_shader.setUniform("camPos", m_camera->getPosition());
-  m_shader.setUniform("albedo", 0.5f, 0.0f, 0.0f);
-  m_shader.setUniform("ao", 1.0f);
-  m_shader.setUniform("exposure", 1.0f);
-  m_shader.setUniform("roughness", 0.5f);
-  m_shader.setUniform("metallic", 1.0f);
-
-  // Send all our matrices to the GPU
-  for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
-  {
-    glv::glUniform(m_matrixAdress[matrixId], m_matrix[matrixId]);
-  }
+  m_material->update(&m_shaderProgram);
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataSize() / 3);
 }

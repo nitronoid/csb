@@ -33,11 +33,13 @@ HEADERS += \
   include/GLWindow.h \
   include/Camera.h \
   include/TrackballCamera.h \
-  include/Shader.h \
   include/Mesh.h \
   include/Buffer.h \
   include/CameraStates.h \
-    include/openglvariadic.h
+    include/openglvariadic.h \
+    include/ShaderProgram.h \
+    include/material.h \
+    include/materialpbr.h
 
 SOURCES += \
   src/main.cpp \
@@ -45,10 +47,12 @@ SOURCES += \
   src/GLWindow.cpp \
   src/Camera.cpp \
   src/TrackballCamera.cpp \
-  src/Shader.cpp \
   src/Mesh.cpp \
   src/Buffer.cpp \
-  src/CameraStates.cpp
+  src/CameraStates.cpp \
+    src/ShaderProgram.cpp \
+    src/materialpbr.cpp \
+    src/material.cpp
 
 OTHER_FILES += \
   $$files(shaders/*, true) \

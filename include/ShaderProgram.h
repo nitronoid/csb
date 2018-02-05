@@ -10,17 +10,16 @@
 #include <string>
 #include <fstream>
 #include <glm.hpp>
-#include <gtc/type_ptr.hpp>
 
-class Shader
+class ShaderProgram
 {
 public:
-  Shader() = default;
-  Shader(const Shader&) = default;
-  Shader& operator=(const Shader&) = default;
-  Shader(Shader&&) = default;
-  Shader& operator=(Shader&&) = default;
-  ~Shader() = default;
+  ShaderProgram() = default;
+  ShaderProgram(const ShaderProgram&) = default;
+  ShaderProgram& operator=(const ShaderProgram&) = default;
+  ShaderProgram(ShaderProgram&&) = default;
+  ShaderProgram& operator=(ShaderProgram&&) = default;
+  ~ShaderProgram() = default;
 
   void init(const std::string &_name, const std::string &_vertex, const std::string &_fragment);
   std::string getName();
@@ -32,9 +31,15 @@ public:
   void setUniform(const char*_name, const float _v0, const float _v1, const float _v2);
   void setUniform(const char*_name, const float _v0, const float _v1, const float _v2, const float _v3);
 
+  //------Float Vectors-------------------------------------------------------------------------------------------
   void setUniform(const char*_name, const glm::vec2 _v);
   void setUniform(const char*_name, const glm::vec3 _v);
   void setUniform(const char*_name, const glm::vec4 _v);
+
+  //------Float Matrices------------------------------------------------------------------------------------------
+  void setUniform(const char*_name, const glm::mat2 _v);
+  void setUniform(const char*_name, const glm::mat3 _v);
+  void setUniform(const char*_name, const glm::mat4 _v);
 
   void use();
 

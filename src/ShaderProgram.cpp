@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <iostream>
+#include <gtc/type_ptr.hpp>
 #include <assert.h>
-#include "Shader.h"
+#include "ShaderProgram.h"
 
-void Shader::init(const std::string &_name, const std::string &_vertex, const std::string &_fragment)
+void ShaderProgram::init(const std::string &_name, const std::string &_vertex, const std::string &_fragment)
 {
   m_shaderProgram = glCreateProgram();
   m_name = _name;
@@ -14,7 +15,7 @@ void Shader::init(const std::string &_name, const std::string &_vertex, const st
   glLinkProgram(m_shaderProgram);
 }
 
-void Shader::loadShader(const std::string &_filename, const GLenum _shaderType)
+void ShaderProgram::loadShader(const std::string &_filename, const GLenum _shaderType)
 {
   // creation of the vertex shader
   GLuint newShader = glCreateShader(_shaderType);
@@ -41,7 +42,7 @@ void Shader::loadShader(const std::string &_filename, const GLenum _shaderType)
   glDeleteShader(newShader);
 }
 
-std::string Shader::loadShaderFile(std::string _filename)
+std::string ShaderProgram::loadShaderFile(std::string _filename)
 {
   std::ifstream shaderFile(_filename);
   std::string source ((std::istreambuf_iterator<char>(shaderFile)),
@@ -52,60 +53,78 @@ std::string Shader::loadShaderFile(std::string _filename)
 }
 
 
-void Shader::setUniform(const char*_name, const float _v)
+void ShaderProgram::setUniform(const char*_name, const float _v)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform1f(location, _v);
 }
 
-void Shader::setUniform(const char*_name, const float _v0, const float _v1)
+void ShaderProgram::setUniform(const char*_name, const float _v0, const float _v1)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform2f(location, _v0, _v1);
 }
 
-void Shader::setUniform(const char*_name, const float _v0, const float _v1, const float _v2)
+void ShaderProgram::setUniform(const char*_name, const float _v0, const float _v1, const float _v2)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform3f(location, _v0, _v1, _v2);
 }
 
-void Shader::setUniform(const char*_name, const float _v0, const float _v1, const float _v2, const float _v3)
+void ShaderProgram::setUniform(const char*_name, const float _v0, const float _v1, const float _v2, const float _v3)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform4f(location, _v0, _v1, _v2, _v3);
 }
 
-void Shader::setUniform(const char*_name, const glm::vec2 _v)
+void ShaderProgram::setUniform(const char*_name, const glm::vec2 _v)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform2fv(location, 1, glm::value_ptr(_v));
 }
 
-void Shader::setUniform(const char*_name, const glm::vec3 _v)
+void ShaderProgram::setUniform(const char*_name, const glm::vec3 _v)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform3fv(location, 1, glm::value_ptr(_v));
 }
 
-void Shader::setUniform(const char*_name, const glm::vec4 _v)
+void ShaderProgram::setUniform(const char*_name, const glm::vec4 _v)
 {
   auto location = glGetUniformLocation(m_shaderProgram, _name);
   glUniform4fv(location, 1, glm::value_ptr(_v));
 }
 
+void ShaderProgram::setUniform(const char*_name, const glm::mat2 _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniformMatrix2fv(location, 1, GL_FALSE, glm::value_ptr(_v));
+}
 
-void Shader::use()
+void ShaderProgram::setUniform(const char*_name, const glm::mat3 _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(_v));
+}
+
+void ShaderProgram::setUniform(const char*_name, const glm::mat4 _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(_v));
+}
+
+
+void ShaderProgram::use()
 {
   glUseProgram(m_shaderProgram);
 }
 
-std::string Shader::getName()
+std::string ShaderProgram::getName()
 {
   return m_name;
 }
 
-GLuint Shader::getShaderProgram()
+GLuint ShaderProgram::getShaderProgram()
 {
   return m_shaderProgram;
 }

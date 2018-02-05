@@ -2,7 +2,7 @@
 #define NGLSCENE_H_
 
 
-#include "Shader.h"
+#include "ShaderProgram.h"
 #include "Mesh.h"
 #include <gtc/matrix_transform.hpp>
 #include <ext.hpp>
@@ -14,6 +14,7 @@
 #include "Buffer.h"
 #include "Camera.h"
 
+class Material;
 
 class GLWindow : public QOpenGLWidget
 {
@@ -55,10 +56,9 @@ private :
   //----------------------------------------------------------------------------------------------------------------------
   std::array<Mesh, 5> m_meshes;
   //----------------------------------------------------------------------------------------------------------------------
-  Shader m_shader;
-  enum MODEL_MATRIX { MODEL_VIEW, PROJECTION, NORMAL };
-  std::array<GLint, 3> m_matrixAdress;
-  std::array<glm::mat4, 3> m_matrix;
+  ShaderProgram m_shaderProgram;
+  //----------------------------------------------------------------------------------------------------------------------
+  std::unique_ptr<Material> m_material;
   //----------------------------------------------------------------------------------------------------------------------
   Camera* m_camera;
   //----------------------------------------------------------------------------------------------------------------------
