@@ -35,7 +35,8 @@ HEADERS += \
   include/Shader.h \
   include/Mesh.h \
   include/Buffer.h \
-  include/CameraStates.h
+  include/CameraStates.h \
+    include/openglvariadic.h
 
 SOURCES += \
   src/main.cpp \

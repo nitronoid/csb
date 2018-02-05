@@ -4,6 +4,8 @@
 #include <QGLWidget>
 #include <QImage>
 #include <QScreen>
+#include <openglvariadic.h>
+
 //----------------------------------------------------------------------------------------------------------------------
 
 GLWindow::GLWindow(Camera* io_camera , QWidget *_parent) :
@@ -99,10 +101,8 @@ void GLWindow::loadMesh()
 void GLWindow::init()
 {
   std::string shadersAddress = "shaders/";
-  m_shader = Shader("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
-
-  glLinkProgram(m_shader.getShaderProgram());
-  glUseProgram(m_shader.getShaderProgram());
+  m_shader.init("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
+  m_shader.use();
 
   m_buffer.init(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
   loadMesh();
@@ -143,22 +143,23 @@ void GLWindow::renderScene()
   GLuint shaderProg = m_shader.getShaderProgram();
 
   auto albedo = glGetUniformLocation(shaderProg, "albedo");
-  glUniform3f(albedo, 0.5f, 0.0f, 0.0f);
+  glv::glUniform(albedo, 0.5f, 0.0f, 0.0f);
   auto ao = glGetUniformLocation(shaderProg, "ao");
-  glUniform1f(ao, 1.0f);
+  glv::glUniform(ao, 1.0f);
   auto camPos = glGetUniformLocation(shaderProg, "camPos");
   glUniform3fv(camPos, 1, glm::value_ptr(m_camera->getPosition()));
   auto exposure = glGetUniformLocation(shaderProg, "exposure");
-  glUniform1f(exposure, 1.0f);
+  glv::glUniform(exposure, 1.0f);
   auto roughness = glGetUniformLocation(shaderProg, "roughness");
-  glUniform1f(roughness, 0.5f);
+  glv::glUniform(roughness, 0.5f);
   auto metalic = glGetUniformLocation(shaderProg, "metallic");
-  glUniform1f(metalic, 1.0f);
+  glv::glUniform(metalic, 1.0f);
 
   // Send all our matrices to the GPU
   for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
   {
-    glUniformMatrix4fv(m_matrixAdress[matrixId], 1, GL_FALSE, glm::value_ptr(m_matrix[matrixId]));
+    glv::glUniform(m_matrixAdress[matrixId], m_matrix[matrixId]);
+//    glUniformMatrix4fv(m_matrixAdress[matrixId], 1, GL_FALSE, glm::value_ptr(m_matrix[matrixId]));
   }
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataSize() / 3);

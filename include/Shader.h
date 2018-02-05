@@ -12,16 +12,26 @@
 
 class Shader
 {
+public:
+  Shader() = default;
+  Shader(const Shader&) = default;
+  Shader& operator=(const Shader&) = default;
+  Shader(Shader&&) = default;
+  Shader& operator=(Shader&&) = default;
+  ~Shader() = default;
+
+  void init(const std::string &_name, const std::string &_vertex, const std::string &_fragment);
+  std::string getName();
+  GLuint getShaderProgram();
+
+  void use();
+
 private:
 	std::string m_name;
-	GLuint m_shaderProgram;
-	void setName(std::string _name) { this -> m_name = _name; }
-	std::string loadShader(std::string _filename);
-public:
-	Shader(std::string _name, std::string _vertexPath, std::string _fragmentPath);
-	Shader();
-  std::string getName() { return this -> m_name; }
-	GLuint getShaderProgram() { return m_shaderProgram; }
+  GLuint m_shaderProgram;
+  void loadShader(const std::string &_filename, const GLenum _shaderType);
+  std::string loadShaderFile(std::string _filename);
+
 };
 
 #endif /* Shader_h */

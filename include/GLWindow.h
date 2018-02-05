@@ -5,7 +5,6 @@
 #include "Shader.h"
 #include "Mesh.h"
 #include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
 #include <ext.hpp>
 #include <glm.hpp>
 #include <QOpenGLWidget>
