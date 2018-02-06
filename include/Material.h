@@ -16,14 +16,15 @@ public:
   Material& operator=(Material&&) = default;
   virtual ~Material() = default;
 
-  virtual void setup(ShaderProgram* _shader) = 0;
+  virtual void init(ShaderProgram* _shader);
 
-  virtual void update(ShaderProgram* _shader) = 0;
+  virtual void update() = 0;
 
   glm::mat4* modelViewMatrix();
 
 protected:
   enum MODEL_MATRIX { MODEL_VIEW, PROJECTION, NORMAL };
+  ShaderProgram* m_shader = nullptr;
   std::array<glm::mat4, 3> m_matrix;
 };
 

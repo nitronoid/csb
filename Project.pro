@@ -33,13 +33,12 @@ HEADERS += \
   include/GLWindow.h \
   include/Camera.h \
   include/TrackballCamera.h \
-  include/Mesh.h \
   include/Buffer.h \
   include/CameraStates.h \
-    include/openglvariadic.h \
     include/ShaderProgram.h \
-    include/material.h \
-    include/materialpbr.h
+    include/Material.h \
+    include/MaterialPBR.h \
+    include/Mesh.h
 
 SOURCES += \
   src/main.cpp \
@@ -47,12 +46,12 @@ SOURCES += \
   src/GLWindow.cpp \
   src/Camera.cpp \
   src/TrackballCamera.cpp \
-  src/Mesh.cpp \
   src/Buffer.cpp \
   src/CameraStates.cpp \
     src/ShaderProgram.cpp \
-    src/materialpbr.cpp \
-    src/material.cpp
+    src/Mesh.cpp \
+    src/Material.cpp \
+    src/MaterialPBR.cpp
 
 OTHER_FILES += \
   $$files(shaders/*, true) \
@@ -61,7 +60,7 @@ OTHER_FILES += \
 FORMS += ui/mainwindow.ui
 
 linux:{
-  LIBS += -lGL -lGLU -lGLEW
+  LIBS += -lGL -lGLU -lGLEW -lassimp
 }
 
 

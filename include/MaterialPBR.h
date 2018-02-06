@@ -1,7 +1,7 @@
 #ifndef MATERIALPBR_H
 #define MATERIALPBR_H
 
-#include "material.h"
+#include "Material.h"
 
 class Camera;
 
@@ -17,11 +17,11 @@ public:
   MaterialPBR& operator=(const MaterialPBR&) = default;
   MaterialPBR(MaterialPBR&&) = default;
   MaterialPBR& operator=(MaterialPBR&&) = default;
-  ~MaterialPBR() = default;
+  ~MaterialPBR() override = default;
 
-  virtual void setup(ShaderProgram* _shader) override;
+  virtual void init(ShaderProgram* _shader) override;
 
-  virtual void update(ShaderProgram* _shader) override;
+  virtual void update() override;
 
 private:
   Camera* m_cam = nullptr;

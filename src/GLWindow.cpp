@@ -4,8 +4,7 @@
 #include <QGLWidget>
 #include <QImage>
 #include <QScreen>
-#include <openglvariadic.h>
-#include "materialpbr.h"
+#include "MaterialPBR.h"
 
 //----------------------------------------------------------------------------------------------------------------------
 
@@ -36,15 +35,15 @@ void GLWindow::initializeGL()
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_MULTISAMPLE );
   glEnable( GL_TEXTURE_2D );
-  glClearColor(1, 1, 1, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
 
-  m_meshes[0] = Mesh( "models/cube.obj", "cube" );
-  m_meshes[1] = Mesh( "models/Face.obj", "Face" );
-  m_meshes[2] = Mesh( "models/Suzanne.obj", "Suzanne" );
-  m_meshes[3] = Mesh( "models/test2.obj", "weirdShape" );
-  m_meshes[4] = Mesh( "models/Asteroid.obj", "Asteroid" );
-  m_mesh = & m_meshes[0];
+  m_meshes[0].load("models/cube.obj");
+  m_meshes[1].load("models/Face.obj");
+  m_meshes[2].load("models/Suzanne.obj");
+  m_meshes[3].load("models/test2.obj");
+  m_meshes[4].load("models/Asteroid.obj");
+  m_mesh = &m_meshes[0];
 
   init();
   auto modelView = m_material->modelViewMatrix();
@@ -83,12 +82,11 @@ void GLWindow::mouseClick(QMouseEvent * _event)
 
 void GLWindow::loadMesh()
 {
-  m_mesh->setBufferIndex(0);
-
   static constexpr std::array<const char*, 3> shaderAttribs = {{"inVert", "inNormal", "inUV"}};
   const std::vector<const float*> meshData {
-    &m_mesh->getVertexData(), &m_mesh->getNormalsData(), &m_mesh->getUVsData()
+    m_mesh->getVertexData(), m_mesh->getNormalsData(), m_mesh->getUVsData()
   };
+
   using b = Buffer::BufferType;
   for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
   {
@@ -106,8 +104,8 @@ void GLWindow::init()
   std::string shadersAddress = "shaders/";
   m_shaderProgram.init("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
   m_shaderProgram.use();
-  m_material->setup(&m_shaderProgram);
-  m_buffer.init(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
+  m_material->init(&m_shaderProgram);
+  m_buffer.init(sizeof(float), static_cast<GLuint>(m_mesh->getNVertData()));
   loadMesh();
 }
 
@@ -126,7 +124,7 @@ void GLWindow::paintGL()
 
 void GLWindow::renderScene()
 {
-  glClearColor(1, 1, 1, 1.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_camera->update();
@@ -134,7 +132,7 @@ void GLWindow::renderScene()
   auto modelView = m_material->modelViewMatrix();
   *modelView = glm::rotate(*modelView, glm::radians(-1.0f * m_rotating), glm::vec3(0.0f, 1.0f, 0.0f));
 
-  m_material->update(&m_shaderProgram);
+  m_material->update();
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataSize() / 3);
 }
@@ -146,6 +144,6 @@ void GLWindow::generateNewGeometry()
   static size_t count = 0;
   count = (count + 1) % m_meshes.size();
   m_mesh = &m_meshes[count];
-  m_buffer.reset(sizeof(float), static_cast<GLuint>(m_mesh->getAmountVertexData()));
+  m_buffer.reset(sizeof(float), static_cast<GLuint>(m_mesh->getNVertData()));
   loadMesh();
 }
