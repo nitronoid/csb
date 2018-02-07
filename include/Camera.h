@@ -23,94 +23,148 @@
 class Camera
 {
 public:
-  /// Default Constructor
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Default constructor.
+  ///-----------------------------------------------------------------------------------------------------
   Camera() = default;
-
-  /// Default copy constructor
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Default copy constructor.
+  ///-----------------------------------------------------------------------------------------------------
   Camera(const Camera&) = default;
-
-  /// Default copy assignment operator
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Default copy assignment operator.
+  ///-----------------------------------------------------------------------------------------------------
   Camera& operator=(const Camera&) = default;
-
-  /// Default move constructor
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Default move constructor.
+  ///-----------------------------------------------------------------------------------------------------
   Camera(Camera&&) = default;
-
-  /// Default move assignment operator
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Default move assignment operator.
+  ///-----------------------------------------------------------------------------------------------------
   Camera& operator=(Camera&&) = default;
-
-  ///Virtual dtor
-  virtual ~Camera();
-
-  /// Trigger this when the window resizes
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Default virtual destructor.
+  ///-----------------------------------------------------------------------------------------------------
+  virtual ~Camera() = default;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to resize the openGL view by changing the aspect ratio, used for the projection matrix.
+  /// @param _width is the width we have resized to.
+  /// @param _height is the height we have resized to.
+  ///-----------------------------------------------------------------------------------------------------
   virtual void resize(const int _width, const int _height);
-
-  /// Call this before you need to retrieve the matrices from the camera
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to update the cameras matrices, call before retrieving them.
+  ///-----------------------------------------------------------------------------------------------------
   virtual void update();
-
-  /// Handle keypress / release events
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Handles key press events.
+  /// @note THIS IS UNUSED AND NEEDS FIXING
+  ///-----------------------------------------------------------------------------------------------------
   virtual void handleKey(const int _glfwKey, const bool _isPress) = 0;
-
-  /// Mouse movement handler to look around
-  virtual void handleMouseMove(const float _mouseX, const float _mouseY) = 0;
-
-  /// Mouse click handler
-  virtual void handleMouseClick(const QMouseEvent& io_action) = 0;
-
-  virtual void mouseRotate(float _mouseX, float _mouseY) = 0;
-  virtual void mouseZoom(float, float _mouseY) = 0;
-
-  /// Functions to retrieve matrices from the camera
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to respond to mouse movement.
+  /// @param _mousePos is the new position of the mouse.
+  ///-----------------------------------------------------------------------------------------------------
+  virtual void handleMouseMove(const glm::vec2 &_mousePos) = 0;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to respond to the mouse being pressed.
+  /// @param _action is the action that the mouse performed (which button was clicked).
+  ///-----------------------------------------------------------------------------------------------------
+  virtual void handleMouseClick(const QMouseEvent& _action) = 0;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to rotate the camera based on mouse movement.
+  /// @param _mousePos is the current mouse position.
+  ///-----------------------------------------------------------------------------------------------------
+  virtual void mouseRotate(const glm::vec2 &_mousePos) = 0;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to zoom the camera based on mouse movement.
+  /// @param _mousePos is the current mouse position.
+  ///-----------------------------------------------------------------------------------------------------
+  virtual void mouseZoom(const glm::vec2 &_mousePos) = 0;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to access the view matrix of the camera.
+  /// @return An immutable reference to the view matrix.
+  ///-----------------------------------------------------------------------------------------------------
   const glm::mat4 &viewMatrix();
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to access the projection matrix of the camera.
+  /// @return An immutable reference to the projection matrix.
+  ///-----------------------------------------------------------------------------------------------------
   const glm::mat4 &projMatrix();
-
-  /// Get the eye vector
-  virtual glm::vec3 getPosition() const noexcept = 0;
-
-  // Get the eye vector
-  glm::vec3 getEye() const noexcept;
-
-  /// Set the direction you're looking
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to get the current cameras position.
+  /// @return The eye position.
+  ///-----------------------------------------------------------------------------------------------------
+  virtual glm::vec3 getCameraEye() const noexcept = 0;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to access the original starting position of the camera.
+  /// @return The cameras origin or start position.
+  ///-----------------------------------------------------------------------------------------------------
+  glm::vec3 getCameraOrigin() const noexcept;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set the cameras target (what it is looking at).
+  /// @param _x is the x coordinate of the new target.
+  /// @param _y is the y coordinate of the new target.
+  /// @param _z is the z coordinate of the new target.
+  ///-----------------------------------------------------------------------------------------------------
   void setTarget(const float _x, const float _y, const float _z) noexcept;
-
-  /// Set the position that our camera is
-  void setEye(const float _x, const float _y, float _z) noexcept;
-
-  /// Set the initial mouse position manually
-  void setMousePos(float mouseX, float mouseY);
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set the cameras origin (it's start position).
+  /// @param _x is the x coordinate of the new origin.
+  /// @param _y is the y coordinate of the new origin.
+  /// @param _z is the z coordinate of the new origin.
+  ///-----------------------------------------------------------------------------------------------------
+  void setOrigin(const float _x, const float _y, float _z) noexcept;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set last stored mouse position of the camera.
+  /// @param _x is the x coordinate of the mouse position.
+  /// @param _y is the y coordinate of the mouse position.
+  ///-----------------------------------------------------------------------------------------------------
+  void setMousePos(const float _mouseX, const float _mouseY);
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set current camera field of view.
+  /// @param _fov is the new field of view.
+  ///-----------------------------------------------------------------------------------------------------
   void setFov(const float _fov);
-  void setAspectRatio(const float _ratio);
 
 protected:
-  /// Keep track of the last time
-  using hr_clock =  std::chrono::high_resolution_clock;
-  hr_clock::time_point m_lastTime = hr_clock::now();
-
-  /// Our view and project matrices are stored with the camera and retrieved as needed
-  glm::mat4 m_viewMatrix;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief View matrix.
+  ///-----------------------------------------------------------------------------------------------------
+  glm::mat4 m_viewMatrix = glm::mat4(1.0f);
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Projection matrix.
+  ///-----------------------------------------------------------------------------------------------------
   glm::mat4 m_projectMatrix;
-
-  /// Last mouse coordinates
-  glm::vec2 m_lastPos = {0.0f, 0.0f};
-  float m_lastX       = 0.0f;
-  float m_lastY       = 0.0f;
-
-  /// Keep track of the camera dimensions
-  int m_windowWidth   = 1;
-  int m_windowHeight  = 1;
-
-  /// Store the target and position with this class
-  glm::vec3 m_target  = {0.0f, 0.0f, 0.0f};
-  glm::vec3 m_eye     = {0.0f, 0.0f, 1.0f};
-
-  /// Keep track of the camera parameters
-  float m_fovy              = glm::quarter_pi<float>();   //< Field of view in y
-  float m_aspectRatio       = 1.0f; //< Aspect ratio
-  float m_nearClippingPlane = 0.1f;  //< Near clipping plane
-  float m_farClippingPlane  = 100.0f;   //< Far clipping plane
-
-private:
-  /// Return the elapsed time since this was last called
-  float elapsedTime();
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief Last recorded mouse position.
+  ///-----------------------------------------------------------------------------------------------------
+  glm::vec2 m_lastPos   = {0.0f, 0.0f};
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief The cameras target position.
+  ///-----------------------------------------------------------------------------------------------------
+  glm::vec3 m_target    = {0.0f, 0.0f, 0.0f};
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief The cameras start position.
+  ///-----------------------------------------------------------------------------------------------------
+  glm::vec3 m_camOrigin = {0.0f, 0.0f, 1.0f};
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief The cameras field of view (y axis).
+  ///-----------------------------------------------------------------------------------------------------
+  float m_fovy           = glm::quarter_pi<float>();
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief The cameras aspect ratio.
+  ///-----------------------------------------------------------------------------------------------------
+  float m_aspectRatio    = 1.0f;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief The cameras near clipping plane, we won't draw anything closer than this.
+  ///-----------------------------------------------------------------------------------------------------
+  float m_nearClippingPlane = 0.1f;
+  ///-----------------------------------------------------------------------------------------------------
+  /// @brief The cameras far clipping plane, we won't draw anything further away than this.
+  ///-----------------------------------------------------------------------------------------------------
+  float m_farClippingPlane  = 100.0f;
 
 };
 

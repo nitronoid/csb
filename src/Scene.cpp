@@ -37,12 +37,12 @@ void Scene::initializeGL()
 //----------------------------------------------------------------------------------------------------------------------
 void Scene::resizeGL( int _w, int _h )
 {
-  m_camera->setAspectRatio(static_cast<float>(_w)/_h);
+  m_camera->resize(_w, _h);
 }
 //----------------------------------------------------------------------------------------------------------------------
 void Scene::mouseMove(QMouseEvent * _event)
 {
-  m_camera->handleMouseMove( _event->pos().x(), _event->pos().y() );
+  m_camera->handleMouseMove(glm::vec2{_event->pos().x(), _event->pos().y()});
   update();
 }
 //----------------------------------------------------------------------------------------------------------------------

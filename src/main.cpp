@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
   TrackballCamera cam;
   cam.setTarget(0.0f, 0.0f, -2.0f);
-  cam.setEye(0.0f, 0.0f, 0.0f);
+  cam.setOrigin(0.0f, 0.0f, 0.0f);
   // Create a new MainWindow
   MainWindow w(&cam);
   // show it

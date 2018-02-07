@@ -1,88 +1,56 @@
 #include "Camera.h"
 
-/// This gives the compiler a place to store the virtual table
-Camera::~Camera() = default;
 
-/**
- * @brief Camera::resize
- * @param width
- * @param height
- */
+//-----------------------------------------------------------------------------------------------------
 void Camera::resize(const int _width, const int _height)
 {
-  m_windowWidth = _width;
-  m_windowHeight = _height;
-  m_aspectRatio = (_height == 0)? 1.0f : (float(_width)/float(_height));
+  // Check we won't get a divide by zero
+  m_aspectRatio = (!_height)? 1.0f : (float(_width)/float(_height));
 }
-
-/**
- * @brief Camera::elapsedTime
- * @return
- */
-float Camera::elapsedTime()
+//-----------------------------------------------------------------------------------------------------
+glm::vec3 Camera::getCameraOrigin() const noexcept
 {
-  // save some typing
-  using namespace std::chrono;
-  auto now = hr_clock::now();
-  float ret_val = duration_cast<milliseconds>(now - m_lastTime).count()  * 0.001f;
-  m_lastTime = now;
-  return ret_val;
+  return m_camOrigin;
 }
-
-glm::vec3 Camera::getEye() const noexcept
-{
-  return m_eye;
-}
-
+//-----------------------------------------------------------------------------------------------------
 void Camera::setTarget(const float _x, const float _y, const float _z) noexcept
 {
   m_target.x = _x;
   m_target.y = _y;
   m_target.z = _z;
 }
-
-void Camera::setEye(const float _x, const float _y, float _z) noexcept
+//-----------------------------------------------------------------------------------------------------
+void Camera::setOrigin(const float _x, const float _y, float _z) noexcept
 {
-  m_eye.x = _x;
-  m_eye.y = _y;
-  m_eye.z = _z;
+  m_camOrigin.x = _x;
+  m_camOrigin.y = _y;
+  m_camOrigin.z = _z;
 }
-
-/**
- * @brief Camera::update
- *  You should do something in this function to handle the calculation of the
- *  view and projection matrices V and P respectively
- */
+//-----------------------------------------------------------------------------------------------------
 void Camera::update()
 {
-  m_viewMatrix = glm::mat4(1.0f);
   m_projectMatrix = glm::perspective( m_fovy, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane);
 }
-
-
-void Camera::setMousePos( float mouseX, float mouseY )
+//-----------------------------------------------------------------------------------------------------
+void Camera::setMousePos(const float _mouseX, const float _mouseY)
 {
-  m_lastPos.x = mouseX;
-  m_lastPos.y = mouseY;
+  m_lastPos.x = _mouseX;
+  m_lastPos.y = _mouseY;
 }
-
-
+//-----------------------------------------------------------------------------------------------------
 void Camera::setFov(const float _fov)
 {
   m_fovy = _fov;
 }
-
-void Camera::setAspectRatio(const float _ratio)
-{
-  m_aspectRatio = _ratio;
-}
-
+//-----------------------------------------------------------------------------------------------------
 const glm::mat4& Camera::viewMatrix()
 {
   return m_viewMatrix;
 }
-
+//-----------------------------------------------------------------------------------------------------
 const glm::mat4& Camera::projMatrix()
 {
   return m_projectMatrix;
 }
+//-----------------------------------------------------------------------------------------------------
+

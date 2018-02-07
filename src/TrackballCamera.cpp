@@ -9,14 +9,14 @@ const TrackballCamera::statePtr TrackballCamera::m_states[] = {
   statePtr{new CameraPassive}
 };
 
-void TrackballCamera::handleMouseClick(const QMouseEvent &io_action)
+void TrackballCamera::handleMouseClick(const QMouseEvent &_action)
 {
-  auto mousePos = io_action.pos();
+  auto mousePos = _action.pos();
   setMousePos(mousePos.x(), mousePos.y());
   updateYawPitch();
   // Did a branchless version for fun using bool math
-  auto type = io_action.type();
-  auto button = io_action.buttons();
+  auto type = _action.type();
+  auto button = _action.buttons();
   using ME = QMouseEvent;
   int input = (type == ME::MouseButtonPress)
       * (
@@ -29,7 +29,7 @@ void TrackballCamera::handleMouseClick(const QMouseEvent &io_action)
 
 void TrackballCamera::handleKey(const int _glfwKey, const bool _isPress)
 {
-  m_states[m_currentState]->handleMouseMove(this, _glfwKey, _isPress);
+  m_states[m_currentState]->handleKey(this, _glfwKey, _isPress);
 }
 
 /**
@@ -38,9 +38,9 @@ void TrackballCamera::handleKey(const int _glfwKey, const bool _isPress)
  * @param mouseY
  * Pass the mouse move on to the relevent handler
  */
-void TrackballCamera::handleMouseMove(const float _mouseX, const float _mouseY)
+void TrackballCamera::handleMouseMove(const glm::vec2 &_mousePos)
 {
-  m_states[m_currentState]->handleMouseMove(this, _mouseX, _mouseY);
+  m_states[m_currentState]->handleMouseMove(this, _mousePos);
 }
 
 /**
@@ -49,10 +49,10 @@ void TrackballCamera::handleMouseMove(const float _mouseX, const float _mouseY)
  * @param mouseY current mouse coordinate Y
  * This is the easiest trackball available. The mouse x difference maps to yaw angle and the y maps to pitch angle.
  */
-void TrackballCamera::mouseRotate(float _mouseX, float _mouseY)
+void TrackballCamera::mouseRotate(const glm::vec2 &_mousePos)
 {
   // Make sure the yaw is reset when we go past to -pi,pi
-  m_yaw = m_lastYaw + (m_lastPos.x - _mouseX) * m_sensitivity;
+  m_yaw = m_lastYaw + (m_lastPos.x - _mousePos.x) * m_sensitivity;
   m_yaw = glm::mod(m_yaw, glm::pi<float>() * 2.0f);
 
   // Make sure our pitch is clamped within the range of slightly under half pi
@@ -60,7 +60,7 @@ void TrackballCamera::mouseRotate(float _mouseX, float _mouseY)
   // A small epsilon is required to prevent locking at the poles
   static constexpr float epsilon = 0.01f;
   static const float half_pi = glm::half_pi<float>() - epsilon;
-  m_pitch = m_lastPitch + (m_lastPos.y - _mouseY)*m_sensitivity;
+  m_pitch = m_lastPitch + (m_lastPos.y - _mousePos.y)*m_sensitivity;
   m_pitch = glm::clamp(m_pitch, -half_pi, half_pi);
 }
 
@@ -69,19 +69,19 @@ void TrackballCamera::mouseRotate(float _mouseX, float _mouseY)
  * @param mouseX
  * @param mouseY
  */
-void TrackballCamera::mouseZoom(float, float _mouseY)
+void TrackballCamera::mouseZoom(const glm::vec2 &_mousePos)
 {
-  m_zoom += (_mouseY - m_lastPos.y) * 0.1f * m_sensitivity;
-  m_lastPos.y = _mouseY;
+  m_zoom += (_mousePos.y - m_lastPos.y) * 0.1f * m_sensitivity;
+  m_lastPos = _mousePos;
   m_zoom = glm::clamp(m_zoom, 0.0f, 10.0f);
 }
 
-glm::vec3 TrackballCamera::getPosition() const noexcept
+glm::vec3 TrackballCamera::getCameraEye() const noexcept
 {
   // Now use lookat function to set the view matrix (assume y is up)
   glm::mat3 r_yaw = glm::mat3_cast(glm::angleAxis(m_yaw, glm::vec3(0.0f, 1.0f, 0.0f)));
   glm::mat3 r_pitch = glm::mat3_cast(glm::angleAxis(m_pitch, glm::vec3(1.0f, 0.0f, 0.0f)));
-  return m_target - (r_yaw * r_pitch * m_zoom *  (m_target - m_eye));
+  return m_target - (r_yaw * r_pitch * m_zoom *  (m_target - m_camOrigin));
 }
 
 void TrackballCamera::setZoom(const float _zoom) noexcept
@@ -110,5 +110,5 @@ void TrackballCamera::update()
 {
   // Call base class to update perspective
   Camera::update();
-  m_viewMatrix = glm::lookAt(getPosition(), m_target, glm::vec3(0.0f,1.0f,0.0f));
+  m_viewMatrix = glm::lookAt(getCameraEye(), m_target, glm::vec3(0.0f,1.0f,0.0f));
 }

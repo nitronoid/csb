@@ -1,6 +1,8 @@
 #ifndef TRACKBALLCOMMANDS_H
 #define TRACKBALLCOMMANDS_H
 
+#include "vec2.hpp"
+
 class Camera;
 
 class CameraState
@@ -14,7 +16,7 @@ public:
   CameraState(CameraState&&) = default;
   CameraState& operator=(CameraState&&) = default;
 
-  virtual void handleMouseMove(Camera*const _camera, const float _mouseX, const float _mouseY) = 0;
+  virtual void handleMouseMove(Camera*const _camera, const glm::vec2 &_mousePos) = 0;
   virtual void handleKey(Camera*const _camera, const int _glfwKey, const bool _isPress) = 0;
 
 };
@@ -22,21 +24,21 @@ public:
 class CameraZoom : public CameraState
 {
 public:
-  virtual void handleMouseMove(Camera*const _camera, const float _mouseX, const float _mouseY) override;
+  virtual void handleMouseMove(Camera*const _camera, const glm::vec2 &_mousePos) override;
   virtual void handleKey(Camera*const _camera, const int _glfwKey, const bool _isPress) override;
 };
 
 class CameraRotate : public CameraState
 {
 public:
-  virtual void handleMouseMove(Camera*const _camera, const float _mouseX, const float _mouseY) override;
+  virtual void handleMouseMove(Camera*const _camera, const glm::vec2 &_mousePos) override;
   virtual void handleKey(Camera*const _camera, const int _glfwKey, const bool _isPress) override;
 };
 
 class CameraPassive : public CameraState
 {
 public:
-  virtual void handleMouseMove(Camera*const, const float, const float) override;
+  virtual void handleMouseMove(Camera*const _camera, const glm::vec2 &_mousePos) override;
   virtual void handleKey(Camera * const _camera, const int _glfwKey, const bool _isPress) override;
 };
 

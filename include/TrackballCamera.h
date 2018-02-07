@@ -30,13 +30,13 @@ public:
   virtual void update() override;
 
   /// Mouse movement handler to look around
-  virtual void handleMouseMove(const float _mouseX, const float _mouseY) override;
+  virtual void handleMouseMove(const glm::vec2 &_mousePos) override;
 
   /// Handle keypress / release events
   virtual void handleKey(const int _glfwKey, const bool _isPress) override;
 
   /// Mouse click handler
-  virtual void handleMouseClick(const QMouseEvent &io_action) override;
+  virtual void handleMouseClick(const QMouseEvent &_action) override;
 
   /// Set the zoom by scaling the eye position
   void setZoom(const float _zoom) noexcept;
@@ -45,13 +45,13 @@ public:
   void setSensitivity(const float sensitivity) noexcept;
 
   /// Rotate based on the current mouse position and the mouse click position
-  virtual void mouseRotate(float _mouseX, float _mouseY) override;
+  virtual void mouseRotate(const glm::vec2 &_mousePos) override;
 
   /// Zoom based on the current mouse position and the position of the mouse click
-  virtual void mouseZoom(float, float _mouseY) override;
+  virtual void mouseZoom(const glm::vec2 &_mousePos) override;
 
   /// Get the eye vector
-  virtual glm::vec3 getPosition() const noexcept override;
+  virtual glm::vec3 getCameraEye() const noexcept override;
 
 private:
   void updateYawPitch();

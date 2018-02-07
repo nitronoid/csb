@@ -17,7 +17,7 @@ void MaterialPBR::init(ShaderProgram* _shader)
 
 void MaterialPBR::update()
 {
-  m_shader->setUniform("camPos", m_cam->getPosition());
+  m_shader->setUniform("camPos", m_cam->getCameraEye());
   m_matrix[PROJECTION] = m_cam->projMatrix() * m_cam->viewMatrix() * m_matrix[MODEL_VIEW];
   m_matrix[NORMAL] = glm::inverse(glm::transpose(m_matrix[MODEL_VIEW]));
 
