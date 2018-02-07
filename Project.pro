@@ -30,7 +30,6 @@ INCLUDEPATH += \
 
 HEADERS += \
   include/MainWindow.h \
-  include/GLWindow.h \
   include/Camera.h \
   include/TrackballCamera.h \
   include/Buffer.h \
@@ -38,12 +37,13 @@ HEADERS += \
     include/ShaderProgram.h \
     include/Material.h \
     include/MaterialPBR.h \
-    include/Mesh.h
+    include/Mesh.h \
+    include/Scene.h \
+    include/DemoScene.h
 
 SOURCES += \
   src/main.cpp \
   src/MainWindow.cpp \
-  src/GLWindow.cpp \
   src/Camera.cpp \
   src/TrackballCamera.cpp \
   src/Buffer.cpp \
@@ -51,7 +51,9 @@ SOURCES += \
     src/ShaderProgram.cpp \
     src/Mesh.cpp \
     src/Material.cpp \
-    src/MaterialPBR.cpp
+    src/MaterialPBR.cpp \
+    src/Scene.cpp \
+    src/DemoScene.cpp
 
 OTHER_FILES += \
   $$files(shaders/*, true) \

@@ -4,22 +4,24 @@
 #include <vector>
 #include <string>
 
-class AMesh
+class Mesh
 {
 public:
 
-  void load(const std::string &_fname);
+  void load(const std::string &_fname, const size_t _meshNum = 0);
+
+  void reset();
 
   /// \brief getVertices returns the reference of the std::vector that contains the vertices
-  const float* getVertexData() const { return &m_vertices[0]; }
+  const float* getVertexData() const noexcept;
 
   /// \brief getNormals returns the reference of the std::vector that contains the normals
-  const float* getNormalsData() const { return &m_normals[0]; }
+  const float* getNormalsData() const noexcept;
 
   /// \brief getNormals returns the reference of the std::vector that contains the normals
-  const float* getUVsData() const { return &m_uvs[0]; }
+  const float* getUVsData() const noexcept;
 
-  size_t getNVertData() const { return m_vertices.size(); }
+  size_t getNVertData() const noexcept;
 
 private:
   /// \brief m_vertices is a std::vector containing the vertices

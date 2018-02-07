@@ -13,9 +13,7 @@
 class Buffer
 {
 public:
-	enum class operation {r = 'r', u = 'u', l = 'l', d = 'd'};
-	enum BufferType { VERTEX, NORMAL, UV };
-  Buffer() = default;
+  enum BufferType { VERTEX, NORMAL, UV };
   void init(const GLuint _size, GLuint _sizeOfData);
   GLuint append(const void * _address, GLuint size, BufferType _type);
 	void clear(const int _size, int _sizeOfData);

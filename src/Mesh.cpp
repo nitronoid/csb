@@ -4,7 +4,7 @@
 #include <assimp/postprocess.h>
 
 
-void AMesh::load(const std::string &_fname)
+void Mesh::load(const std::string &_fname, const size_t _meshNum)
 {
   Assimp::Importer importer;
   // And have it read the given file with some example postprocessing
@@ -16,7 +16,7 @@ void AMesh::load(const std::string &_fname)
         aiProcess_Triangulate            |
         aiProcess_JoinIdenticalVertices  |
         aiProcess_SortByPType);
-  const aiMesh* mesh = scene->mMeshes[0];
+  const aiMesh* mesh = scene->mMeshes[_meshNum];
 
   // Get the number of faces on the mesh
   size_t numFaces = mesh->mNumFaces;
@@ -63,5 +63,34 @@ void AMesh::load(const std::string &_fname)
       m_uvs.insert(m_uvs.end(), {uv.x,uv.y});
     }
   }
-
 }
+
+void Mesh::reset()
+{
+  m_vertices.clear();
+  m_normals.clear();
+  m_uvs.clear();
+}
+
+const float* Mesh::getVertexData() const noexcept
+{
+  return &m_vertices[0];
+}
+
+const float* Mesh::getNormalsData() const noexcept
+{
+  return &m_normals[0];
+}
+
+const float* Mesh::getUVsData() const noexcept
+{
+  return &m_uvs[0];
+}
+
+size_t Mesh::getNVertData() const noexcept
+{
+  return m_vertices.size();
+}
+
+
+

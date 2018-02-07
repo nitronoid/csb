@@ -2,14 +2,14 @@
 
 
 MainWindow::MainWindow(Camera *io_camera, QWidget *parent) :
-    QMainWindow(parent),
-    m_gl(io_camera, this)
+  QMainWindow(parent),
+  m_gl(io_camera, this)
 {
-    m_ui.setupUi(this);
-    m_ui.setupUi(this);
-    m_ui.s_mainWindowGridLayout->addWidget(&m_gl,0,0,3,5);
-    connect(m_ui.m_rotating, SIGNAL(clicked(bool)), &m_gl, SLOT(rotating(bool)));
-    connect(m_ui.generate, SIGNAL( clicked(bool)), &m_gl, SLOT(generateNewGeometry()));
+  m_ui.setupUi(this);
+  m_ui.setupUi(this);
+  m_ui.s_mainWindowGridLayout->addWidget(&m_gl,0,0,3,5);
+  connect(m_ui.m_rotating, SIGNAL(clicked(bool)), &m_gl, SLOT(rotating(bool)));
+  connect(m_ui.generate, SIGNAL( clicked(bool)), &m_gl, SLOT(generateNewGeometry()));
 }
 
 //----------------------------------------------------------------------------------------------------------------------

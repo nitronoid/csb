@@ -11,7 +11,7 @@
 #endif
 
 #include <QMainWindow>
-#include "GLWindow.h"
+#include "demoscene.h"
 #include "ui_mainwindow.h"
 
 class MainWindow : public QMainWindow
@@ -27,7 +27,7 @@ private slots:
 private:
   Ui::MainWindow m_ui;
 
-  GLWindow m_gl = {nullptr, this};
+  DemoScene m_gl = {nullptr, this};
   void keyPressEvent(QKeyEvent * _event);
   void mouseMoveEvent(QMouseEvent * _event);
   void mousePressEvent(QMouseEvent *_event);
