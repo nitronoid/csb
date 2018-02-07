@@ -1,7 +1,6 @@
 #ifndef NGLSCENE_H_
 #define NGLSCENE_H_
 
-
 #include "ShaderProgram.h"
 #include "Mesh.h"
 #include <gtc/matrix_transform.hpp>

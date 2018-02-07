@@ -1,12 +1,7 @@
 #ifndef Shader_h
 #define Shader_h
 
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#else
-#include <GL/glew.h>
-#endif
-
+#include "OpenglPlatform.h"
 #include <string>
 #include <fstream>
 #include <glm.hpp>

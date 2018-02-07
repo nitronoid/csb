@@ -1,17 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#ifdef linux
-#include <GL/glew.h>
-#include <GL/gl.h>
-#endif
-
-#ifdef __APPLE__
-#include <OpenGL/gl3.h>
-#endif
+#include "OpenglPlatform.h"
 
 #include <QMainWindow>
-#include "demoscene.h"
+#include "DemoScene.h"
 #include "ui_mainwindow.h"
 
 class MainWindow : public QMainWindow

@@ -39,7 +39,8 @@ HEADERS += \
     include/MaterialPBR.h \
     include/Mesh.h \
     include/Scene.h \
-    include/DemoScene.h
+    include/DemoScene.h \
+    include/OpenglPlatform.h
 
 SOURCES += \
   src/main.cpp \

@@ -1,39 +1,48 @@
 #include "Buffer.h"
 
-void Buffer::init(const GLuint _size, GLuint _sizeOfData)
+//-----------------------------------------------------------------------------------------------------
+void Buffer::init(const GLuint _size, const GLuint _amountOfData)
 {
+  // Generate and bind a Vertex array object
   glGenVertexArrays(1,&m_vao);
   glBindVertexArray(m_vao);
+  // Generate all our required buffers
   for (auto& buffer : m_buffers)
     glGenBuffers(1, &buffer);
-  reset(_size, _sizeOfData);
+  // Reset the buffers
+  reset(_size, _amountOfData);
 }
-
-
-GLuint Buffer::append(const void *_address, GLuint size, BufferType _type)
+//-----------------------------------------------------------------------------------------------------
+void Buffer::reset(const GLuint _size, GLuint _amountOfData)
 {
-  // keeps track of the index of the elements, it will point to a specific index depending on the case
-  glBindBuffer(GL_ARRAY_BUFFER, m_buffers[_type]);
-  auto currentIndex = m_bufferIds[_type];
-  m_elements.push_back(currentIndex);
-  glBufferSubData(GL_ARRAY_BUFFER, 0, size * m_sizeOfData, _address);
-  return currentIndex; // return the index of the current element
-}
-
-void Buffer::reset(const GLuint _size, GLuint _sizeOfData)
-{
-  m_sizeOfData = _sizeOfData;
-  // for all the buffers
+  // Track the amount of data being stored
+  m_amountOfData = _amountOfData;
+  // Track the size of our stored data
+  m_size = _size;
+  // For all the buffers, we bind them then clear the data pointer
   for (const auto& buffer : m_buffers)
   {
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, _size * m_sizeOfData, nullptr, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, m_size * m_amountOfData, nullptr, GL_STATIC_DRAW);
   }
-  m_elements.clear();
-  std::fill(m_bufferIds.begin(), m_bufferIds.end(), 0);
 }
-
+//-----------------------------------------------------------------------------------------------------
+void Buffer::append(const void *_address, const BufferType _type)
+{
+  // Bind the requested buffer, then set it's data pointer
+  glBindBuffer(GL_ARRAY_BUFFER, m_buffers[_type]);
+  glBufferSubData(GL_ARRAY_BUFFER, 0, m_size * m_amountOfData, _address);
+}
+//-----------------------------------------------------------------------------------------------------
 GLuint Buffer::dataSize() const noexcept
 {
-  return m_sizeOfData;
+  // Returns the size the stored of data elements
+  return m_size;
 }
+//-----------------------------------------------------------------------------------------------------
+GLuint Buffer::dataAmount() const noexcept
+{
+  // Returns the amount of data elements
+  return m_amountOfData;
+}
+//-----------------------------------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 #ifndef AMESH_H
 #define AMESH_H
 
+#include "OpenglPlatform.h"
 #include <vector>
 #include <string>
 
@@ -13,25 +14,25 @@ public:
   void reset();
 
   /// \brief getVertices returns the reference of the std::vector that contains the vertices
-  const float* getVertexData() const noexcept;
+  const GLfloat* getVertexData() const noexcept;
 
   /// \brief getNormals returns the reference of the std::vector that contains the normals
-  const float* getNormalsData() const noexcept;
+  const GLfloat* getNormalsData() const noexcept;
 
   /// \brief getNormals returns the reference of the std::vector that contains the normals
-  const float* getUVsData() const noexcept;
+  const GLfloat* getUVsData() const noexcept;
 
-  size_t getNVertData() const noexcept;
+  GLuint getNVertData() const noexcept;
 
 private:
   /// \brief m_vertices is a std::vector containing the vertices
-  std::vector<float> m_vertices;
+  std::vector<GLfloat> m_vertices;
 
   /// \brief m_normals is a std::vector containing the normals
-  std::vector<float> m_normals;
+  std::vector<GLfloat> m_normals;
 
   /// \brief m_normals is a std::vector containing the normals
-  std::vector<float> m_uvs;
+  std::vector<GLfloat> m_uvs;
 };
 
 #endif // AMESH_H

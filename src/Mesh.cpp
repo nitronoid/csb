@@ -72,24 +72,24 @@ void Mesh::reset()
   m_uvs.clear();
 }
 
-const float* Mesh::getVertexData() const noexcept
+const GLfloat* Mesh::getVertexData() const noexcept
 {
   return &m_vertices[0];
 }
 
-const float* Mesh::getNormalsData() const noexcept
+const GLfloat* Mesh::getNormalsData() const noexcept
 {
   return &m_normals[0];
 }
 
-const float* Mesh::getUVsData() const noexcept
+const GLfloat *Mesh::getUVsData() const noexcept
 {
   return &m_uvs[0];
 }
 
-size_t Mesh::getNVertData() const noexcept
+GLuint Mesh::getNVertData() const noexcept
 {
-  return m_vertices.size();
+  return static_cast<GLuint>(m_vertices.size());
 }
 
 
