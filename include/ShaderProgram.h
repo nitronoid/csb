@@ -3,6 +3,7 @@
 
 #include "OpenglPlatform.h"
 #include <string>
+#include <unordered_map>
 #include <fstream>
 #include <glm.hpp>
 
@@ -14,7 +15,7 @@ public:
   ShaderProgram& operator=(const ShaderProgram&) = default;
   ShaderProgram(ShaderProgram&&) = default;
   ShaderProgram& operator=(ShaderProgram&&) = default;
-  ~ShaderProgram() = default;
+  ~ShaderProgram();
 
   void init(const std::string &_name, const std::string &_vertex, const std::string &_fragment);
   std::string getName();
@@ -36,12 +37,18 @@ public:
   void setUniform(const char*_name, const glm::mat3 _v);
   void setUniform(const char*_name, const glm::mat4 _v);
 
+  void setUniform(const char*_name, const bool _v);
+
+
+  void loadShader(const std::string &_filename, const GLenum _shaderType);
   void use();
+  void clearShader(const GLenum _shaderType);
+  void clearAllShaders();
 
 private:
 	std::string m_name;
   GLuint m_shaderProgram;
-  void loadShader(const std::string &_filename, const GLenum _shaderType);
+  std::unordered_map<GLenum, GLuint> m_attachedShaders;
   std::string loadShaderFile(std::string _filename);
 
 };

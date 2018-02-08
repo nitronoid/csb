@@ -15,6 +15,12 @@ void ShaderProgram::init(const std::string &_name, const std::string &_vertex, c
   glLinkProgram(m_shaderProgram);
 }
 
+ShaderProgram::~ShaderProgram()
+{
+  clearAllShaders();
+  glDeleteProgram(m_shaderProgram);
+}
+
 void ShaderProgram::loadShader(const std::string &_filename, const GLenum _shaderType)
 {
   // creation of the vertex shader
@@ -24,7 +30,7 @@ void ShaderProgram::loadShader(const std::string &_filename, const GLenum _shade
   glShaderSource(newShader, 1, &shaderFilePtr, nullptr);
   glCompileShader(newShader);
   glAttachShader(m_shaderProgram, newShader);
-
+  m_attachedShaders[_shaderType] = newShader;
   GLint status;
   glGetShaderiv(newShader, GL_COMPILE_STATUS, &status);
   if (!status)
@@ -42,6 +48,21 @@ void ShaderProgram::loadShader(const std::string &_filename, const GLenum _shade
   glDeleteShader(newShader);
 }
 
+void ShaderProgram::clearShader(const GLenum _shaderType)
+{
+  glDetachShader(m_shaderProgram, m_attachedShaders[_shaderType]);
+  m_attachedShaders.erase(_shaderType);
+}
+
+void ShaderProgram::clearAllShaders()
+{
+  for (const auto& attached : m_attachedShaders)
+  {
+    glDetachShader(m_shaderProgram, attached.second);
+  }
+  m_attachedShaders.clear();
+}
+
 std::string ShaderProgram::loadShaderFile(std::string _filename)
 {
   std::ifstream shaderFile(_filename);
@@ -52,6 +73,11 @@ std::string ShaderProgram::loadShaderFile(std::string _filename)
   return source;
 }
 
+void ShaderProgram::setUniform(const char*_name, const bool _v)
+{
+  auto location = glGetUniformLocation(m_shaderProgram, _name);
+  glUniform1i(location, _v);
+}
 
 void ShaderProgram::setUniform(const char*_name, const float _v)
 {

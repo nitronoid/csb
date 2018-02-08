@@ -31,3 +31,14 @@ void MaterialPBR::update()
     }
   }
 }
+
+const char* MaterialPBR::vertexName() const
+{
+  return "shaders/PBRVertex.glsl";
+}
+
+const char* MaterialPBR::fragName() const
+{
+  return "shaders/PBRFragment.glsl";
+}
+

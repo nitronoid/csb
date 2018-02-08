@@ -14,7 +14,7 @@ void DemoScene::loadMesh()
   for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
   {
     m_buffer.append(meshData[buff], buff);
-    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shaderProgram.getShaderProgram(), shaderAttribs[buff]));
+    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shaderPrograms[m_currentMaterial].getShaderProgram(), shaderAttribs[buff]));
     glEnableVertexAttribArray(pos);
     glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
   }
@@ -31,10 +31,14 @@ void DemoScene::init()
   m_meshes[4].load("models/Asteroid.obj");
   m_rotating = false;
 
-  std::string shadersAddress = "shaders/";
-  m_shaderProgram.init("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
-  m_shaderProgram.use();
-  m_material->init(&m_shaderProgram, &m_matrices);
+  for (size_t i = 0; i < m_shaderPrograms.size(); ++i)
+  {
+    auto& mat = m_materials[i];
+    m_shaderPrograms[i].init("m_shader", mat->vertexName(), mat->fragName());
+    m_shaderPrograms[i].use();
+    mat->init(&m_shaderPrograms[i], &m_matrices);
+  }
+  m_shaderPrograms[m_currentMaterial].use();
   m_buffer.init(sizeof(float), m_meshes[m_meshIndex].getNVertData());
   loadMesh();
 
@@ -57,6 +61,14 @@ void DemoScene::generateNewGeometry()
   loadMesh();
 }
 //-----------------------------------------------------------------------------------------------------
+void DemoScene::nextMaterial()
+{
+  makeCurrent();
+  m_currentMaterial = (m_currentMaterial + 1) % m_materials.size();
+  m_shaderPrograms[m_currentMaterial].use();
+}
+//-----------------------------------------------------------------------------------------------------
+
 void DemoScene::renderScene()
 {
   Scene::renderScene();
@@ -67,7 +79,7 @@ void DemoScene::renderScene()
     m_matrices[MODEL_VIEW] = glm::rotate(m_matrices[MODEL_VIEW], glm::radians(-1.0f * m_rotating), glm::vec3(0.0f, 1.0f, 0.0f));
   }
 
-  m_material->update();
+  m_materials[m_currentMaterial]->update();
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataAmount() / 3);
 }

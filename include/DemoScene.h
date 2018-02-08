@@ -3,6 +3,7 @@
 
 #include "Scene.h"
 #include "MaterialPBR.h"
+#include "MaterialPhong.h"
 
 
 class DemoScene : public Scene
@@ -16,8 +17,7 @@ public:
   /// @param [io] io_parent the parent window to create the GL context in.
   //----------------------------------------------------------------------------------------------------------------------
   DemoScene(Camera* io_camera, QWidget *_parent) :
-    Scene(io_camera, _parent),
-    m_material(new MaterialPBR(io_camera))
+    Scene(io_camera, _parent)
   {}
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
@@ -56,6 +56,8 @@ public slots:
   //-----------------------------------------------------------------------------------------------------
   void generateNewGeometry();
 
+  void nextMaterial();
+
 private:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to load mesh data into our buffer.
@@ -78,11 +80,16 @@ private:
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Holds our shader program.
   //----------------------------------------------------------------------------------------------------------------------
-  ShaderProgram m_shaderProgram;
+  std::array<ShaderProgram, 2> m_shaderPrograms;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Holds our material settings for the shader.
   //----------------------------------------------------------------------------------------------------------------------
-  std::unique_ptr<Material> m_material;
+  using matPtr = std::unique_ptr<Material>;
+  std::array<matPtr, 2> m_materials = {{
+    matPtr{new MaterialPBR(m_camera)},
+    matPtr{new MaterialPhong}
+  }};
+  size_t m_currentMaterial = 0;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Is the mesh rotating.
   //----------------------------------------------------------------------------------------------------------------------

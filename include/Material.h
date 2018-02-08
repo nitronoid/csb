@@ -42,6 +42,10 @@ public:
   //-----------------------------------------------------------------------------------------------------
   virtual void update() = 0;
 
+  virtual const char* vertexName() const = 0;
+
+  virtual const char* fragName() const = 0;
+
 protected:
   //-----------------------------------------------------------------------------------------------------
   /// @brief A pointer to the shader program that this material affects.

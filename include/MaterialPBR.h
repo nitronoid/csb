@@ -8,7 +8,6 @@ class Camera;
 class MaterialPBR : public Material
 {
 public:
-  MaterialPBR() = default;
   MaterialPBR(Camera* _cam) :
     Material(),
     m_cam(_cam)
@@ -22,6 +21,10 @@ public:
   virtual void init(ShaderProgram* io_shader, std::array<glm::mat4, 3>* io_matrices) override;
 
   virtual void update() override;
+
+  virtual const char* vertexName() const override;
+
+  virtual const char* fragName() const override;
 
 private:
   Camera* m_cam = nullptr;
