@@ -27,9 +27,9 @@ void TrackballCamera::handleMouseClick(const QMouseEvent &_action)
   m_currentState = static_cast<CAM_STATE>(input);
 }
 
-void TrackballCamera::handleKey(const int _glfwKey, const bool _isPress)
+void TrackballCamera::handleKey(const int _key, const bool _isPress)
 {
-  m_states[m_currentState]->handleKey(this, _glfwKey, _isPress);
+  m_states[m_currentState]->handleKey(this, _key, _isPress);
 }
 
 /**
@@ -82,6 +82,16 @@ glm::vec3 TrackballCamera::getCameraEye() const noexcept
   glm::mat3 r_yaw = glm::mat3_cast(glm::angleAxis(m_yaw, glm::vec3(0.0f, 1.0f, 0.0f)));
   glm::mat3 r_pitch = glm::mat3_cast(glm::angleAxis(m_pitch, glm::vec3(1.0f, 0.0f, 0.0f)));
   return m_target - (r_yaw * r_pitch * m_zoom *  (m_target - m_camOrigin));
+}
+
+void TrackballCamera::resetPosition()
+{
+  Camera::resetPosition();
+  m_yaw         = 0.0f;
+  m_pitch       = 0.0f;
+  m_zoom        = 2.5f;
+  m_lastYaw     = 0.0f;
+  m_lastPitch   = 0.0f;
 }
 
 void TrackballCamera::setZoom(const float _zoom) noexcept

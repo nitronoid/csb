@@ -12,15 +12,16 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit MainWindow(Camera* io_camera, QWidget * parent = nullptr);
+  explicit MainWindow(QWidget * parent = nullptr);
   ~MainWindow() = default;
 
+  void init(Scene* io_scene);
 private slots:
 
 private:
   Ui::MainWindow m_ui;
 
-  DemoScene m_gl = {nullptr, this};
+  Scene* m_gl = nullptr;
   void keyPressEvent(QKeyEvent * _event);
   void mouseMoveEvent(QMouseEvent * _event);
   void mousePressEvent(QMouseEvent *_event);

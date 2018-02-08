@@ -1,15 +1,20 @@
 #include "MainWindow.h"
 
 
-MainWindow::MainWindow(Camera *io_camera, QWidget *parent) :
-  QMainWindow(parent),
-  m_gl(io_camera, this)
+MainWindow::MainWindow(QWidget *parent) :
+  QMainWindow(parent)
 {
   m_ui.setupUi(this);
   m_ui.setupUi(this);
-  m_ui.s_mainWindowGridLayout->addWidget(&m_gl,0,0,3,5);
-  connect(m_ui.m_rotating, SIGNAL(clicked(bool)), &m_gl, SLOT(rotating(bool)));
-  connect(m_ui.generate, SIGNAL( clicked(bool)), &m_gl, SLOT(generateNewGeometry()));
+
+}
+
+void MainWindow::init(Scene* io_scene)
+{
+  m_gl = io_scene;
+  m_ui.s_mainWindowGridLayout->addWidget(m_gl,0,0,3,5);
+  connect(m_ui.m_rotating, SIGNAL(clicked(bool)), m_gl, SLOT(rotating(bool)));
+  connect(m_ui.generate, SIGNAL( clicked(bool)), m_gl, SLOT(generateNewGeometry()));
 }
 
 //----------------------------------------------------------------------------------------------------------------------
@@ -23,27 +28,28 @@ void MainWindow::keyPressEvent(QKeyEvent *_event)
     case Qt::Key_Escape : QApplication::exit(EXIT_SUCCESS); break;
     default : break;
   }
+  m_gl->keyPress(_event);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::mouseMoveEvent(QMouseEvent * _event)
 {
-  m_gl.mouseMove(_event);
+  m_gl->mouseMove(_event);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::mousePressEvent(QMouseEvent * _event)
 {
-  m_gl.mouseClick(_event);
+  m_gl->mouseClick(_event);
 }
 
 //----------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::mouseReleaseEvent(QMouseEvent * _event)
 {
-  m_gl.mouseClick(_event);
+  m_gl->mouseClick(_event);
 }
 
 //----------------------------------------------------------------------------------------------------------------------

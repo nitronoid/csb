@@ -31,6 +31,7 @@ public :
   /// @brief dtor
   virtual ~Scene() = default;
 
+  void keyPress(QKeyEvent* _event);
   void mouseMove( QMouseEvent * _event );
   void mouseClick( QMouseEvent * _event );
 

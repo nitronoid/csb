@@ -37,14 +37,16 @@ int main(int argc, char *argv[])
   QSurfaceFormat::setDefaultFormat( format );
   // make an instance of the QApplication
   QApplication a(argc, argv);
-
-  TrackballCamera cam;
-  cam.setTarget(0.0f, 0.0f, -2.0f);
-  cam.setOrigin(0.0f, 0.0f, 0.0f);
   // Create a new MainWindow
-  MainWindow w(&cam);
+  MainWindow window;
+  // Create a camera
+  TrackballCamera cam;
+  // Create a scene to place inside the window
+  DemoScene scene(&cam, &window);
+  // Initialise the window using our scene
+  window.init(&scene);
   // show it
-  w.show();
+  window.show();
   // hand control over to Qt framework
   return a.exec();
 }

@@ -43,6 +43,13 @@ void Camera::setFov(const float _fov)
   m_fovy = _fov;
 }
 //-----------------------------------------------------------------------------------------------------
+void Camera::resetPosition()
+{
+  m_lastPos = {0.0f, 0.0f};
+  m_target = {0.0f, 0.0f, -2.0f};
+  m_camOrigin = {0.0f, 0.0f, 0.0f};
+}
+//-----------------------------------------------------------------------------------------------------
 const glm::mat4& Camera::viewMatrix()
 {
   return m_viewMatrix;

@@ -33,7 +33,7 @@ public:
   virtual void handleMouseMove(const glm::vec2 &_mousePos) override;
 
   /// Handle keypress / release events
-  virtual void handleKey(const int _glfwKey, const bool _isPress) override;
+  virtual void handleKey(const int _key, const bool _isPress) override;
 
   /// Mouse click handler
   virtual void handleMouseClick(const QMouseEvent &_action) override;
@@ -52,6 +52,8 @@ public:
 
   /// Get the eye vector
   virtual glm::vec3 getCameraEye() const noexcept override;
+
+  virtual void resetPosition() override;
 
 private:
   void updateYawPitch();
@@ -73,12 +75,14 @@ private:
   /// Store the yaw and pitch
   float m_yaw         = 0.0f;
   float m_pitch       = 0.0f;
-  float m_zoom        = 1.0;
-  float m_sensitivity = 0.01f;
+  float m_zoom        = 2.5f;
 
   /// Store the last yaw and pitch so that the trackball stays put when the mouse is released
   float m_lastYaw     = 0.0f;
   float m_lastPitch   = 0.0f;
+
+
+  float m_sensitivity = 0.01f;
 
 };
 
