@@ -7,13 +7,13 @@
 #include "MaterialPBR.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-Scene::Scene(Camera* io_camera , QWidget *_parent) :
-  QOpenGLWidget(_parent),
+Scene::Scene(Camera* io_camera , QWidget *io_parent) :
+  QOpenGLWidget(io_parent),
   m_camera(io_camera)
 {
   // set this widget to have the initial keyboard focus
   // re-size the widget to that of the parent (in this case the GLFrame passed in on construction)
-  this->resize( _parent->size() );
+  this->resize( io_parent->size() );
 }
 //----------------------------------------------------------------------------------------------------------------------
 void Scene::initializeGL()
@@ -64,19 +64,28 @@ void Scene::init()
 //------------------------------------------------------------------------------------------------------------------------------
 void Scene::paintGL()
 {
+  // Set our viewport size based on the devide displace
   glViewport(0, 0, width()*devicePixelRatio(), height()*devicePixelRatio());
-  glClearColor( 1, 1, 1, 1.0f );
-  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+  // Call the render scene function that may be overriden
   renderScene();
+  // Update the OpenGL widget
   update();
 }
 //------------------------------------------------------------------------------------------------------------------------------
 void Scene::renderScene()
 {
+  // Clear the screen
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  // Update our camera view
   m_camera->update();
+
+  // Scope the using declaration
+  {
+    using namespace SceneMatrices;
+    m_matrices[PROJECTION] = m_camera->projMatrix() * m_camera->viewMatrix() * m_matrices[MODEL_VIEW];
+    m_matrices[NORMAL] = glm::inverse(glm::transpose(m_matrices[MODEL_VIEW]));
+  }
 }
 //------------------------------------------------------------------------------------------------------------------------------
 

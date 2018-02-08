@@ -1,6 +1,7 @@
 #ifndef TRACKBALLCAMERA_H
 #define TRACKBALLCAMERA_H
 
+/// @author Jack Diver
 /// Modified from :-
 /// Richard Southern (02/02/2017). Trackball workshop.
 /// @note Changes were made to the interface of camera, mouse rotate and zoom are pure virtual.

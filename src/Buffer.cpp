@@ -13,7 +13,7 @@ void Buffer::init(const GLuint _size, const GLuint _amountOfData)
   reset(_size, _amountOfData);
 }
 //-----------------------------------------------------------------------------------------------------
-void Buffer::reset(const GLuint _size, GLuint _amountOfData)
+void Buffer::reset(const GLuint _size, const GLuint _amountOfData)
 {
   // Track the amount of data being stored
   m_amountOfData = _amountOfData;

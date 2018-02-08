@@ -1,5 +1,7 @@
 #include "DemoScene.h"
 
+
+//-----------------------------------------------------------------------------------------------------
 void DemoScene::loadMesh()
 {
   static constexpr std::array<const char*, 3> shaderAttribs = {{"inVert", "inNormal", "inUV"}};
@@ -17,7 +19,7 @@ void DemoScene::loadMesh()
     glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
   }
 }
-
+//-----------------------------------------------------------------------------------------------------
 void DemoScene::init()
 {
   Scene::init();
@@ -32,29 +34,41 @@ void DemoScene::init()
   std::string shadersAddress = "shaders/";
   m_shaderProgram.init("m_shader", shadersAddress + "PBRVertex.glsl", shadersAddress + "PBRFragment.glsl");
   m_shaderProgram.use();
-  m_material->init(&m_shaderProgram);
+  m_material->init(&m_shaderProgram, &m_matrices);
   m_buffer.init(sizeof(float), m_meshes[m_meshIndex].getNVertData());
   loadMesh();
 
-  auto modelView = m_material->modelViewMatrix();
-  *modelView = glm::translate(*modelView, glm::vec3(0.0f, 0.0f, -2.0f));
+  // Scope the using declaration
+  {
+    using namespace SceneMatrices;
+    m_matrices[MODEL_VIEW] = glm::translate(m_matrices[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f));
+  }
 }
-
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::rotating( const bool _rotating )
+{
+  m_rotating = _rotating;
+}
+//-----------------------------------------------------------------------------------------------------
 void DemoScene::generateNewGeometry()
 {
   m_meshIndex = (m_meshIndex + 1) % m_meshes.size();
   m_buffer.reset(sizeof(float), m_meshes[m_meshIndex].getNVertData());
   loadMesh();
 }
-
+//-----------------------------------------------------------------------------------------------------
 void DemoScene::renderScene()
 {
   Scene::renderScene();
 
-  auto modelView = m_material->modelViewMatrix();
-  *modelView = glm::rotate(*modelView, glm::radians(-1.0f * m_rotating), glm::vec3(0.0f, 1.0f, 0.0f));
+  // Scope the using declaration
+  {
+    using namespace SceneMatrices;
+    m_matrices[MODEL_VIEW] = glm::rotate(m_matrices[MODEL_VIEW], glm::radians(-1.0f * m_rotating), glm::vec3(0.0f, 1.0f, 0.0f));
+  }
 
   m_material->update();
 
   glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataAmount() / 3);
 }
+//-----------------------------------------------------------------------------------------------------

@@ -5,8 +5,6 @@ MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent)
 {
   m_ui.setupUi(this);
-  m_ui.setupUi(this);
-
 }
 
 void MainWindow::init(Scene* io_scene)

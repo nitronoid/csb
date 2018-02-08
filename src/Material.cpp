@@ -1,12 +1,10 @@
 #include "Material.h"
 
-
-void Material::init(ShaderProgram* _shader)
+//-----------------------------------------------------------------------------------------------------
+void Material::init(ShaderProgram* io_shader, std::array<glm::mat4, 3>* io_matrices)
 {
-  m_shader = _shader;
+  // Setup our pointers
+  m_shader = io_shader;
+  m_matrices = io_matrices;
 }
-
-glm::mat4* Material::modelViewMatrix()
-{
-  return &m_matrix[MODEL_VIEW];
-}
+//-----------------------------------------------------------------------------------------------------
