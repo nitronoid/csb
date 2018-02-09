@@ -1,5 +1,5 @@
-#ifndef TRACKBALLCOMMANDS_H
-#define TRACKBALLCOMMANDS_H
+#ifndef CAMERASTATES_H
+#define CAMERASTATES_H
 
 #include "vec2.hpp"
 
@@ -88,4 +88,4 @@ public:
 };
 
 
-#endif // TRACKBALLCOMMANDS_H
+#endif // CAMERASTATES_H

@@ -6,13 +6,14 @@ void MaterialPhong::init(ShaderProgram* io_shader, std::array<glm::mat4, 3>* io_
 {
   Material::init(io_shader, io_matrices);
 
-  io_shader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
+  //io_shader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
   // Update our matrices
   update();
 }
 
 void MaterialPhong::update()
 {
+  m_shader->setUniform("camPos", m_cam->getCameraEye());
   // Scope the using declaration
   {
     using namespace SceneMatrices;
@@ -32,5 +33,5 @@ const char* MaterialPhong::vertexName() const
 
 const char* MaterialPhong::fragName() const
 {
-  return "shaders/phong_frag_toon.glsl";
+  return "shaders/phong_frag.glsl";
 }

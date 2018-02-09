@@ -1,5 +1,5 @@
-#ifndef Shader_h
-#define Shader_h
+#ifndef SHADERPROGRAM_H_
+#define SHADERPROGRAM_H_
 
 #include "OpenglPlatform.h"
 #include <string>
@@ -53,4 +53,4 @@ private:
 
 };
 
-#endif /* Shader_h */
+#endif //SHADERPROGRAM_H_

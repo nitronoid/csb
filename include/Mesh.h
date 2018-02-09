@@ -1,5 +1,5 @@
-#ifndef AMESH_H
-#define AMESH_H
+#ifndef MESH_H
+#define MESH_H
 
 #include "OpenglPlatform.h"
 #include <vector>
@@ -35,4 +35,4 @@ private:
   std::vector<GLfloat> m_uvs;
 };
 
-#endif // AMESH_H
+#endif // MESH_H

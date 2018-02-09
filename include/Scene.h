@@ -1,5 +1,5 @@
-#ifndef NGLSCENE_H_
-#define NGLSCENE_H_
+#ifndef SCENE_H_
+#define SCENE_H_
 
 #include "ShaderProgram.h"
 #include "Mesh.h"
@@ -102,4 +102,4 @@ protected:
 
 };
 
-#endif
+#endif //SCENE_H_

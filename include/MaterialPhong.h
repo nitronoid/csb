@@ -3,10 +3,15 @@
 
 #include "Material.h"
 
+class Camera;
+
 class MaterialPhong : public Material
 {
 public:
-  MaterialPhong() = default;
+  MaterialPhong(Camera* _cam) :
+    Material(),
+    m_cam(_cam)
+  {}
   MaterialPhong(const MaterialPhong&) = default;
   MaterialPhong& operator=(const MaterialPhong&) = default;
   MaterialPhong(MaterialPhong&&) = default;
@@ -20,6 +25,9 @@ public:
   virtual const char* vertexName() const override;
 
   virtual const char* fragName() const override;
+
+private:
+  Camera* m_cam = nullptr;
 };
 
 #endif // MATERIALPHONG_H

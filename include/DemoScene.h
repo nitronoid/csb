@@ -87,7 +87,7 @@ private:
   using matPtr = std::unique_ptr<Material>;
   std::array<matPtr, 2> m_materials = {{
     matPtr{new MaterialPBR(m_camera)},
-    matPtr{new MaterialPhong}
+    matPtr{new MaterialPhong(m_camera)}
   }};
   size_t m_currentMaterial = 0;
   //----------------------------------------------------------------------------------------------------------------------
