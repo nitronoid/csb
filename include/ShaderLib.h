@@ -7,13 +7,14 @@
 class ShaderLib
 {
 public:
+  ShaderLib() /*: m_shaders(2)*/ {}
   void createShader(const std::string &_vertexName, const std::string &_fragName);
   void useShader(const size_t _index);
   ShaderProgram* getShader(const size_t _index);
   ShaderProgram* getCurrentShader();
   size_t getCurrentShaderIndex() const noexcept;
 
-private:
+//private:
   std::vector<ShaderProgram> m_shaders;
   size_t m_currentShader = 0;
 };

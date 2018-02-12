@@ -44,7 +44,7 @@ void ShaderProgram::loadShader(const std::string &_filename, const GLenum _shade
     std::cout<<log<<'\n';
     assert(status);
   }
-  glDeleteShader(newShader);
+  //glDeleteShader(newShader);
 }
 
 void ShaderProgram::clearShader(const GLenum _shaderType)

@@ -2,8 +2,7 @@
 
 void ShaderLib::createShader(const std::string &_vertexName, const std::string &_fragName)
 {
-  m_shaders.push_back(ShaderProgram{});
-  m_shaders.back().init(_vertexName, _fragName);
+  m_shaders.emplace_back();
 }
 
 void ShaderLib::useShader(const size_t _index)

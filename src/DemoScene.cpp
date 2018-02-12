@@ -31,10 +31,13 @@ void DemoScene::init()
   m_meshes[4].load("models/Asteroid.obj");
   m_rotating = false;
 
+  m_shaderLib->m_shaders.resize(2);
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];
+//    m_shaderLib->m_shaders.emplace_back();
     m_shaderLib->createShader(mat->vertexName(), mat->fragName());
+    m_shaderLib->getShader(i)->init(mat->vertexName(), mat->fragName());
     m_shaderLib->useShader(i);
     mat->init(m_shaderLib, i, &m_matrices);
   }
