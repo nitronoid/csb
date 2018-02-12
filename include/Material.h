@@ -4,7 +4,7 @@
 #include <array>
 #include <mat4x4.hpp>
 
-class ShaderProgram;
+class ShaderLib;
 
 class Material
 {
@@ -36,11 +36,13 @@ public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to intialise a passed shader, subclasses must call this base function.
   //-----------------------------------------------------------------------------------------------------
-  virtual void init(ShaderProgram* io_shader, std::array<glm::mat4, 3>* io_matrices);
+  virtual void init(ShaderLib* io_shaderLib, const size_t _index, std::array<glm::mat4, 3>* io_matrices);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to update shader values.
   //-----------------------------------------------------------------------------------------------------
   virtual void update() = 0;
+
+  void apply();
 
   virtual const char* vertexName() const = 0;
 
@@ -50,7 +52,9 @@ protected:
   //-----------------------------------------------------------------------------------------------------
   /// @brief A pointer to the shader program that this material affects.
   //-----------------------------------------------------------------------------------------------------
-  ShaderProgram* m_shader = nullptr;
+  ShaderLib* m_shaderLib = nullptr;
+
+  size_t m_shaderIndex = 0;
   //-----------------------------------------------------------------------------------------------------
   /// @brief A pointer to matrices this material should use for the vertex shader.
   //-----------------------------------------------------------------------------------------------------

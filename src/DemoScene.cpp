@@ -14,7 +14,7 @@ void DemoScene::loadMesh()
   for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
   {
     m_buffer.append(meshData[buff], buff);
-    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shaderPrograms[m_currentMaterial].getShaderProgram(), shaderAttribs[buff]));
+    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shaderLib->getShader(m_currentMaterial)->getShaderProgram(), shaderAttribs[buff]));
     glEnableVertexAttribArray(pos);
     glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
   }
@@ -31,14 +31,14 @@ void DemoScene::init()
   m_meshes[4].load("models/Asteroid.obj");
   m_rotating = false;
 
-  for (size_t i = 0; i < m_shaderPrograms.size(); ++i)
+  for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];
-    m_shaderPrograms[i].init("m_shader", mat->vertexName(), mat->fragName());
-    m_shaderPrograms[i].use();
-    mat->init(&m_shaderPrograms[i], &m_matrices);
+    m_shaderLib->createShader(mat->vertexName(), mat->fragName());
+    m_shaderLib->useShader(i);
+    mat->init(m_shaderLib, i, &m_matrices);
   }
-  m_shaderPrograms[m_currentMaterial].use();
+  m_materials[m_currentMaterial]->apply();
   m_buffer.init(sizeof(float), m_meshes[m_meshIndex].getNVertData());
   loadMesh();
 
@@ -65,7 +65,7 @@ void DemoScene::nextMaterial()
 {
   makeCurrent();
   m_currentMaterial = (m_currentMaterial + 1) % m_materials.size();
-  m_shaderPrograms[m_currentMaterial].use();
+  m_materials[m_currentMaterial]->apply();
 }
 //-----------------------------------------------------------------------------------------------------
 

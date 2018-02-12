@@ -41,7 +41,8 @@ HEADERS += \
     include/Scene.h \
     include/DemoScene.h \
     include/OpenglPlatform.h \
-    include/MaterialPhong.h
+    include/MaterialPhong.h \
+    include/ShaderLib.h
 
 SOURCES += \
     src/main.cpp \
@@ -56,7 +57,8 @@ SOURCES += \
     src/MaterialPBR.cpp \
     src/Scene.cpp \
     src/DemoScene.cpp \
-    src/MaterialPhong.cpp
+    src/MaterialPhong.cpp \
+    src/ShaderLib.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \

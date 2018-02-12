@@ -18,7 +18,7 @@ public:
   MaterialPBR& operator=(MaterialPBR&&) = default;
   ~MaterialPBR() override = default;
 
-  virtual void init(ShaderProgram* io_shader, std::array<glm::mat4, 3>* io_matrices) override;
+  virtual void init(ShaderLib* io_shaderLib, const size_t _index, std::array<glm::mat4, 3>* io_matrices) override;
 
   virtual void update() override;
 

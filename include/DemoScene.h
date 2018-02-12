@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "MaterialPBR.h"
 #include "MaterialPhong.h"
+#include "ShaderLib.h"
 
 
 class DemoScene : public Scene
@@ -16,8 +17,9 @@ public:
   /// @param [io] io_camera the camera used to view the scene.
   /// @param [io] io_parent the parent window to create the GL context in.
   //----------------------------------------------------------------------------------------------------------------------
-  DemoScene(Camera* io_camera, QWidget *_parent) :
-    Scene(io_camera, _parent)
+  DemoScene(Camera* io_camera, ShaderLib* io_shaderLib, QWidget *_parent) :
+    Scene(io_camera, _parent),
+    m_shaderLib(io_shaderLib)
   {}
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
@@ -78,18 +80,18 @@ private:
   //----------------------------------------------------------------------------------------------------------------------
   std::array<Mesh, 5> m_meshes;
   //----------------------------------------------------------------------------------------------------------------------
-  /// @brief Holds our shader program.
+  /// @brief Holds our shader programs.
   //----------------------------------------------------------------------------------------------------------------------
-  std::array<ShaderProgram, 2> m_shaderPrograms;
+  ShaderLib* m_shaderLib;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Holds our material settings for the shader.
   //----------------------------------------------------------------------------------------------------------------------
   using matPtr = std::unique_ptr<Material>;
   std::array<matPtr, 2> m_materials = {{
-    matPtr{new MaterialPBR(m_camera)},
-    matPtr{new MaterialPhong(m_camera)}
+    matPtr{new MaterialPhong(m_camera)},
+    matPtr{new MaterialPBR(m_camera)}
   }};
-  size_t m_currentMaterial = 0;
+  size_t m_currentMaterial = 1;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Is the mesh rotating.
   //----------------------------------------------------------------------------------------------------------------------
@@ -98,7 +100,6 @@ private:
   /// @brief Wraps up our openGL buffers and VAO.
   //----------------------------------------------------------------------------------------------------------------------
   Buffer m_buffer;
-
 
 };
 

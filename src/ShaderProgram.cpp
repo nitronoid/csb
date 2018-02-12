@@ -4,10 +4,9 @@
 #include <assert.h>
 #include "ShaderProgram.h"
 
-void ShaderProgram::init(const std::string &_name, const std::string &_vertex, const std::string &_fragment)
+void ShaderProgram::init(const std::string &_vertex, const std::string &_fragment)
 {
   m_shaderProgram = glCreateProgram();
-  m_name = _name;
 
   loadShader(_vertex, GL_VERTEX_SHADER);
   loadShader(_fragment, GL_FRAGMENT_SHADER);
@@ -145,10 +144,6 @@ void ShaderProgram::use()
   glUseProgram(m_shaderProgram);
 }
 
-std::string ShaderProgram::getName()
-{
-  return m_name;
-}
 
 GLuint ShaderProgram::getShaderProgram()
 {

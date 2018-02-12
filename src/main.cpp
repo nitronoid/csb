@@ -4,7 +4,7 @@
 #include <QApplication>
 #include "MainWindow.h"
 #include "TrackballCamera.h"
-
+#include "ShaderLib.h"
 #include <random>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -41,8 +41,10 @@ int main(int argc, char *argv[])
   MainWindow window;
   // Create a camera
   TrackballCamera cam;
+
+  ShaderLib lib;
   // Create a scene to place inside the window
-  DemoScene scene(&cam, &window);
+  DemoScene scene(&cam, &lib, &window);
   // Initialise the window using our scene
   window.init(&scene);
   // show it

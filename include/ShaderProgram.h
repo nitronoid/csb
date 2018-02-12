@@ -17,8 +17,7 @@ public:
   ShaderProgram& operator=(ShaderProgram&&) = default;
   ~ShaderProgram();
 
-  void init(const std::string &_name, const std::string &_vertex, const std::string &_fragment);
-  std::string getName();
+  void init(const std::string &_vertex, const std::string &_fragment);
   GLuint getShaderProgram();
 
   //------Floats--------------------------------------------------------------------------------------------------
@@ -46,7 +45,6 @@ public:
   void clearAllShaders();
 
 private:
-	std::string m_name;
   GLuint m_shaderProgram;
   std::unordered_map<GLenum, GLuint> m_attachedShaders;
   std::string loadShaderFile(std::string _filename);
