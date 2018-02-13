@@ -18,13 +18,7 @@ Scene::Scene(Camera* io_camera , QWidget *io_parent) :
 //----------------------------------------------------------------------------------------------------------------------
 void Scene::initializeGL()
 {
-#ifdef linux
-  // this needs to be after the context creation, otherwise GLEW will crash
-  //std::cout <<"linux \n";
-  glewExperimental = GL_TRUE;
-  glewInit();
-  //	GLenum error = glGetError();
-#endif
+  initializeOpenGLFunctions();
   glEnable( GL_DEPTH_TEST );
   glEnable( GL_MULTISAMPLE );
   glEnable( GL_TEXTURE_2D );

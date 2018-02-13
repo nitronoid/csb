@@ -9,8 +9,7 @@
 
 class DemoScene : public Scene
 {
-  Q_OBJECT // must include this if you use Qt signals/slots
-
+  Q_OBJECT
 public:
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Constructor for DemoScene.
@@ -91,7 +90,7 @@ private:
     matPtr{new MaterialPhong(m_camera)},
     matPtr{new MaterialPBR(m_camera)}
   }};
-  size_t m_currentMaterial = 1;
+  size_t m_currentMaterial = 0;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Is the mesh rotating.
   //----------------------------------------------------------------------------------------------------------------------

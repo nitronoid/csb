@@ -1,5 +1,4 @@
 #include "MaterialPhong.h"
-#include "ShaderProgram.h"
 #include "Scene.h"
 #include "ShaderLib.h"
 
@@ -15,7 +14,9 @@ void MaterialPhong::init(ShaderLib *io_shaderLib, const size_t _index, std::arra
 void MaterialPhong::update()
 {
   auto shaderPtr = m_shaderLib->getShader(m_shaderIndex);
-  shaderPtr->setUniform("camPos", m_cam->getCameraEye());
+  auto eye = m_cam->getCameraEye();
+  shaderPtr->setUniformValue("camPos", QVector3D{eye.x, eye.y, eye.z});
+
   // Scope the using declaration
   {
     using namespace SceneMatrices;
@@ -23,7 +24,10 @@ void MaterialPhong::update()
     // Send all our matrices to the GPU
     for (const auto matrixId : {MODEL_VIEW, PROJECTION, NORMAL})
     {
-      shaderPtr->setUniform(shaderUniforms[matrixId], (*m_matrices)[matrixId]);
+      // Convert from glm to Qt
+      QMatrix4x4 qmat(glm::value_ptr((*m_matrices)[matrixId]));
+      // Need to transpose the matrix as they both use different majors
+      shaderPtr->setUniformValue(shaderUniforms[matrixId], qmat.transposed());
     }
   }
 }

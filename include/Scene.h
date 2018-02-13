@@ -1,12 +1,12 @@
 #ifndef SCENE_H_
 #define SCENE_H_
 
-#include "ShaderProgram.h"
 #include "Mesh.h"
 #include <gtc/matrix_transform.hpp>
 #include <ext.hpp>
 #include <glm.hpp>
 #include <QOpenGLWidget>
+#include <QOpenGLFunctions>
 #include <QResizeEvent>
 #include <QEvent>
 #include <memory>
@@ -19,10 +19,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 namespace SceneMatrices { enum MATRIX { MODEL_VIEW, PROJECTION, NORMAL }; }
 
-class Scene : public QOpenGLWidget
+class Scene : public QOpenGLWidget, protected QOpenGLFunctions
 {
-  Q_OBJECT // must include this if you use Qt signals/slots
-
+  Q_OBJECT
 public:
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Constructor for Scene.

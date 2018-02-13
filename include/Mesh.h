@@ -1,7 +1,7 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "OpenglPlatform.h"
+#include <QOpenGLFunctions>
 #include <vector>
 #include <string>
 
@@ -22,7 +22,13 @@ public:
   /// \brief getNormals returns the reference of the std::vector that contains the normals
   const GLfloat* getUVsData() const noexcept;
 
-  GLuint getNVertData() const noexcept;
+  int getNVertData() const noexcept;
+
+  int getNNormData() const noexcept;
+
+  int getNUVData() const noexcept;
+
+  int getNData() const noexcept;
 
 private:
   /// \brief m_vertices is a std::vector containing the vertices

@@ -1,6 +1,3 @@
-
-#include "OpenglPlatform.h"
-
 #include <QApplication>
 #include "MainWindow.h"
 #include "TrackballCamera.h"

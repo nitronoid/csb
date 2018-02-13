@@ -1,9 +1,11 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include "OpenglPlatform.h"
+#include <QOpenGLVertexArrayObject>
+#include <QOpenGLBuffer>
 #include <iostream>
 #include <vector>
+#include <memory>
 
 class Buffer
 {
@@ -18,13 +20,13 @@ public:
   /// @param [in] _size is the size in bytes of the data type we are storing, float would be 4 (probably).
   /// @param [in] _amountOfData is the number of data elements we will store.
   //-----------------------------------------------------------------------------------------------------
-  void init(const GLuint _size, const GLuint _amountOfData);
+  void init(QObject *parent);
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to reset our buffers, removing data from them
   /// @param [in] _size is the size in bytes of the data type we are storing, float would be 4 (probably).
   /// @param [in] _amountOfData is the number of data elements we will remove.
   //-----------------------------------------------------------------------------------------------------
-  void reset(const GLuint _size, const GLuint _amountOfData);
+  void reset(const int _size, const int _nVert, const int _nNorm, const int _nUV);
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to add new data into the specified buffer.
   /// @param [in] _address is a pointer to the data we want to store.
@@ -35,30 +37,36 @@ public:
   /// @brief called to get the size of each data element we are storing.
   /// @return the size of the data elements in our buffer
   //-----------------------------------------------------------------------------------------------------
-  GLuint dataSize() const noexcept;
+  int dataSize() const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to get the amount of data elements we are storing.
   /// @return the number of data elements in our buffer
   //-----------------------------------------------------------------------------------------------------
-  GLuint dataAmount() const noexcept;
+  int dataAmount() const noexcept;
+
+  int offset(const BufferType _type) const noexcept;
+
+  void testBindVAO() { m_vao->bind(); }
 
 private:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Buffer addresses.
   //-----------------------------------------------------------------------------------------------------
-  std::vector<GLuint> m_buffers   = {0,0,0};
+  QOpenGLBuffer m_vbo;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Vertex array object.
   //-----------------------------------------------------------------------------------------------------
-  GLuint m_vao;
+  std::unique_ptr<QOpenGLVertexArrayObject> m_vao;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Current amount of data elements in the buffer.
   //-----------------------------------------------------------------------------------------------------
-  GLuint m_amountOfData = 0;
+  int m_amountOfData = 0;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Current size of the stored data members in the buffer.
   //-----------------------------------------------------------------------------------------------------
-  GLuint m_size = 0;
+  int m_size = 0;
+
+  std::array<int, 3> m_amountData = {{0,0,0}};
 };
 
 #endif // BUFFER_H

@@ -34,7 +34,6 @@ HEADERS += \
     include/TrackballCamera.h \
     include/Buffer.h \
     include/CameraStates.h \
-    include/ShaderProgram.h \
     include/Material.h \
     include/MaterialPBR.h \
     include/Mesh.h \
@@ -51,7 +50,6 @@ SOURCES += \
     src/TrackballCamera.cpp \
     src/Buffer.cpp \
     src/CameraStates.cpp \
-    src/ShaderProgram.cpp \
     src/Mesh.cpp \
     src/Material.cpp \
     src/MaterialPBR.cpp \

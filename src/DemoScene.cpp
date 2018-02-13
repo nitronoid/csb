@@ -14,9 +14,9 @@ void DemoScene::loadMesh()
   for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
   {
     m_buffer.append(meshData[buff], buff);
-    GLuint pos = static_cast<GLuint>(glGetAttribLocation(m_shaderLib->getShader(m_currentMaterial)->getShaderProgram(), shaderAttribs[buff]));
-    glEnableVertexAttribArray(pos);
-    glVertexAttribPointer(pos, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    auto prog = m_shaderLib->getCurrentShader();
+    prog->enableAttributeArray(shaderAttribs[buff]);
+    prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_buffer.offset(buff), 3);
   }
 }
 //-----------------------------------------------------------------------------------------------------
@@ -31,19 +31,16 @@ void DemoScene::init()
   m_meshes[4].load("models/Asteroid.obj");
   m_rotating = false;
 
-  m_shaderLib->m_shaders.resize(2);
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];
-//    m_shaderLib->m_shaders.emplace_back();
     m_shaderLib->createShader(mat->vertexName(), mat->fragName());
-    m_shaderLib->getShader(i)->init(mat->vertexName(), mat->fragName());
     m_shaderLib->useShader(i);
     mat->init(m_shaderLib, i, &m_matrices);
   }
   m_materials[m_currentMaterial]->apply();
-  m_buffer.init(sizeof(float), m_meshes[m_meshIndex].getNVertData());
-  loadMesh();
+  m_buffer.init(dynamic_cast<QObject*>(this));
+  generateNewGeometry();
 
   // Scope the using declaration
   {
@@ -59,8 +56,14 @@ void DemoScene::rotating( const bool _rotating )
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::generateNewGeometry()
 {
+  makeCurrent();
   m_meshIndex = (m_meshIndex + 1) % m_meshes.size();
-  m_buffer.reset(sizeof(float), m_meshes[m_meshIndex].getNVertData());
+  m_buffer.reset(
+        sizeof(GLfloat),
+        m_meshes[m_meshIndex].getNVertData(),
+        m_meshes[m_meshIndex].getNNormData(),
+        m_meshes[m_meshIndex].getNUVData()
+        );
   loadMesh();
 }
 //-----------------------------------------------------------------------------------------------------
@@ -84,6 +87,6 @@ void DemoScene::renderScene()
 
   m_materials[m_currentMaterial]->update();
 
-  glDrawArrays(GL_TRIANGLES, 0, m_buffer.dataAmount() / 3);
+  glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);
 }
 //-----------------------------------------------------------------------------------------------------

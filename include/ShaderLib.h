@@ -2,20 +2,21 @@
 #define SHADERLIB_H
 
 #include <vector>
-#include "ShaderProgram.h"
+#include <QOpenGLShaderProgram>
+#include <memory>
 
 class ShaderLib
 {
 public:
   ShaderLib() /*: m_shaders(2)*/ {}
-  void createShader(const std::string &_vertexName, const std::string &_fragName);
+  void createShader(const QString &_vertexName, const QString &_fragName);
   void useShader(const size_t _index);
-  ShaderProgram* getShader(const size_t _index);
-  ShaderProgram* getCurrentShader();
+  QOpenGLShaderProgram* getShader(const size_t _index);
+  QOpenGLShaderProgram* getCurrentShader();
   size_t getCurrentShaderIndex() const noexcept;
 
 //private:
-  std::vector<ShaderProgram> m_shaders;
+  std::vector<std::unique_ptr<QOpenGLShaderProgram>> m_shaders;
   size_t m_currentShader = 0;
 };
 

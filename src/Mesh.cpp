@@ -87,9 +87,24 @@ const GLfloat *Mesh::getUVsData() const noexcept
   return &m_uvs[0];
 }
 
-GLuint Mesh::getNVertData() const noexcept
+int Mesh::getNVertData() const noexcept
 {
-  return static_cast<GLuint>(m_vertices.size());
+  return static_cast<int>(m_vertices.size());
+}
+
+int Mesh::getNNormData() const noexcept
+{
+  return static_cast<int>(m_normals.size());
+}
+
+int Mesh::getNUVData() const noexcept
+{
+  return static_cast<int>(m_uvs.size());
+}
+
+int Mesh::getNData() const noexcept
+{
+  return getNVertData() + getNNormData() + getNUVData();
 }
 
 
