@@ -12,7 +12,10 @@ public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default constructor.
   //-----------------------------------------------------------------------------------------------------
-  Material() = default;
+  Material(ShaderLib *io_shaderLib, std::array<glm::mat4, 3>* io_matrices) :
+    m_shaderLib(io_shaderLib),
+    m_matrices(io_matrices)
+  {}
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
   //-----------------------------------------------------------------------------------------------------
@@ -36,7 +39,9 @@ public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to intialise a passed shader, subclasses must call this base function.
   //-----------------------------------------------------------------------------------------------------
-  virtual void init(ShaderLib* io_shaderLib, const size_t _index, std::array<glm::mat4, 3>* io_matrices);
+  virtual void init() = 0;
+
+  void setShaderName(const std::string &_name);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to update shader values.
   //-----------------------------------------------------------------------------------------------------
@@ -44,17 +49,17 @@ public:
 
   void apply();
 
-  virtual const char* vertexName() const = 0;
-
-  virtual const char* fragName() const = 0;
+  virtual const char* shaderFileName() const = 0;
 
 protected:
   //-----------------------------------------------------------------------------------------------------
-  /// @brief A pointer to the shader program that this material affects.
+  /// @brief A pointer to the central Shader Library.
   //-----------------------------------------------------------------------------------------------------
   ShaderLib* m_shaderLib = nullptr;
-
-  size_t m_shaderIndex = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Unique id of the shader within the shader library, that this material affects.
+  //-----------------------------------------------------------------------------------------------------
+  std::string m_shaderName;
   //-----------------------------------------------------------------------------------------------------
   /// @brief A pointer to matrices this material should use for the vertex shader.
   //-----------------------------------------------------------------------------------------------------

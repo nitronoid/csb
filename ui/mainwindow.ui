@@ -41,8 +41,8 @@
       </property>
      </spacer>
     </item>
-    <item row="0" column="2">
-     <spacer name="horizontalSpacer_2">
+    <item row="0" column="4">
+     <spacer name="horizontalSpacer">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
@@ -54,8 +54,8 @@
       </property>
      </spacer>
     </item>
-    <item row="0" column="4">
-     <spacer name="horizontalSpacer">
+    <item row="0" column="2">
+     <spacer name="horizontalSpacer_2">
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>

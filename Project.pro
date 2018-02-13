@@ -32,7 +32,6 @@ HEADERS += \
     include/MainWindow.h \
     include/Camera.h \
     include/TrackballCamera.h \
-    include/Buffer.h \
     include/CameraStates.h \
     include/Material.h \
     include/MaterialPBR.h \
@@ -41,14 +40,14 @@ HEADERS += \
     include/DemoScene.h \
     include/OpenglPlatform.h \
     include/MaterialPhong.h \
-    include/ShaderLib.h
+    include/ShaderLib.h \
+    include/MeshVBO.h
 
 SOURCES += \
     src/main.cpp \
     src/MainWindow.cpp \
     src/Camera.cpp \
     src/TrackballCamera.cpp \
-    src/Buffer.cpp \
     src/CameraStates.cpp \
     src/Mesh.cpp \
     src/Material.cpp \
@@ -56,10 +55,12 @@ SOURCES += \
     src/Scene.cpp \
     src/DemoScene.cpp \
     src/MaterialPhong.cpp \
-    src/ShaderLib.cpp
+    src/ShaderLib.cpp \
+    src/MeshVBO.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \
+    $$files(shaderPrograms/*, true) \
     $$files(models/*, true)
 
 FORMS += ui/mainwindow.ui

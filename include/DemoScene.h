@@ -45,6 +45,9 @@ public:
   //-----------------------------------------------------------------------------------------------------
   virtual void init() override;
 
+  void initGeo();
+  void initMaterials();
+
 public slots:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to link a Qt button to the scene, to allow rotation of the model to be toggled.
@@ -85,20 +88,25 @@ private:
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Holds our material settings for the shader.
   //----------------------------------------------------------------------------------------------------------------------
-  using matPtr = std::unique_ptr<Material>;
-  std::array<matPtr, 2> m_materials = {{
-    matPtr{new MaterialPhong(m_camera)},
-    matPtr{new MaterialPBR(m_camera)}
-  }};
   size_t m_currentMaterial = 0;
+  using matPtr = std::unique_ptr<Material>;
+  std::array<matPtr, 3> m_materials = {{
+    matPtr{new MaterialPhong(m_shaderLib, &m_matrices, m_camera)},
+    matPtr{new MaterialPBR(m_shaderLib, &m_matrices, m_camera, {0.5f, 0.0f, 0.0f})},
+    matPtr{new MaterialPBR(m_shaderLib, &m_matrices, m_camera, {0.0f, 0.5f, 0.5f})}
+  }};
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Is the mesh rotating.
   //----------------------------------------------------------------------------------------------------------------------
-  bool m_rotating;
+  bool m_rotating = false;
   //----------------------------------------------------------------------------------------------------------------------
   /// @brief Wraps up our openGL buffers and VAO.
   //----------------------------------------------------------------------------------------------------------------------
-  Buffer m_buffer;
+  MeshVBO m_meshVBO;
+  //----------------------------------------------------------------------------------------------------------------------
+  /// @brief Vertex array object.
+  //----------------------------------------------------------------------------------------------------------------------
+  std::unique_ptr<QOpenGLVertexArrayObject> m_vao {new QOpenGLVertexArrayObject(dynamic_cast<QObject*>(this))};
 
 };
 

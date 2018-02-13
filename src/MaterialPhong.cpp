@@ -2,18 +2,14 @@
 #include "Scene.h"
 #include "ShaderLib.h"
 
-void MaterialPhong::init(ShaderLib *io_shaderLib, const size_t _index, std::array<glm::mat4, 3>* io_matrices)
+void MaterialPhong::init()
 {
-  Material::init(io_shaderLib, _index, io_matrices);
-
-  //io_shader->setUniform("color", glm::vec3(1.0f, 1.0f, 1.0f));
-  // Update our matrices
   update();
 }
 
 void MaterialPhong::update()
 {
-  auto shaderPtr = m_shaderLib->getShader(m_shaderIndex);
+  auto shaderPtr = m_shaderLib->getShader(m_shaderName);
   auto eye = m_cam->getCameraEye();
   shaderPtr->setUniformValue("camPos", QVector3D{eye.x, eye.y, eye.z});
 
@@ -32,12 +28,7 @@ void MaterialPhong::update()
   }
 }
 
-const char* MaterialPhong::vertexName() const
+const char* MaterialPhong::shaderFileName() const
 {
-  return "shaders/phong_vert.glsl";
-}
-
-const char* MaterialPhong::fragName() const
-{
-  return "shaders/phong_frag.glsl";
+  return "shaderPrograms/phong.json";
 }

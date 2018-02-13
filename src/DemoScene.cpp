@@ -10,13 +10,13 @@ void DemoScene::loadMesh()
     mesh.getVertexData(), mesh.getNormalsData(), mesh.getUVsData()
   };
 
-  using b = Buffer::BufferType;
+  using b = MeshVBO::BufferSection;
   for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
   {
-    m_buffer.append(meshData[buff], buff);
+    m_meshVBO.append(meshData[buff], buff);
     auto prog = m_shaderLib->getCurrentShader();
     prog->enableAttributeArray(shaderAttribs[buff]);
-    prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_buffer.offset(buff), 3);
+    prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_meshVBO.offset(buff), 3);
   }
 }
 //-----------------------------------------------------------------------------------------------------
@@ -24,29 +24,41 @@ void DemoScene::init()
 {
   Scene::init();
 
-  m_meshes[0].load("models/cube.obj");
-  m_meshes[1].load("models/Face.obj");
-  m_meshes[2].load("models/Suzanne.obj");
-  m_meshes[3].load("models/test2.obj");
-  m_meshes[4].load("models/Asteroid.obj");
-  m_rotating = false;
-
-  for (size_t i = 0; i < m_materials.size(); ++i)
-  {
-    auto& mat = m_materials[i];
-    m_shaderLib->createShader(mat->vertexName(), mat->fragName());
-    m_shaderLib->useShader(i);
-    mat->init(m_shaderLib, i, &m_matrices);
-  }
-  m_materials[m_currentMaterial]->apply();
-  m_buffer.init(dynamic_cast<QObject*>(this));
-  generateNewGeometry();
+  initMaterials();
+  initGeo();
 
   // Scope the using declaration
   {
     using namespace SceneMatrices;
     m_matrices[MODEL_VIEW] = glm::translate(m_matrices[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f));
   }
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initGeo()
+{
+  m_meshes[0].load("models/cube.obj");
+  m_meshes[1].load("models/Face.obj");
+  m_meshes[2].load("models/Suzanne.obj");
+  m_meshes[3].load("models/test2.obj");
+  m_meshes[4].load("models/Asteroid.obj");
+  // Create and bind our Vertex Array Object
+  m_vao->create();
+  m_vao->bind();
+  // Create and bind our Vertex Buffer Object
+  m_meshVBO.init();
+  generateNewGeometry();
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initMaterials()
+{
+  for (size_t i = 0; i < m_materials.size(); ++i)
+  {
+    auto& mat = m_materials[i];
+    auto name = m_shaderLib->loadShaderProg(mat->shaderFileName());
+    mat->setShaderName(name);
+    mat->apply();
+  }
+  m_materials[m_currentMaterial]->apply();
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::rotating( const bool _rotating )
@@ -58,7 +70,7 @@ void DemoScene::generateNewGeometry()
 {
   makeCurrent();
   m_meshIndex = (m_meshIndex + 1) % m_meshes.size();
-  m_buffer.reset(
+  m_meshVBO.reset(
         sizeof(GLfloat),
         m_meshes[m_meshIndex].getNVertData(),
         m_meshes[m_meshIndex].getNNormData(),

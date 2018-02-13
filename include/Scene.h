@@ -10,7 +10,7 @@
 #include <QResizeEvent>
 #include <QEvent>
 #include <memory>
-#include "Buffer.h"
+#include "MeshVBO.h"
 #include "Camera.h"
 
 
