@@ -56,7 +56,6 @@ public:
   //-----------------------------------------------------------------------------------------------------
   int offset(const BufferSection _section) const noexcept;
 
-
 private:
   //-----------------------------------------------------------------------------------------------------
   /// @brief The vertex buffer object that stores our data.

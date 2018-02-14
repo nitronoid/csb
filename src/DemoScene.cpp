@@ -51,6 +51,10 @@ void DemoScene::initGeo()
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::initMaterials()
 {
+  m_materials.reserve(3);
+  m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
+  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}));
+  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.0f, 0.5f, 0.5f}));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];

@@ -14,16 +14,14 @@ public:
   ~MainWindow() = default;
 
   void init(const std::shared_ptr<Scene> &io_scene);
-private slots:
 
-private:
+private:  
   Ui::MainWindow m_ui;
-
   std::shared_ptr<Scene> m_gl = nullptr;
-  void keyPressEvent(QKeyEvent * _event);
-  void mouseMoveEvent(QMouseEvent * _event);
-  void mousePressEvent(QMouseEvent *_event);
-  void mouseReleaseEvent(QMouseEvent *_event);
+  void keyPressEvent(QKeyEvent * io_event);
+  void mouseMoveEvent(QMouseEvent * io_event);
+  void mousePressEvent(QMouseEvent *io_event);
+  void mouseReleaseEvent(QMouseEvent *io_event);
 };
 
 #endif // MAINWINDOW_H

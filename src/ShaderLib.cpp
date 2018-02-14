@@ -37,7 +37,7 @@ void ShaderLib::createShader(const std::string &_name, const QString &_vertexNam
 
 void ShaderLib::useShader(const std::string& _name)
 {
-  m_currentShader =  m_shaderPrograms[_name].get();
+  m_currentShader = m_shaderPrograms[_name].get();
   m_currentShader->bind();
 }
 

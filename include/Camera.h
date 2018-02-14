@@ -1,6 +1,7 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
+//-------------------------------------------------------------------------------------------------------
 /// @author Jack Diver
 /// Modified from :-
 /// Richard Southern (02/02/2017). Trackball workshop.
@@ -9,6 +10,7 @@
 /// based on the camera and cameras state, to act accordingly.
 /// @note The eye is now the origin, and a function is used to return the eye vector, as this is
 /// calculated by applying transformations to the origin.
+//-------------------------------------------------------------------------------------------------------
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

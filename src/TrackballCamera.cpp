@@ -62,6 +62,11 @@ void TrackballCamera::mouseRotate(const glm::vec2 &_mousePos)
   static const float half_pi = glm::half_pi<float>() - epsilon;
   m_pitch = m_lastPitch + (m_lastPos.y - _mousePos.y)*m_sensitivity;
   m_pitch = glm::clamp(m_pitch, -half_pi, half_pi);
+
+  // Update our last yaw/pitch
+  updateYawPitch();
+  // Update the last mouse position
+  m_lastPos = _mousePos;
 }
 
 /**
@@ -71,7 +76,7 @@ void TrackballCamera::mouseRotate(const glm::vec2 &_mousePos)
  */
 void TrackballCamera::mouseZoom(const glm::vec2 &_mousePos)
 {
-  m_zoom += (_mousePos.y - m_lastPos.y) * 0.1f * m_sensitivity;
+  m_zoom += (_mousePos.y - m_lastPos.y) * 0.25f * m_sensitivity;
   m_lastPos = _mousePos;
   m_zoom = glm::clamp(m_zoom, 0.0f, 10.0f);
 }
@@ -99,9 +104,9 @@ void TrackballCamera::setZoom(const float _zoom) noexcept
   m_zoom = _zoom;
 }
 
-void TrackballCamera::setSensitivity(const float sensitivity) noexcept
+void TrackballCamera::setSensitivity(const float _sensitivity) noexcept
 {
-  m_sensitivity = sensitivity;
+  m_sensitivity = _sensitivity;
 }
 
 void TrackballCamera::updateYawPitch()

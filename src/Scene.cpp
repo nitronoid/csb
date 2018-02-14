@@ -34,20 +34,20 @@ void Scene::resizeGL( int _w, int _h )
   m_camera->resize(_w, _h);
 }
 //----------------------------------------------------------------------------------------------------------------------
-void Scene::keyPress(QKeyEvent* _event)
+void Scene::keyPress(QKeyEvent* io_event)
 {
-  m_camera->handleKey(_event->key(), (_event->type()==QKeyEvent::KeyPress));
+  m_camera->handleKey(io_event->key(), (io_event->type()==QKeyEvent::KeyPress));
 }
 //----------------------------------------------------------------------------------------------------------------------
-void Scene::mouseMove(QMouseEvent * _event)
+void Scene::mouseMove(QMouseEvent * io_event)
 {
-  m_camera->handleMouseMove(glm::vec2{_event->pos().x(), _event->pos().y()});
+  m_camera->handleMouseMove(glm::vec2{io_event->pos().x(), io_event->pos().y()});
   update();
 }
 //----------------------------------------------------------------------------------------------------------------------
-void Scene::mouseClick(QMouseEvent * _event)
+void Scene::mouseClick(QMouseEvent * io_event)
 {
-  m_camera->handleMouseClick(*_event);
+  m_camera->handleMouseClick(*io_event);
   update();
 }
 //----------------------------------------------------------------------------------------------------------------------

@@ -51,19 +51,19 @@ public:
   virtual ~Scene() = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Receives and acts on a key event.
-  /// @param _event is the key event that was received.
+  /// @param [io] io_event is the key event that was received.
   //-----------------------------------------------------------------------------------------------------
-  void keyPress(QKeyEvent* _event);
+  void keyPress(QKeyEvent* io_event);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Receives and acts on a mouse event, when moved.
-  /// @param _event is the mouse event that was received.
+  /// @param [io] io_event is the mouse event that was received.
   //-----------------------------------------------------------------------------------------------------
-  void mouseMove(QMouseEvent * _event);
+  void mouseMove(QMouseEvent * io_event);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Receives and acts on a mouse event, when clicked.
-  /// @param _event is the mouse event that was received.
+  /// @param [io] io_event is the mouse event that was received.
   //-----------------------------------------------------------------------------------------------------
-  void mouseClick(QMouseEvent * _event);
+  void mouseClick(QMouseEvent * io_event);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to intialise the scene, subclasses must call this base function.
   //-----------------------------------------------------------------------------------------------------
@@ -76,8 +76,8 @@ protected:
   void initializeGL();
   //-----------------------------------------------------------------------------------------------------
   /// @brief this is called whenever the window is re-sized
-  /// @param[in] _w the width of the resized window
-  /// @param[in] _h the height of the resized window
+  /// @param [in] _w the width of the resized window
+  /// @param [in] _h the height of the resized window
   //-----------------------------------------------------------------------------------------------------
   void resizeGL(int _w , int _h);
   //-----------------------------------------------------------------------------------------------------
