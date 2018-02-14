@@ -7,7 +7,7 @@
 #include "MaterialPBR.h"
 
 //----------------------------------------------------------------------------------------------------------------------
-Scene::Scene(Camera* io_camera , QWidget *io_parent) :
+Scene::Scene(const std::shared_ptr<Camera> &io_camera , QWidget *io_parent) :
   QOpenGLWidget(io_parent),
   m_camera(io_camera)
 {

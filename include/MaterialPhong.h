@@ -8,9 +8,8 @@ class Camera;
 class MaterialPhong : public Material
 {
 public:
-  MaterialPhong(ShaderLib *io_shaderLib, std::array<glm::mat4, 3>* io_matrices, Camera* _cam) :
-    Material(io_shaderLib, io_matrices),
-    m_cam(_cam)
+  MaterialPhong(const std::shared_ptr<Camera> &io_camera, const std::shared_ptr<ShaderLib> &io_shaderLib, std::array<glm::mat4, 3>* io_matrices) :
+    Material(io_camera, io_shaderLib, io_matrices)
   {}
   MaterialPhong(const MaterialPhong&) = default;
   MaterialPhong& operator=(const MaterialPhong&) = default;
@@ -24,9 +23,6 @@ public:
 
   virtual const char* shaderFileName() const override;
 
-
-private:
-  Camera* m_cam = nullptr;
 };
 
 #endif // MATERIALPHONG_H

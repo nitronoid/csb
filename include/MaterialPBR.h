@@ -4,14 +4,11 @@
 #include "Material.h"
 #include "vec3.hpp"
 
-class Camera;
-
 class MaterialPBR : public Material
 {
 public:
-  MaterialPBR(ShaderLib *io_shaderLib, std::array<glm::mat4, 3>* io_matrices, Camera* _cam, const glm::vec3 &_albedo) :
-    Material(io_shaderLib, io_matrices),
-    m_cam(_cam),
+  MaterialPBR(const std::shared_ptr<Camera> &io_camera, const std::shared_ptr<ShaderLib> &io_shaderLib, std::array<glm::mat4, 3>* io_matrices, const glm::vec3 &_albedo) :
+    Material(io_camera, io_shaderLib, io_matrices),
     m_albedo(_albedo)
   {}
   MaterialPBR(const MaterialPBR&) = default;
@@ -28,7 +25,6 @@ public:
 
 
 private:
-  Camera* m_cam = nullptr;
   glm::vec3 m_albedo;
 
 };

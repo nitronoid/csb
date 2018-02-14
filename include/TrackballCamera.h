@@ -6,7 +6,7 @@
 /// Richard Southern (02/02/2017). Trackball workshop.
 /// @note Changes were made to the interface of camera, mouse rotate and zoom are pure virtual.
 /// @note The case statements have been removed in favour of CameraStates which use double dispatch,
-/// based on the camera and cameras state, to act accordingly.
+/// based on the camera and camera's state, to act accordingly.
 /// @note The bug with zooming was fixed by updating the last mouse position.
 /// @note Rotation locking bug was fixed using a small epsilon before clamping.
 

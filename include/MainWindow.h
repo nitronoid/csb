@@ -13,13 +13,13 @@ public:
   explicit MainWindow(QWidget * parent = nullptr);
   ~MainWindow() = default;
 
-  void init(Scene* io_scene);
+  void init(const std::shared_ptr<Scene> &io_scene);
 private slots:
 
 private:
   Ui::MainWindow m_ui;
 
-  Scene* m_gl = nullptr;
+  std::shared_ptr<Scene> m_gl = nullptr;
   void keyPressEvent(QKeyEvent * _event);
   void mouseMoveEvent(QMouseEvent * _event);
   void mousePressEvent(QMouseEvent *_event);

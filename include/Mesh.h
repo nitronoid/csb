@@ -8,37 +8,66 @@
 class Mesh
 {
 public:
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to load a mesh from a file path.
+  /// @param [in] _fname is the path to the mesh file.
+  /// @param [in] _meshNum is the index of the mesh in the file's scene.
+  //-----------------------------------------------------------------------------------------------------
   void load(const std::string &_fname, const size_t _meshNum = 0);
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to reset the mesh arrays.
+  //-----------------------------------------------------------------------------------------------------
   void reset();
-
-  /// \brief getVertices returns the reference of the std::vector that contains the vertices
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a pointer to the first data element in the vertex array for use with openGL buffers.
+  /// @return A pointer to the first element in vertex array.
+  //-----------------------------------------------------------------------------------------------------
   const GLfloat* getVertexData() const noexcept;
-
-  /// \brief getNormals returns the reference of the std::vector that contains the normals
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a pointer to the first data element in the normal array for use with openGL buffers.
+  /// @return A pointer to the first element in normal array.
+  //-----------------------------------------------------------------------------------------------------
   const GLfloat* getNormalsData() const noexcept;
-
-  /// \brief getNormals returns the reference of the std::vector that contains the normals
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a pointer to the first data element in the UV array for use with openGL buffers.
+  /// @return A pointer to the first element in UV array.
+  //-----------------------------------------------------------------------------------------------------
   const GLfloat* getUVsData() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the the amount of vertex data elements.
+  /// @return The size of our vertex array.
+  //-----------------------------------------------------------------------------------------------------
   int getNVertData() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the the amount of normal data elements.
+  /// @return The size of our normal array.
+  //-----------------------------------------------------------------------------------------------------
   int getNNormData() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the the amount of UV data elements.
+  /// @return The size of our UV array.
+  //-----------------------------------------------------------------------------------------------------
   int getNUVData() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the the amount of data elements across all arrays.
+  /// @return The size of our data arrays combined.
+  //-----------------------------------------------------------------------------------------------------
   int getNData() const noexcept;
 
 private:
-  /// \brief m_vertices is a std::vector containing the vertices
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief m_vertices contains the vertices
+  //-----------------------------------------------------------------------------------------------------
   std::vector<GLfloat> m_vertices;
-
-  /// \brief m_normals is a std::vector containing the normals
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief m_normals contains the normals
+  //-----------------------------------------------------------------------------------------------------
   std::vector<GLfloat> m_normals;
-
-  /// \brief m_normals is a std::vector containing the normals
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief m_uvs contains the UV's
+  //-----------------------------------------------------------------------------------------------------
   std::vector<GLfloat> m_uvs;
+
 };
 
 #endif // MESH_H

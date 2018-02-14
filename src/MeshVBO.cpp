@@ -24,11 +24,11 @@ void MeshVBO::reset(const int _size, const int _nVert, const int _nNorm, const i
   m_vbo.allocate(m_size * m_totalAmountOfData);
 }
 //-----------------------------------------------------------------------------------------------------
-void MeshVBO::append(const void *_address, const BufferSection _type)
+void MeshVBO::append(const void *_address, const BufferSection _section)
 {
   // Bind the requested buffer, then set it's data pointer
   m_vbo.bind();
-  m_vbo.write(offset(_type), _address, m_amountOfData[_type] * m_size);
+  m_vbo.write(offset(_section), _address, m_amountOfData[_section] * m_size);
 }
 //-----------------------------------------------------------------------------------------------------
 int MeshVBO::dataSize() const noexcept
@@ -43,16 +43,16 @@ int MeshVBO::dataAmount() const noexcept
   return m_totalAmountOfData;
 }
 //-----------------------------------------------------------------------------------------------------
-int MeshVBO::dataAmount(const BufferSection _type) const noexcept
+int MeshVBO::dataAmount(const BufferSection _section) const noexcept
 {
   // Returns the amount of data elements
-  return m_amountOfData[_type];
+  return m_amountOfData[_section];
 }
 //-----------------------------------------------------------------------------------------------------
-int MeshVBO::offset(const BufferSection _type) const noexcept
+int MeshVBO::offset(const BufferSection _section) const noexcept
 {
   int offset = 0;
-  for (size_t i = 0; i < _type; ++i)
+  for (size_t i = 0; i < _section; ++i)
     offset += m_amountOfData[i];
   return offset * m_size;
 }

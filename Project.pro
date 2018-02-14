@@ -38,7 +38,6 @@ HEADERS += \
     include/Mesh.h \
     include/Scene.h \
     include/DemoScene.h \
-    include/OpenglPlatform.h \
     include/MaterialPhong.h \
     include/ShaderLib.h \
     include/MeshVBO.h
