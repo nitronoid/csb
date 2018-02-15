@@ -22,7 +22,7 @@ public:
   /// @param [in] _vertexName is the file path to the vertex glsl shader.
   /// @param [in] _fragName is the file path to the fragment glsl shader.
   //-----------------------------------------------------------------------------------------------------
-  void createShader(const std::string& _name, const QString &_vertexName, const QString &_fragName);
+  void createShader(const std::string& _name, const QString &_vertexName, const QString &_fragName, const QString& _geoName = "");
   //-----------------------------------------------------------------------------------------------------
   /// @brief Binds a stored shader.
   /// @param [in] _name is the name of the shader program that should be bound.

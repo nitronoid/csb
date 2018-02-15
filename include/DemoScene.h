@@ -2,8 +2,7 @@
 #define DEMOSCENE_H
 
 #include "Scene.h"
-#include "MaterialPBR.h"
-#include "MaterialPhong.h"
+#include "Material.h"
 #include "ShaderLib.h"
 
 

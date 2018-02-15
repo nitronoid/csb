@@ -1,5 +1,7 @@
 #include "DemoScene.h"
-
+#include "MaterialWireframe.h"
+#include "MaterialPBR.h"
+#include "MaterialPhong.h"
 
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::loadMesh()
@@ -52,6 +54,8 @@ void DemoScene::initMaterials()
   m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
+
+  m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];

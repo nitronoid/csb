@@ -17,19 +17,26 @@ std::string ShaderLib::loadShaderProg(const QString &_jsonFileName)
   // Get a string out from the json
   std::string shaderName = shaderParts["Name"].toString().toStdString();
 
+  QString geoName = "";
+  if (shaderParts.contains("Geometry"))
+    geoName = shaderParts["Geometry"].toString();
+
   // Load the shader if we haven't already
   if (!m_shaderPrograms.count(shaderName))
-    createShader(shaderName, shaderParts["Vertex"].toString(), shaderParts["Fragment"].toString());
+    createShader(shaderName, shaderParts["Vertex"].toString(), shaderParts["Fragment"].toString(), geoName);
 
   return shaderName;
 }
 
-void ShaderLib::createShader(const std::string &_name, const QString &_vertexName, const QString &_fragName)
+void ShaderLib::createShader(const std::string &_name, const QString &_vertexName, const QString &_fragName, const QString &_geoName)
 {
   QOpenGLShaderProgram *program = new QOpenGLShaderProgram();
 
   program->addShaderFromSourceFile(QOpenGLShader::Vertex, _vertexName);
   program->addShaderFromSourceFile(QOpenGLShader::Fragment, _fragName);
+
+  if (_geoName.count())
+    program->addShaderFromSourceFile(QOpenGLShader::Geometry, _geoName);
 
   program->link();
   m_shaderPrograms[_name].reset(program);

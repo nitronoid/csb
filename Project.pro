@@ -40,7 +40,8 @@ HEADERS += \
     include/DemoScene.h \
     include/MaterialPhong.h \
     include/ShaderLib.h \
-    include/MeshVBO.h
+    include/MeshVBO.h \
+    include/MaterialWireframe.h
 
 SOURCES += \
     src/main.cpp \
@@ -55,7 +56,8 @@ SOURCES += \
     src/DemoScene.cpp \
     src/MaterialPhong.cpp \
     src/ShaderLib.cpp \
-    src/MeshVBO.cpp
+    src/MeshVBO.cpp \
+    src/MaterialWireframe.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \
@@ -70,3 +72,8 @@ linux:{
 
 
 #DISTFILES +=
+
+DISTFILES += \
+    shaders/WireframeGeometry.glsl \
+    shaders/WireframeVertex.glsl \
+    shaders/WireframeFragment.glsl
