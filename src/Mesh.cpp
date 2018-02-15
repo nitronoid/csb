@@ -87,6 +87,20 @@ const GLfloat *Mesh::getUVsData() const noexcept
   return &m_uvs[0];
 }
 
+const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) const noexcept
+{
+  using namespace MeshAttributes;
+  const GLfloat * data = nullptr;
+  switch (_attrib)
+  {
+    case VERTEX: data = getVertexData(); break;
+    case NORMAL: data = getNormalsData(); break;
+    case UV:     data = getUVsData(); break;
+    default: break;
+  }
+  return data;
+}
+
 int Mesh::getNVertData() const noexcept
 {
   return static_cast<int>(m_vertices.size());

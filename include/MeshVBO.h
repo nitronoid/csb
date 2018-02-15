@@ -7,13 +7,17 @@
 #include <vector>
 #include <memory>
 
+//-----------------------------------------------------------------------------------------------------
+/// @brief used to refer to a section of buffer data
+//-----------------------------------------------------------------------------------------------------
+namespace MeshAttributes
+{
+  enum Attribute { VERTEX, NORMAL, UV };
+}
+
 class MeshVBO
 {
 public:
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief used to refer to a section of buffer data
-  //-----------------------------------------------------------------------------------------------------
-  enum BufferSection { VERTEX, NORMAL, UV };
   //-----------------------------------------------------------------------------------------------------
   /// @brief called after construction, used to generate and bind our VBO to store mesh data.
   //-----------------------------------------------------------------------------------------------------
@@ -34,7 +38,7 @@ public:
   /// @param [in] _address is a pointer to the data we want to store.
   /// @param [in] _section is the section of the buffer we should write our data to.
   //-----------------------------------------------------------------------------------------------------
-  void append(const void * _address, const BufferSection _section);
+  void append(const void * _address, const MeshAttributes::Attribute _section);
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to get the size of each data element we are storing.
   /// @return the size of the data elements in our buffer
@@ -49,12 +53,12 @@ public:
   /// @brief called to get the amount of data elements we are storing for a specific section.
   /// @return the number of data elements in the _section of the buffer
   //-----------------------------------------------------------------------------------------------------
-  int dataAmount(const BufferSection _section) const noexcept;
+  int dataAmount(const MeshAttributes::Attribute _section) const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to get the offset in bytes of the specified section of data in our buffer.
   /// @return the offset in bytes of _section.
   //-----------------------------------------------------------------------------------------------------
-  int offset(const BufferSection _section) const noexcept;
+  int offset(const MeshAttributes::Attribute _section) const noexcept;
 
 private:
   //-----------------------------------------------------------------------------------------------------

@@ -1,16 +1,20 @@
-#version 330 core
+#version 420 // Keeping you on the bleeding edge!
+#extension GL_EXT_gpu_shader4 : enable
 // This code is based on code from here https://learnopengl.com/#!PBR/Lighting
-layout (location =0) out vec4 fragColour;
+layout (location = 0) out vec4 fragColour;
 
 in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
 
 // material parameters
-uniform vec3 albedo;
+uniform vec3  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
+// camera parameters
+uniform vec3 camPos;
+uniform float exposure;
 
 // lights
 const float scale = 10.0f;
@@ -30,9 +34,7 @@ const vec3 lightColors[4] = vec3[4](
       vec3(intensity, intensity, intensity)
       );
 
-uniform vec3 camPos;
-uniform float exposure;
-
+// Define pi
 const float PI = 3.14159265359;
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)

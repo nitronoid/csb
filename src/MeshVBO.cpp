@@ -11,10 +11,13 @@ void MeshVBO::init()
 //-----------------------------------------------------------------------------------------------------
 void MeshVBO::reset(const int _size, const int _nVert, const int _nNorm, const int _nUV)
 {
-  // Track the amount of data being stored
-  m_amountOfData[VERTEX] = _nVert;
-  m_amountOfData[NORMAL] = _nNorm;
-  m_amountOfData[UV]     = _nUV;
+  {
+    using namespace MeshAttributes;
+    // Track the amount of data being stored
+    m_amountOfData[VERTEX] = _nVert;
+    m_amountOfData[NORMAL] = _nNorm;
+    m_amountOfData[UV]     = _nUV;
+  }
   m_totalAmountOfData = _nVert + _nNorm + _nUV;
   // Track the size of our stored data
   m_size = _size;
@@ -24,7 +27,7 @@ void MeshVBO::reset(const int _size, const int _nVert, const int _nNorm, const i
   m_vbo.allocate(m_size * m_totalAmountOfData);
 }
 //-----------------------------------------------------------------------------------------------------
-void MeshVBO::append(const void *_address, const BufferSection _section)
+void MeshVBO::append(const void *_address, const MeshAttributes::Attribute _section)
 {
   // Bind the requested buffer, then set it's data pointer
   m_vbo.bind();
@@ -43,13 +46,13 @@ int MeshVBO::dataAmount() const noexcept
   return m_totalAmountOfData;
 }
 //-----------------------------------------------------------------------------------------------------
-int MeshVBO::dataAmount(const BufferSection _section) const noexcept
+int MeshVBO::dataAmount(const MeshAttributes::Attribute _section) const noexcept
 {
   // Returns the amount of data elements
   return m_amountOfData[_section];
 }
 //-----------------------------------------------------------------------------------------------------
-int MeshVBO::offset(const BufferSection _section) const noexcept
+int MeshVBO::offset(const MeshAttributes::Attribute _section) const noexcept
 {
   int offset = 0;
   for (size_t i = 0; i < _section; ++i)

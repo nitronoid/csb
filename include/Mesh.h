@@ -4,6 +4,7 @@
 #include <QOpenGLFunctions>
 #include <vector>
 #include <string>
+#include "MeshVBO.h"
 
 class Mesh
 {
@@ -33,6 +34,12 @@ public:
   /// @return A pointer to the first element in UV array.
   //-----------------------------------------------------------------------------------------------------
   const GLfloat* getUVsData() const noexcept;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a pointer to the first data element in the specified attribute array for use with
+  /// openGL buffers.
+  /// @return A pointer to the first element in an attribute array.
+  //-----------------------------------------------------------------------------------------------------
+  const GLfloat* getAttribData(const MeshAttributes::Attribute _attrib) const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to the the amount of vertex data elements.
   /// @return The size of our vertex array.

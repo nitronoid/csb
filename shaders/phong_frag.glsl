@@ -33,7 +33,7 @@ struct MaterialInfo {
 // The object has a material
 uniform MaterialInfo Material = MaterialInfo(
             vec3(0.1, 0.1, 0.1),    // Ka
-            vec3(1.0, 1.0, 1.0),    // Kd
+            vec3(0.1, 0.75, 0.1),    // Kd
             vec3(1.0, 1.0, 1.0),    // Ks
             10.0                    // Shininess
             );

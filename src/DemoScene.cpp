@@ -6,15 +6,12 @@ void DemoScene::loadMesh()
 {
   static constexpr std::array<const char*, 3> shaderAttribs = {{"inVert", "inNormal", "inUV"}};
   const auto& mesh = m_meshes[m_meshIndex];
-  const std::vector<const float*> meshData {
-    mesh.getVertexData(), mesh.getNormalsData(), mesh.getUVsData()
-  };
+  auto prog = m_shaderLib->getCurrentShader();
 
-  using b = MeshVBO::BufferSection;
-  for (const auto buff : {b::VERTEX, b::NORMAL, b::UV})
+  using namespace MeshAttributes;
+  for (const auto buff : {VERTEX, NORMAL, UV})
   {
-    m_meshVBO.append(meshData[buff], buff);
-    auto prog = m_shaderLib->getCurrentShader();
+    m_meshVBO.append(mesh.getAttribData(buff), buff);
     prog->enableAttributeArray(shaderAttribs[buff]);
     prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_meshVBO.offset(buff), 3);
   }
@@ -53,8 +50,8 @@ void DemoScene::initMaterials()
 {
   m_materials.reserve(3);
   m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
-  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}));
-  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.0f, 0.5f, 0.5f}));
+  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
+  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];
