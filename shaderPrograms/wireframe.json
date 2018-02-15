@@ -1,0 +1,6 @@
+{
+    "Name" : "Wireframe",
+    "Vertex" : "shaders/WireframeVertex.glsl",
+    "Fragment" : "shaders/WireframeFragment.glsl",
+    "Geometry" : "shaders/WireframeGeometry.glsl"
+}

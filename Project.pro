@@ -1,4 +1,3 @@
-
 TEMPLATE = app
 TARGET = Project
 
@@ -41,7 +40,8 @@ HEADERS += \
     include/MaterialPhong.h \
     include/ShaderLib.h \
     include/MeshVBO.h \
-    include/MaterialWireframe.h
+    include/MaterialWireframe.h \
+    include/MaterialFractal.h
 
 SOURCES += \
     src/main.cpp \
@@ -57,7 +57,8 @@ SOURCES += \
     src/MaterialPhong.cpp \
     src/ShaderLib.cpp \
     src/MeshVBO.cpp \
-    src/MaterialWireframe.cpp
+    src/MaterialWireframe.cpp \
+    src/MaterialFractal.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \

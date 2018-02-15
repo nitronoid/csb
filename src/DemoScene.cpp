@@ -2,6 +2,7 @@
 #include "MaterialWireframe.h"
 #include "MaterialPBR.h"
 #include "MaterialPhong.h"
+#include "MaterialFractal.h"
 
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::loadMesh()
@@ -17,6 +18,7 @@ void DemoScene::loadMesh()
     prog->enableAttributeArray(shaderAttribs[buff]);
     prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_meshVBO.offset(buff), 3);
   }
+
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::init()
@@ -36,10 +38,11 @@ void DemoScene::init()
 void DemoScene::initGeo()
 {
   m_meshes[0].load("models/cube.obj");
-  m_meshes[1].load("models/Face.obj");
-  m_meshes[2].load("models/Suzanne.obj");
-  m_meshes[3].load("models/test2.obj");
-  m_meshes[4].load("models/Asteroid.obj");
+  m_meshes[1].load("models/plane.obj");
+  m_meshes[2].load("models/Face.obj");
+  m_meshes[3].load("models/Suzanne.obj");
+  m_meshes[4].load("models/test2.obj");
+  m_meshes[5].load("models/Asteroid.obj");
   // Create and bind our Vertex Array Object
   m_vao->create();
   m_vao->bind();
@@ -50,12 +53,13 @@ void DemoScene::initGeo()
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::initMaterials()
 {
-  m_materials.reserve(3);
+  m_materials.reserve(5);
+
   m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
-
   m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
+  m_materials.emplace_back(new MaterialFractal(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
     auto& mat = m_materials[i];
@@ -82,6 +86,10 @@ void DemoScene::generateNewGeometry()
         m_meshes[m_meshIndex].getNUVData()
         );
   loadMesh();
+  auto uvdata = m_meshes[m_meshIndex].getAttribData(MeshAttributes::UV);
+  for (int i = 0; i < 4; ++i)
+    std::cout<<uvdata[i]<<'\t';
+  std::cout<<'\n';
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::nextMaterial()
@@ -89,6 +97,8 @@ void DemoScene::nextMaterial()
   makeCurrent();
   m_currentMaterial = (m_currentMaterial + 1) % m_materials.size();
   m_materials[m_currentMaterial]->apply();
+//  loadMesh();
+
 }
 //-----------------------------------------------------------------------------------------------------
 
