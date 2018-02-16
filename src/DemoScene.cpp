@@ -4,7 +4,6 @@
 #include "MaterialPhong.h"
 #include "MaterialFractal.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions_4_1_Core>
 
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::writeMeshAttributes()
@@ -61,6 +60,13 @@ void DemoScene::initGeo()
   // Create and bind our Vertex Buffer Object
   m_meshVBO.init();
   generateNewGeometry();
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::keyPress(QKeyEvent* io_event)
+{
+  makeCurrent();
+  Scene::keyPress(io_event);
+  m_materials[m_currentMaterial]->handleKey(io_event, context());
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::initMaterials()
@@ -121,8 +127,6 @@ void DemoScene::renderScene()
   }
 
   m_materials[m_currentMaterial]->update();
-  GLuint id = 0;
-  context()->versionFunctions<QOpenGLFunctions_4_1_Core>()->glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &id);
 
 
   glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);

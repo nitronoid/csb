@@ -2,7 +2,7 @@
 #extension GL_EXT_gpu_shader4 : enable
 
 layout (triangles) in;
-layout (line_strip, max_vertices = 3) out;
+layout (line_strip, max_vertices = 4) out;
 
 in VertexData
 {
@@ -27,14 +27,16 @@ out vec3 outNormal;
 
 void main()
 {
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 4; ++i)
     {
-        gl_Position = gl_in[i].gl_Position;
-        outData.vert = inData[i].vert;
-        outData.norm = inData[i].norm;
-        outData.uv = inData[i].uv;
+        int index = i % 3;
+        gl_Position = gl_in[index].gl_Position;
+        outData.vert = inData[index].vert;
+        outData.norm = inData[index].norm;
+        outData.uv = inData[index].uv;
         outData.wireframeDist = vec3(0.0);
-        outData.wireframeDist[i] = 1.0;
+        outData.wireframeDist[index] = 1.0;
         EmitVertex();
     }
+    EndPrimitive();
 }

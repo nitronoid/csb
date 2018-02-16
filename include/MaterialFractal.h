@@ -24,9 +24,13 @@ public:
 
   virtual const char* shaderFileName() const override;
 
+  virtual void handleKey(QKeyEvent* io_event, QOpenGLContext* io_context) override;
+
 private:
   using hrclock = std::chrono::high_resolution_clock;
   hrclock::time_point m_start = hrclock::now();
+  float m_elapsed = 0.0f;
+  bool m_updateTime = true;
 };
 
 

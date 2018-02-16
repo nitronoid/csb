@@ -13,3 +13,6 @@ void Material::setShaderName(const std::string &_name)
 {
   m_shaderName = _name;
 }
+//-----------------------------------------------------------------------------------------------------
+void Material::handleKey(QKeyEvent*, QOpenGLContext*)
+{}

@@ -4,9 +4,9 @@
 #include <array>
 #include <mat4x4.hpp>
 #include <memory>
+#include <QKeyEvent>
 #include "ShaderLib.h"
 #include "Camera.h"
-
 
 class Material
 {
@@ -66,6 +66,8 @@ public:
   /// @brief The file name of the json shader file that this material works with.
   //-----------------------------------------------------------------------------------------------------
   virtual const char* shaderFileName() const = 0;
+
+  virtual void handleKey(QKeyEvent* io_event, QOpenGLContext* io_context);
 
 protected:
   //-----------------------------------------------------------------------------------------------------

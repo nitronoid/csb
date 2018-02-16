@@ -56,17 +56,17 @@ public:
   /// @brief Receives and acts on a key event.
   /// @param [io] io_event is the key event that was received.
   //-----------------------------------------------------------------------------------------------------
-  void keyPress(QKeyEvent* io_event);
+  virtual void keyPress(QKeyEvent* io_event);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Receives and acts on a mouse event, when moved.
   /// @param [io] io_event is the mouse event that was received.
   //-----------------------------------------------------------------------------------------------------
-  void mouseMove(QMouseEvent * io_event);
+  virtual void mouseMove(QMouseEvent * io_event);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Receives and acts on a mouse event, when clicked.
   /// @param [io] io_event is the mouse event that was received.
   //-----------------------------------------------------------------------------------------------------
-  void mouseClick(QMouseEvent * io_event);
+  virtual void mouseClick(QMouseEvent * io_event);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to intialise the scene, subclasses must call this base function.
   //-----------------------------------------------------------------------------------------------------

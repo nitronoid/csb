@@ -57,6 +57,11 @@ public:
   /// @brief Used to create our shader programs, or use exisiting ones if they have been loaded.
   //-----------------------------------------------------------------------------------------------------
   void initMaterials();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Receives and acts on a key event.
+  /// @param [io] io_event is the key event that was received.
+  //-----------------------------------------------------------------------------------------------------
+  virtual void keyPress(QKeyEvent* io_event) override;
 
 public slots:
   //-----------------------------------------------------------------------------------------------------
