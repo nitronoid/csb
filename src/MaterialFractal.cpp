@@ -7,6 +7,7 @@
 
 void MaterialFractal::init()
 {
+  m_last = std::chrono::high_resolution_clock::now();
   update();
 }
 
@@ -14,9 +15,11 @@ void MaterialFractal::update()
 {
   auto shaderPtr = m_shaderLib->getShader(m_shaderName);
 
-  if (m_updateTime)
-    m_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(hrclock::now() - m_start).count();
-  shaderPtr->setUniformValue("t", m_elapsed / 1000.0f);
+  using namespace std::chrono;
+  auto now = high_resolution_clock::now();
+  m_time += (duration_cast<milliseconds>(now - m_last).count() * m_updateTime);
+  m_last = now;
+  shaderPtr->setUniformValue("t", m_time / 1000.0f);
   // Scope the using declaration
   {
     using namespace SceneMatrices;
@@ -41,24 +44,24 @@ void MaterialFractal::handleKey(QKeyEvent* io_event, QOpenGLContext* io_context)
 {
   switch(io_event->key())
   {
-  case Qt::Key_E :
-  {
-    static constexpr GLuint id = 1;
-    io_context->versionFunctions<QOpenGLFunctions_4_1_Core>()->glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &id);
-    break;
-  }
-  case Qt::Key_R :
-  {
-    static constexpr GLuint id = 0;
-    io_context->versionFunctions<QOpenGLFunctions_4_1_Core>()->glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &id);
-    break;
-  }
-  case Qt::Key_T :
-  {
-    m_updateTime = !m_updateTime;
-    break;
-  }
-  default: break;
+    case Qt::Key_E :
+    {
+      static constexpr GLuint id = 1;
+      io_context->versionFunctions<QOpenGLFunctions_4_1_Core>()->glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &id);
+      break;
+    }
+    case Qt::Key_R :
+    {
+      static constexpr GLuint id = 0;
+      io_context->versionFunctions<QOpenGLFunctions_4_1_Core>()->glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &id);
+      break;
+    }
+    case Qt::Key_T :
+    {
+      m_updateTime = !m_updateTime;
+      break;
+    }
+    default: break;
   }
 
 }
