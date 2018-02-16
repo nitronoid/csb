@@ -17,7 +17,10 @@
 //-------------------------------------------------------------------------------------------------------
 /// @brief Enum used to access matrices in a more readable way.
 //-------------------------------------------------------------------------------------------------------
-namespace SceneMatrices { enum MATRIX { MODEL_VIEW, PROJECTION, NORMAL }; }
+namespace SceneMatrices
+{
+enum MATRIX { MODEL_VIEW, PROJECTION, NORMAL };
+}
 
 class Scene : public QOpenGLWidget, protected QOpenGLFunctions
 {

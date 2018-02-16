@@ -12,10 +12,8 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
   // propably to request more postprocessing than we do in this example.
   const aiScene* scene = importer.ReadFile(
         _fname,
-        aiProcess_CalcTangentSpace       |
-        aiProcess_Triangulate            |
-        aiProcess_JoinIdenticalVertices  |
-        aiProcess_SortByPType);
+        aiProcessPreset_TargetRealtime_MaxQuality |
+        aiProcess_FlipUVs);
   const aiMesh* mesh = scene->mMeshes[_meshNum];
 
   // Get the number of faces on the mesh
@@ -59,8 +57,8 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
       if (!hasTexCoords) continue;
 
       // UV's only use the first two members
-      auto& uv = texCoords[vertInFace];
-      m_uvs.insert(m_uvs.end(), {uv.x,uv.y});
+      const auto& uv = hasTexCoords ? texCoords[vertInFace] : aiVector3D(0.0f, 0.0f, 0.0f);
+      m_uvs.insert(m_uvs.end(), {uv.x, uv.y});
     }
   }
 }

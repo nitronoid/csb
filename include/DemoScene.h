@@ -2,7 +2,8 @@
 #define DEMOSCENE_H
 
 #include "Scene.h"
-#include "Material.h"
+#include "MaterialPBR.h"
+#include "MaterialPhong.h"
 #include "ShaderLib.h"
 
 
@@ -76,9 +77,13 @@ public slots:
 
 private:
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to load mesh data into our buffer.
+  /// @brief Used to write our mesh data into the vbo.
   //-----------------------------------------------------------------------------------------------------
-  void loadMesh();
+  void writeMeshAttributes();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to pass attribute pointers to the current shader program.
+  //-----------------------------------------------------------------------------------------------------
+  void setAttributeBuffers();
   //-----------------------------------------------------------------------------------------------------
   /// @brief Must call the base class function, it then applies our shader and draws the current mesh.
   //-----------------------------------------------------------------------------------------------------

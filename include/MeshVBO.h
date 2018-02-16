@@ -7,12 +7,12 @@
 #include <vector>
 #include <memory>
 
-//-----------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
 /// @brief used to refer to a section of buffer data
-//-----------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------
 namespace MeshAttributes
 {
-  enum Attribute { VERTEX, NORMAL, UV };
+enum Attribute { VERTEX, NORMAL, UV };
 }
 
 class MeshVBO
@@ -38,7 +38,7 @@ public:
   /// @param [in] _address is a pointer to the data we want to store.
   /// @param [in] _section is the section of the buffer we should write our data to.
   //-----------------------------------------------------------------------------------------------------
-  void append(const void * _address, const MeshAttributes::Attribute _section);
+  void write(const void * _address, const MeshAttributes::Attribute _section);
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to get the size of each data element we are storing.
   /// @return the size of the data elements in our buffer
@@ -59,6 +59,8 @@ public:
   /// @return the offset in bytes of _section.
   //-----------------------------------------------------------------------------------------------------
   int offset(const MeshAttributes::Attribute _section) const noexcept;
+
+  void use();
 
 private:
   //-----------------------------------------------------------------------------------------------------

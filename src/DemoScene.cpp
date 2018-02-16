@@ -3,20 +3,32 @@
 #include "MaterialPBR.h"
 #include "MaterialPhong.h"
 #include "MaterialFractal.h"
+#include <QOpenGLContext>
+#include <QOpenGLFunctions_4_1_Core>
 
 //-----------------------------------------------------------------------------------------------------
-void DemoScene::loadMesh()
+void DemoScene::writeMeshAttributes()
+{
+  const auto& mesh = m_meshes[m_meshIndex];
+
+  using namespace MeshAttributes;
+  for (const auto buff : {VERTEX, NORMAL, UV})
+  {
+    m_meshVBO.write(mesh.getAttribData(buff), buff);
+  }
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::setAttributeBuffers()
 {
   static constexpr std::array<const char*, 3> shaderAttribs = {{"inVert", "inNormal", "inUV"}};
-  const auto& mesh = m_meshes[m_meshIndex];
+  static constexpr int tupleSize[] = {3,3,2};
   auto prog = m_shaderLib->getCurrentShader();
 
   using namespace MeshAttributes;
   for (const auto buff : {VERTEX, NORMAL, UV})
   {
-    m_meshVBO.append(mesh.getAttribData(buff), buff);
     prog->enableAttributeArray(shaderAttribs[buff]);
-    prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_meshVBO.offset(buff), 3);
+    prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_meshVBO.offset(buff), tupleSize[buff]);
   }
 
 }
@@ -85,23 +97,19 @@ void DemoScene::generateNewGeometry()
         m_meshes[m_meshIndex].getNNormData(),
         m_meshes[m_meshIndex].getNUVData()
         );
-  loadMesh();
-  auto uvdata = m_meshes[m_meshIndex].getAttribData(MeshAttributes::UV);
-  for (int i = 0; i < 4; ++i)
-    std::cout<<uvdata[i]<<'\t';
-  std::cout<<'\n';
+  writeMeshAttributes();
+  setAttributeBuffers();
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::nextMaterial()
 {
   makeCurrent();
   m_currentMaterial = (m_currentMaterial + 1) % m_materials.size();
-  m_materials[m_currentMaterial]->apply();
-//  loadMesh();
 
+  m_materials[m_currentMaterial]->apply();
+  setAttributeBuffers();
 }
 //-----------------------------------------------------------------------------------------------------
-
 void DemoScene::renderScene()
 {
   Scene::renderScene();
@@ -113,6 +121,9 @@ void DemoScene::renderScene()
   }
 
   m_materials[m_currentMaterial]->update();
+  GLuint id = 0;
+  context()->versionFunctions<QOpenGLFunctions_4_1_Core>()->glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, &id);
+
 
   glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);
 }

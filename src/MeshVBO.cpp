@@ -27,7 +27,7 @@ void MeshVBO::reset(const int _size, const int _nVert, const int _nNorm, const i
   m_vbo.allocate(m_size * m_totalAmountOfData);
 }
 //-----------------------------------------------------------------------------------------------------
-void MeshVBO::append(const void *_address, const MeshAttributes::Attribute _section)
+void MeshVBO::write(const void *_address, const MeshAttributes::Attribute _section)
 {
   // Bind the requested buffer, then set it's data pointer
   m_vbo.bind();
@@ -59,4 +59,8 @@ int MeshVBO::offset(const MeshAttributes::Attribute _section) const noexcept
     offset += m_amountOfData[i];
   return offset * m_size;
 }
-
+//-----------------------------------------------------------------------------------------------------
+void MeshVBO::use()
+{
+  m_vbo.bind();
+}

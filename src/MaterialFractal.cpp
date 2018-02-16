@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "ShaderLib.h"
 #include <chrono>
+#include <QOpenGLFunctions>
 
 void MaterialFractal::init()
 {
@@ -13,7 +14,7 @@ void MaterialFractal::update()
   auto shaderPtr = m_shaderLib->getShader(m_shaderName);
 
   float elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(hrclock::now() - m_start).count();
-  shaderPtr->setUniformValue("t", elapsed);
+  shaderPtr->setUniformValue("t", elapsed / 500.0f);
   // Scope the using declaration
   {
     using namespace SceneMatrices;
