@@ -12,7 +12,7 @@
 //-------------------------------------------------------------------------------------------------------
 namespace MeshAttributes
 {
-enum Attribute { VERTEX, NORMAL, UV };
+enum Attribute { VERTEX, UV, NORMAL };
 }
 
 class MeshVBO
@@ -32,7 +32,7 @@ public:
   /// @param [in] _nUV is the amount of elements of _size bytes that we should allocate for the,
   /// UV's in the Vertex Buffer Object.
   //-----------------------------------------------------------------------------------------------------
-  void reset(const int _size, const int _nVert, const int _nNorm, const int _nUV);
+  void reset(const int _size, const int _nVert, const int _nUV, const int _nNorm);
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to add new data into the specified buffer.
   /// @param [in] _address is a pointer to the data we want to store.

@@ -9,14 +9,14 @@ void MeshVBO::init()
   m_vbo.bind();
 }
 //-----------------------------------------------------------------------------------------------------
-void MeshVBO::reset(const int _size, const int _nVert, const int _nNorm, const int _nUV)
+void MeshVBO::reset(const int _size, const int _nVert, const int _nUV, const int _nNorm)
 {
   {
     using namespace MeshAttributes;
     // Track the amount of data being stored
     m_amountOfData[VERTEX] = _nVert;
-    m_amountOfData[NORMAL] = _nNorm;
     m_amountOfData[UV]     = _nUV;
+    m_amountOfData[NORMAL] = _nNorm;
   }
   m_totalAmountOfData = _nVert + _nNorm + _nUV;
   // Track the size of our stored data

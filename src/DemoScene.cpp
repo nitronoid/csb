@@ -11,7 +11,7 @@ void DemoScene::writeMeshAttributes()
   const auto& mesh = m_meshes[m_meshIndex];
 
   using namespace MeshAttributes;
-  for (const auto buff : {VERTEX, NORMAL, UV})
+  for (const auto buff : {VERTEX, UV, NORMAL})
   {
     m_meshVBO.write(mesh.getAttribData(buff), buff);
   }
@@ -19,15 +19,14 @@ void DemoScene::writeMeshAttributes()
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::setAttributeBuffers()
 {
-  static constexpr std::array<const char*, 3> shaderAttribs = {{"inVert", "inNormal", "inUV"}};
-  static constexpr int tupleSize[] = {3,3,2};
+  static constexpr int tupleSize[] = {3,2,3};
   auto prog = m_shaderLib->getCurrentShader();
 
   using namespace MeshAttributes;
-  for (const auto buff : {VERTEX, NORMAL, UV})
+  for (const auto buff : {VERTEX, UV, NORMAL})
   {
-    prog->enableAttributeArray(shaderAttribs[buff]);
-    prog->setAttributeBuffer(shaderAttribs[buff], GL_FLOAT, m_meshVBO.offset(buff), tupleSize[buff]);
+    prog->enableAttributeArray(buff);
+    prog->setAttributeBuffer(buff, GL_FLOAT, m_meshVBO.offset(buff), tupleSize[buff]);
   }
 
 }
@@ -100,8 +99,8 @@ void DemoScene::generateNewGeometry()
   m_meshVBO.reset(
         sizeof(GLfloat),
         m_meshes[m_meshIndex].getNVertData(),
-        m_meshes[m_meshIndex].getNNormData(),
-        m_meshes[m_meshIndex].getNUVData()
+        m_meshes[m_meshIndex].getNUVData(),
+        m_meshes[m_meshIndex].getNNormData()
         );
   writeMeshAttributes();
   setAttributeBuffers();
