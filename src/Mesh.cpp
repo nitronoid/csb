@@ -72,17 +72,17 @@ void Mesh::reset()
 
 const GLfloat* Mesh::getVertexData() const noexcept
 {
-  return &m_vertices[0];
+  return &m_vertices[0].x;
 }
 
 const GLfloat* Mesh::getNormalsData() const noexcept
 {
-  return &m_normals[0];
+  return &m_normals[0].x;
 }
 
 const GLfloat *Mesh::getUVsData() const noexcept
 {
-  return &m_uvs[0];
+  return &m_uvs[0].x;
 }
 
 const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) const noexcept
@@ -101,17 +101,17 @@ const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) cons
 
 int Mesh::getNVertData() const noexcept
 {
-  return static_cast<int>(m_vertices.size());
+  return static_cast<int>(m_vertices.size()) * 3;
 }
 
 int Mesh::getNNormData() const noexcept
 {
-  return static_cast<int>(m_normals.size());
+  return static_cast<int>(m_normals.size()) * 3;
 }
 
 int Mesh::getNUVData() const noexcept
 {
-  return static_cast<int>(m_uvs.size());
+  return static_cast<int>(m_uvs.size()) * 2;
 }
 
 int Mesh::getNData() const noexcept
