@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>6</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>492</x>
+      <y>582</y>
+      <w>180</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>PinConstraint
+--
+/+ project(const bool _equality, /
+/          const float _stiffness, /
+/          const float _invMass /
+/          ) : virtual void/
+--
+- m_pos : vec3&amp;
+- m_pinPos : vec3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>864</x>
+      <y>582</y>
+      <w>180</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>DistanceConstraint
+--
+/+ project(const bool _equality, /
+/          const float _stiffness, /
+/          const float _invMass /
+/          ) : virtual void/
+--
+- m_posA : vec3&amp;
+- m_posB : vec3&amp;
+- m_restLength : float</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>684</x>
+      <y>582</y>
+      <w>168</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>BendingConstraint
+--
+/+ project(const bool _equality, /
+/          const float _stiffness, /
+/          const float _invMass /
+/          ) : virtual void/
+--
+- m_posA : vec3&amp;
+- m_posB : vec3&amp;
+- m_posC : vec3&amp;
+- m_posD : vec3&amp;
+- m_minAngle : float</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>684</x>
+      <y>456</y>
+      <w>168</w>
+      <h>78</h>
+    </coordinates>
+    <panel_attributes>*&lt;&lt;Interface&gt;&gt;*
+/Constraint/
+--
+/+ project(const bool _equality, /
+/          const float _stiffness, /
+/          const float _invMass /
+/          ) : virtual void/
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>912</x>
+      <y>456</y>
+      <w>132</w>
+      <h>78</h>
+    </coordinates>
+    <panel_attributes>Point
+--
++ Point(const vec3 &amp;_pos, 
+        const vec3 &amp;_vel
+        )
+--
++ m_pos : vec3
++ m_vel : vec3</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>660</x>
+      <y>234</y>
+      <w>216</w>
+      <h>180</h>
+    </coordinates>
+    <panel_attributes>CSBScene
+--
++ CSBScene(const float _mass,
+           const float _stiffness
+           )
++ init() : void
++ loadMesh(const string &amp;_path) : void
++ loadMesh(const vector&lt;vec3&gt; &amp;_verts) : void
++ update() : void
++ draw() : void
+- initGL() : void
+- initBodies() : void
+--
+- m_time : float
+- m_invMass : float
+- m_stiffness : float
+- m_points : vector&lt;Point&gt;
+- m_normals : vector&lt;vec3&gt;
+- m_constraints : vector&lt;unique_ptr&lt;Constraint&gt;&gt;
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>762</x>
+      <y>528</y>
+      <w>18</w>
+      <h>66</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>762</x>
+      <y>552</y>
+      <w>210</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;330.0;10.0;330.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>576</x>
+      <y>552</y>
+      <w>204</w>
+      <h>42</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>320.0;10.0;10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>762</x>
+      <y>408</y>
+      <w>18</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;80.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>870</x>
+      <y>354</y>
+      <w>120</w>
+      <h>114</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;180.0;10.0;180.0;170.0</additional_attributes>
+  </element>
+</diagram>
