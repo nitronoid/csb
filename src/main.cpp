@@ -1,5 +1,7 @@
 #include <QApplication>
 #include "MainWindow.h"
+#include "CSBscene.h"
+#include "DemoScene.h"
 #include "TrackballCamera.h"
 #include "ShaderLib.h"
 #include <random>
@@ -41,7 +43,7 @@ int main(int argc, char *argv[])
   // Create a shader library
   std::shared_ptr<ShaderLib> lib(new ShaderLib);
   // Create a scene to place inside the window
-  std::shared_ptr<Scene> scene(new DemoScene(cam, lib, &window));
+  std::shared_ptr<Scene> scene(new CSBscene(cam, lib, &window));
   // Initialise the window using our scene
   window.init(scene);
   // show it

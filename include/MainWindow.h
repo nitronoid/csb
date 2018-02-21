@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "DemoScene.h"
+#include "Scene.h"
 #include "ui_mainwindow.h"
 
 class MainWindow : public QMainWindow

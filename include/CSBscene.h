@@ -1,12 +1,12 @@
-#ifndef DEMOSCENE_H
-#define DEMOSCENE_H
+#ifndef CSBSCENE_H
+#define CSBSCENE_H
 
 #include "Scene.h"
 #include "Material.h"
 #include "ShaderLib.h"
 
 
-class DemoScene : public Scene
+class CSBscene : public Scene
 {
   Q_OBJECT
 public:
@@ -16,7 +16,7 @@ public:
   /// @param [io] io_shaderLib the shader library to store and retrieve our shaders.
   /// @param [io] io_parent the parent window to create the GL context in.
   //-----------------------------------------------------------------------------------------------------
-  DemoScene(
+  CSBscene(
       const std::shared_ptr<Camera> &io_camera,
       const std::shared_ptr<ShaderLib> &io_shaderLib,
       QWidget *_parent
@@ -27,23 +27,23 @@ public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
   //-----------------------------------------------------------------------------------------------------
-  DemoScene(const DemoScene&) = default;
+  CSBscene(const CSBscene&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  DemoScene& operator=(const DemoScene&) = default;
+  CSBscene& operator=(const CSBscene&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default move constructor.
   //-----------------------------------------------------------------------------------------------------
-  DemoScene(DemoScene&&) = default;
+  CSBscene(CSBscene&&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default move assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  DemoScene& operator=(DemoScene&&) = default;
+  CSBscene& operator=(CSBscene&&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default destructor.
   //-----------------------------------------------------------------------------------------------------
-  ~DemoScene() override = default;
+  ~CSBscene() override = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to intialise the scene, must call the base class init.
   //-----------------------------------------------------------------------------------------------------
@@ -133,4 +133,4 @@ private:
 
 };
 
-#endif // DEMOSCENE_H
+#endif // CSBSCENE_H
