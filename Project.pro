@@ -61,7 +61,8 @@ SOURCES += \
     src/MeshVBO.cpp \
     src/MaterialWireframe.cpp \
     src/MaterialFractal.cpp \
-    src/CSBscene.cpp
+    src/CSBscene.cpp \
+    src/CSBmesh.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \

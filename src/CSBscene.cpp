@@ -53,6 +53,7 @@ void CSBscene::initGeo()
   m_meshes[3].load("models/Suzanne.obj");
   m_meshes[4].load("models/test2.obj");
   m_meshes[5].load("models/Asteroid.obj");
+  for (auto& mesh : m_meshes) mesh.init();
   // Create and bind our Vertex Array Object
   m_vao->create();
   m_vao->bind();
@@ -126,7 +127,12 @@ void CSBscene::renderScene()
   }
 
   m_materials[m_currentMaterial]->update();
-
+  using namespace std::chrono;
+  static auto lastTime = high_resolution_clock::now();
+  float elapsed = duration_cast<milliseconds>(high_resolution_clock::now() - lastTime).count() / 1000.0f;
+  lastTime = high_resolution_clock::now();
+  m_meshes[m_meshIndex].update(elapsed);
+  writeMeshAttributes();
 
   glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);
 }

@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "Material.h"
 #include "ShaderLib.h"
+#include "CSBmesh.h"
 
 
 class CSBscene : public Scene
@@ -94,10 +95,11 @@ private:
   virtual void renderScene() override;
 
 private:
+
   //-----------------------------------------------------------------------------------------------------
   /// @brief Holds our test meshes.
   //-----------------------------------------------------------------------------------------------------
-  std::array<Mesh, 6> m_meshes;
+  std::array<CSBmesh, 6> m_meshes;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Wraps up our OpenGL buffers and VAO.
   //-----------------------------------------------------------------------------------------------------
