@@ -1,0 +1,5 @@
+{
+    "Name" : "EnvMap",
+    "Vertex" : "shaders/env_vert.glsl",
+    "Fragment" : "shaders/env_frag.glsl"
+}

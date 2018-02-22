@@ -44,6 +44,7 @@ HEADERS += \
     include/MaterialFractal.h \
     include/CSBscene.h \
     include/CSBmesh.h
+    include/MaterialEnvMap.h
 
 SOURCES += \
     src/main.cpp \
@@ -63,6 +64,7 @@ SOURCES += \
     src/MaterialFractal.cpp \
     src/CSBscene.cpp \
     src/CSBmesh.cpp
+    src/MaterialEnvMap.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \

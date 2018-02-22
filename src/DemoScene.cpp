@@ -3,6 +3,7 @@
 #include "MaterialPBR.h"
 #include "MaterialPhong.h"
 #include "MaterialFractal.h"
+#include "MaterialEnvMap.h"
 #include <QOpenGLContext>
 
 //-----------------------------------------------------------------------------------------------------
@@ -70,8 +71,8 @@ void DemoScene::keyPress(QKeyEvent* io_event)
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::initMaterials()
 {
-  m_materials.reserve(5);
-
+  m_materials.reserve(6);
+  m_materials.emplace_back(new MaterialEnvMap(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
