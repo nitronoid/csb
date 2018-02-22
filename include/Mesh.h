@@ -26,18 +26,23 @@ public:
   //-----------------------------------------------------------------------------------------------------
   void reset();
   //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a pointer to the first data element in the indices array for use with openGL buffers.
+  /// @return A pointer to the first element in the indices array.
+  //-----------------------------------------------------------------------------------------------------
+  const GLushort *getIndicesData() const noexcept;
+  //-----------------------------------------------------------------------------------------------------
   /// @brief Gets a pointer to the first data element in the vertex array for use with openGL buffers.
-  /// @return A pointer to the first element in vertex array.
+  /// @return A pointer to the first element in the vertex array.
   //-----------------------------------------------------------------------------------------------------
   const GLfloat* getVertexData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Gets a pointer to the first data element in the normal array for use with openGL buffers.
-  /// @return A pointer to the first element in normal array.
+  /// @return A pointer to the first element in the normal array.
   //-----------------------------------------------------------------------------------------------------
   const GLfloat* getNormalsData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Gets a pointer to the first data element in the UV array for use with openGL buffers.
-  /// @return A pointer to the first element in UV array.
+  /// @return A pointer to the first element in the UV array.
   //-----------------------------------------------------------------------------------------------------
   const GLfloat* getUVsData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
@@ -46,6 +51,11 @@ public:
   /// @return A pointer to the first element in an attribute array.
   //-----------------------------------------------------------------------------------------------------
   const GLfloat* getAttribData(const MeshAttributes::Attribute _attrib) const noexcept;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the the amount of face indices.
+  /// @return The size of our indices array.
+  //-----------------------------------------------------------------------------------------------------
+  int getNIndicesData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to the the amount of vertex data elements.
   /// @return The size of our vertex array.
@@ -77,9 +87,13 @@ protected:
   //-----------------------------------------------------------------------------------------------------
   std::vector<glm::vec3> m_normals;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief m_uvs contains the UV's
+  /// @brief m_uvs contains the UVs
   //-----------------------------------------------------------------------------------------------------
   std::vector<glm::vec2> m_uvs;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief m_indices contains the indices
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<GLushort> m_indices;
 
 };
 

@@ -16,6 +16,7 @@ void DemoScene::writeMeshAttributes()
   {
     m_meshVBO.write(mesh.getAttribData(buff), buff);
   }
+  m_meshVBO.setIndices(mesh.getIndicesData());
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::setAttributeBuffers()
@@ -97,11 +98,14 @@ void DemoScene::generateNewGeometry()
 {
   makeCurrent();
   m_meshIndex = (m_meshIndex + 1) % m_meshes.size();
+  auto& mesh = m_meshes[m_meshIndex];
   m_meshVBO.reset(
+        sizeof(GLushort),
+        mesh.getNIndicesData(),
         sizeof(GLfloat),
-        m_meshes[m_meshIndex].getNVertData(),
-        m_meshes[m_meshIndex].getNUVData(),
-        m_meshes[m_meshIndex].getNNormData()
+        mesh.getNVertData(),
+        mesh.getNUVData(),
+        mesh.getNNormData()
         );
   writeMeshAttributes();
   setAttributeBuffers();
@@ -128,7 +132,8 @@ void DemoScene::renderScene()
 
   m_materials[m_currentMaterial]->update();
 
-
-  glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);
+  m_meshVBO.use();
+  glDrawElements(GL_TRIANGLES, m_meshes[m_meshIndex].getNIndicesData(), GL_UNSIGNED_SHORT, nullptr);
+//  glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);
 }
 //-----------------------------------------------------------------------------------------------------
