@@ -15,6 +15,7 @@ void CSBscene::writeMeshAttributes()
   {
     m_meshVBO.write(mesh.getAttribData(buff), buff);
   }
+  m_meshVBO.setIndices(mesh.getIndicesData());
 }
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::setAttributeBuffers()
@@ -73,10 +74,10 @@ void CSBscene::initMaterials()
 {
   m_materials.reserve(5);
 
+  m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
-  m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialFractal(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
@@ -97,11 +98,14 @@ void CSBscene::generateNewGeometry()
 {
   makeCurrent();
   m_meshIndex = (m_meshIndex + 1) % m_meshes.size();
+  auto& mesh = m_meshes[m_meshIndex];
   m_meshVBO.reset(
+        sizeof(GLushort),
+        mesh.getNIndicesData(),
         sizeof(GLfloat),
-        m_meshes[m_meshIndex].getNVertData(),
-        m_meshes[m_meshIndex].getNUVData(),
-        m_meshes[m_meshIndex].getNNormData()
+        mesh.getNVertData(),
+        mesh.getNUVData(),
+        mesh.getNNormData()
         );
   writeMeshAttributes();
   setAttributeBuffers();
@@ -134,6 +138,6 @@ void CSBscene::renderScene()
   m_meshes[m_meshIndex].update(elapsed);
   writeMeshAttributes();
 
-  glDrawArrays(GL_TRIANGLES, 0, m_meshes[m_meshIndex].getNVertData()/3);
+  glDrawElements(GL_TRIANGLES, m_meshes[m_meshIndex].getNIndicesData(), GL_UNSIGNED_SHORT, nullptr);
 }
 //-----------------------------------------------------------------------------------------------------

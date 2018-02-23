@@ -4,6 +4,14 @@
 void CSBmesh::init()
 {
   m_prevPosition = m_vertices;
+  for (size_t i = 0; i < m_indices.size() - 1; ++i)
+  {
+    auto p1 = m_indices[i];
+    auto p2 = m_indices[i + 1];
+    if (p1 == p2) continue;
+    float distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
+    m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
+  }
 }
 
 void CSBmesh::update(const float _time)
@@ -17,15 +25,9 @@ void CSBmesh::update(const float _time)
     pos = newPos;
   }
 
-  constexpr auto restLength = 1.0f;
-  constexpr auto restSqr = restLength * restLength;
-  for (size_t i = 0; i < m_vertices.size() - 1; ++i)
+  for (int i = 0; i < 3; ++i)
+  for (auto& constraint : m_constraints)
   {
-    auto& p1 = m_vertices[i];
-    auto& p2 = m_vertices[i + 1];
-    auto delta = p2 - p1;
-    delta *= restSqr / (delta * delta + restSqr) - 0.5f;
-    p1 -= delta;
-    p2 += delta;
+    constraint->project(m_vertices);
   }
 }
