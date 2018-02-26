@@ -1,36 +1,10 @@
 #include "CSBmesh.h"
 #include "gtx/fast_square_root.hpp"
-#include <tuple>
-#include <unordered_set>
 
-struct edgePair
-{
-  edgePair(const GLushort _a, const GLushort _b) :
-    p(std::min(_a, _b), std::max(_a, _b))
-  {}
-  friend bool operator==(const edgePair &_a, const edgePair &_b)
-  {
-    return _a.p == _b.p;
-  }
-  std::pair<GLushort, GLushort> p;
-};
-
-namespace std
-{
-template <>
-struct hash<edgePair>
-{
-  size_t operator()(const edgePair &_up) const
-  {
-    return std::hash<size_t>()(std::hash<GLushort>()(_up.p.first)) ^ std::hash<GLushort>()(_up.p.second);
-  }
-};
-}
-
-void CSBmesh::init()
+std::unordered_set<CSBmesh::edgePair> CSBmesh::getEdges()
 {
   std::unordered_set<edgePair> edgeSet;
-  auto numEdges = m_vertices.size() + m_indices.size() / 3 - 2;
+  auto numEdges = m_vertices.size() + (m_indices.size() / 3) - 2;
   edgeSet.reserve(numEdges);
 
   m_prevPosition = m_vertices;
@@ -43,7 +17,12 @@ void CSBmesh::init()
     edgeSet.insert({p2, p3});
     edgeSet.insert({p3, p1});
   }
+  return edgeSet;
+}
 
+void CSBmesh::init()
+{
+  auto edgeSet = getEdges();
   for (const auto & edge : edgeSet)
   {
     auto p1 = edge.p.first;

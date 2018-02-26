@@ -13,7 +13,8 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
   const aiScene* scene = importer.ReadFile(
         _fname,
         aiProcessPreset_TargetRealtime_MaxQuality |
-        aiProcess_FlipUVs);
+        aiProcess_FlipUVs
+        );
   const aiMesh* mesh = scene->mMeshes[_meshNum];
 
   // Calculate the amount of vertices we will store (3 per face)

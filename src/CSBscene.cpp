@@ -29,7 +29,6 @@ void CSBscene::setAttributeBuffers()
     prog->enableAttributeArray(buff);
     prog->setAttributeBuffer(buff, GL_FLOAT, m_meshVBO.offset(buff), tupleSize[buff]);
   }
-
 }
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::init()
