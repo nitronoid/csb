@@ -30,6 +30,7 @@ private:
 
 
   std::unordered_set<edgePair> getEdges();
+  std::vector<GLushort> getConnectedVertices(const GLushort _vert);
 
   std::vector<glm::vec3> m_prevPosition;
   std::vector<std::unique_ptr<CSBconstraint>> m_constraints;

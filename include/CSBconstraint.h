@@ -38,4 +38,28 @@ private:
 };
 
 
+class BendingConstraint : public CSBconstraint
+{
+public:
+  BendingConstraint(const size_t _p1, const size_t _p2, const size_t _p3, float _angle) :
+    m_distance(_angle),
+    m_p1(_p1),
+    m_p2(_p2),
+    m_p3(_p3)
+  {}
+  BendingConstraint(const BendingConstraint&) = default;
+  BendingConstraint& operator=(const BendingConstraint&) = default;
+  BendingConstraint(BendingConstraint&&) = default;
+  BendingConstraint& operator=(BendingConstraint&&) = default;
+  virtual ~BendingConstraint() override = default;
+  virtual void project(std::vector<glm::vec3> &_positions) override;
+
+private:
+  float m_distance;
+  size_t m_p1;
+  size_t m_p2;
+  size_t m_p3;
+};
+
+
 #endif // CSBCONSTRAINT_H

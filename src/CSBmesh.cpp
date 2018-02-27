@@ -8,16 +8,37 @@ std::unordered_set<CSBmesh::edgePair> CSBmesh::getEdges()
   edgeSet.reserve(numEdges);
 
   m_prevPosition = m_vertices;
-  for (size_t i = 0; i < m_indices.size() - 2; i+=3)
+  const auto last = m_indices.size() - 2;
+  for (size_t i = 0; i < last; i+=3)
   {
-    auto p1 = m_indices[i];
-    auto p2 = m_indices[i + 1];
-    auto p3 = m_indices[i + 2];
+    const auto p1 = m_indices[i];
+    const auto p2 = m_indices[i + 1];
+    const auto p3 = m_indices[i + 2];
     edgeSet.insert({p1, p2});
     edgeSet.insert({p2, p3});
     edgeSet.insert({p3, p1});
   }
   return edgeSet;
+}
+
+
+std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
+{
+  std::unordered_set<GLushort> connected;
+
+  const auto last = m_indices.size() - 2;
+  for (size_t i = 0; i < last; i+=3)
+  {
+    std::unordered_set<GLushort> facePoints = {m_indices[i], m_indices[i + 1], m_indices[i + 2]};
+
+    if (facePoints.count(_vert))
+    {
+      facePoints.erase(_vert);
+      connected.insert(facePoints.begin(), facePoints.end());
+    }
+  }
+
+  return std::vector<GLushort>{connected.begin(), connected.end()};
 }
 
 void CSBmesh::init()
@@ -30,13 +51,46 @@ void CSBmesh::init()
     float distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
     m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
   }
+
+  const auto size = m_vertices.size();
+  std::unordered_set<edgePair> connections;
+  for (GLushort v = 0; v < size; ++v)
+  {
+    auto neighbours = getConnectedVertices(v);
+    for (const auto vi : neighbours)
+    {
+      float bestCosTheta = 0.0f;
+      auto bestV = vi;
+      for (const auto vj : neighbours)
+      {
+        auto a = m_vertices[vi] - m_vertices[v];
+        auto b = m_vertices[vj] - m_vertices[v];
+        auto cosTheta = glm::dot(a, b) / (glm::fastLength(a) * glm::fastLength(b));
+        if (cosTheta < bestCosTheta)
+        {
+          bestCosTheta = cosTheta;
+          bestV = vj;
+        }
+      }
+      edgePair connection {bestV, vi};
+      if (!connections.count(connection) && bestV != vi)
+      {
+        connections.insert(connection);
+        constexpr float third = 1.0f / 3.0f;
+        auto centre = third * (m_vertices[vi] + m_vertices[bestV] + m_vertices[v]);
+        auto rest = glm::fastDistance(m_vertices[v], centre);
+        m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest));
+      }
+    }
+  }
 }
 
 void CSBmesh::update(const float _time)
 {
   const auto pos = m_vertices[0];
   const auto gravity = glm::vec3(0.f,-0.1f,0.f);
-  for (size_t i = 0; i < m_vertices.size(); ++i)
+  const auto size = m_vertices.size();
+  for (size_t i = 0; i < size; ++i)
   {
     auto& pos = m_vertices[i];
     glm::vec3 newPos = pos * 2.0f - m_prevPosition[i] + gravity * _time * _time;
