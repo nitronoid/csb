@@ -83,12 +83,14 @@ void CSBmesh::init()
       }
     }
   }
+
+  m_constraints.emplace_back(new PinConstraint(0, m_vertices[0]));
+  m_constraints.emplace_back(new PinConstraint(20, m_vertices[20]));
 }
 
 void CSBmesh::update(const float _time)
 {
-  const auto pos = m_vertices[0];
-  const auto gravity = glm::vec3(0.f,-0.1f,0.f);
+  const auto gravity = glm::vec3(0.f,-4.95f,0.f);
   const auto size = m_vertices.size();
   for (size_t i = 0; i < size; ++i)
   {
@@ -103,6 +105,4 @@ void CSBmesh::update(const float _time)
   {
     constraint->project(m_vertices);
   }
-
-  m_vertices[0] = pos;
 }

@@ -26,13 +26,7 @@ void BendingConstraint::project(std::vector<glm::vec3> &_positions)
   auto centre = third * (p1 + p2 + p3);
   auto dirCentre = p3 - centre;
 
-  volatile float x = centre.x;
-  volatile float y = centre.x;
-  volatile float z = centre.x;
-  volatile float x1 = p3.x;
-  volatile float y2 = p3.x;
-  volatile float z3 = p3.x;
-  volatile auto distCentre = glm::fastLength(dirCentre);
+  auto distCentre = glm::fastLength(dirCentre);
 
   float diff = 1.0f - (m_distance / distCentre);
   auto force = dirCentre;
@@ -41,4 +35,9 @@ void BendingConstraint::project(std::vector<glm::vec3> &_positions)
   _positions[m_p1] += (0.0f * 2.f * force);
   _positions[m_p2] += (0.0f * 2.f * force);
   _positions[m_p3] += (0.0f * -4.f * force);
+}
+
+void PinConstraint::project(std::vector<glm::vec3> &_positions)
+{
+  _positions[m_p] = m_pin;
 }
