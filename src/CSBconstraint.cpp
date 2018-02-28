@@ -28,13 +28,16 @@ void BendingConstraint::project(std::vector<glm::vec3> &_positions)
 
   auto distCentre = glm::fastLength(dirCentre);
 
-  float diff = 1.0f - (m_distance / distCentre);
-  auto force = dirCentre;
-  force *= diff;
+  float sub = m_distance / distCentre;
+  float diff = 1.0f;
+  if (std::isfinite(sub))
+    diff -= sub;
+  auto force = dirCentre * diff;
 
-  _positions[m_p1] += (0.0f * 2.f * force);
-  _positions[m_p2] += (0.0f * 2.f * force);
-  _positions[m_p3] += (0.0f * -4.f * force);
+  constexpr auto k = 0.05f;
+  _positions[m_p1] += (k * 2.f * force);
+  _positions[m_p2] += (k * 2.f * force);
+  _positions[m_p3] += (k * -4.f * force);
 }
 
 void PinConstraint::project(std::vector<glm::vec3> &_positions)

@@ -100,7 +100,7 @@ void CSBmesh::update(const float _time)
     pos = newPos;
   }
 
-  //for (int i = 0; i < 3; ++i)
+  for (int i = 0; i < 3; ++i)
   for (auto& constraint : m_constraints)
   {
     constraint->project(m_vertices);
