@@ -85,7 +85,7 @@ void CSBmesh::init()
   }
 
   m_constraints.emplace_back(new PinConstraint(0, m_vertices[0]));
-  m_constraints.emplace_back(new PinConstraint(20, m_vertices[20]));
+  m_constraints.emplace_back(new PinConstraint(60, m_vertices[60]));
 }
 
 void CSBmesh::update(const float _time)
