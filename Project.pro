@@ -47,7 +47,8 @@ HEADERS += \
     include/CSBscene.h \
     include/CSBmesh.h \
     include/MaterialEnvMap.h \
-    include/CSBconstraint.h
+    include/CSBconstraint.h \
+    include/csbpoint.h
 
 SOURCES += \
     src/main.cpp \
