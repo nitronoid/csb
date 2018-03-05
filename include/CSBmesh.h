@@ -2,7 +2,9 @@
 #define CSBMESH_H
 
 #include "Mesh.h"
+#include "glm/common.hpp"
 #include <tuple>
+#include <unordered_map>
 #include <unordered_set>
 #include "csbpoint.h"
 #include "CSBconstraint.h"
@@ -27,22 +29,29 @@ private:
   };
   friend struct std::hash<CSBmesh::EdgePair>;
 
-
+  void hashVerts();
   std::unordered_set<EdgePair> getEdges();
   std::vector<GLushort> getConnectedVertices(const GLushort _vert);
 
   std::vector<CSBpoint> m_points;
   std::vector<std::unique_ptr<CSBconstraint>> m_constraints;
+
+
+  size_t hashPoint(const glm::vec3& _coord) const;
+
+  std::vector<std::vector<GLushort>> m_hashTable;
 };
+
+
 
 namespace std
 {
 template <>
 struct hash<CSBmesh::EdgePair>
 {
-  size_t operator()(const CSBmesh::EdgePair &_up) const
+  size_t operator()(const CSBmesh::EdgePair &_key) const
   {
-    return std::hash<size_t>()(std::hash<GLushort>()(_up.p.first)) ^ std::hash<GLushort>()(_up.p.second);
+    return std::hash<size_t>()(std::hash<GLushort>()(_key.p.first)) ^ std::hash<GLushort>()(_key.p.second);
   }
 };
 }

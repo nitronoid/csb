@@ -40,8 +40,32 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
   return std::vector<GLushort>{connected.begin(), connected.end()};
 }
 
+size_t CSBmesh::hashPoint (const glm::vec3& _coord) const
+{
+  static constexpr auto posMod = [](const int _x, const int _m)
+  {
+    return static_cast<size_t>(((_x % _m) + _m) % _m);
+  };
+  static constexpr float cellsize = 1.2f;
+  auto x = static_cast<int>(glm::floor(_coord.x / cellsize));
+  auto y = static_cast<int>(glm::floor(_coord.y / cellsize));
+  auto z = static_cast<int>(glm::floor(_coord.z / cellsize));
+  static constexpr int primes[] = {73856093, 19349663, 83492791};
+  return posMod((x * primes[0]) ^ (y * primes[1]) ^ (z * primes[2]), 999);
+}
+
+void CSBmesh::hashVerts()
+{
+  for (auto& cell : m_hashTable) cell.clear();
+  for (GLushort i = 0; i < m_points.size(); ++i)
+  {
+    m_hashTable[hashPoint(m_points[i].m_pos)].push_back(i);
+  }
+}
+
 void CSBmesh::init()
 {
+  m_hashTable.resize(999);
   m_points.reserve(m_vertices.size());
   for (auto& vert : m_vertices)
     m_points.emplace_back(vert, 1.f);
@@ -70,6 +94,7 @@ void CSBmesh::init()
       auto bestV = vi;
       for (const auto vj : neighbours)
       {
+        if (vj == vi) continue;
         auto a = m_vertices[vi] - m_vertices[v];
         auto b = m_vertices[vj] - m_vertices[v];
         auto cosTheta = glm::dot(a, b) / (glm::fastLength(a) * glm::fastLength(b));
@@ -90,6 +115,8 @@ void CSBmesh::init()
       }
     }
   }
+
+
 }
 
 void CSBmesh::update(const float _time)
@@ -103,8 +130,8 @@ void CSBmesh::update(const float _time)
     point.m_prevPos = point.m_pos;
     point.m_pos = newPos;
   }
-
-  for (int i = 0; i < 3; ++i)
+  hashVerts();
+  for (int i = 0; i < 5; ++i)
   for (auto& constraint : m_constraints)
   {
     constraint->project(m_points);
