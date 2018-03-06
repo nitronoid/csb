@@ -40,18 +40,30 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
   return std::vector<GLushort>{connected.begin(), connected.end()};
 }
 
-size_t CSBmesh::hashPoint (const glm::vec3& _coord) const
+glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
+{
+  static constexpr float cellsize = 1.2f;
+  return glm::ivec3(
+    static_cast<int>(glm::floor(_coord.x / cellsize)),
+    static_cast<int>(glm::floor(_coord.y / cellsize)),
+    static_cast<int>(glm::floor(_coord.z / cellsize))
+  );
+}
+
+size_t CSBmesh::hashCell (const glm::ivec3& _cell) const
 {
   static constexpr auto posMod = [](const int _x, const int _m)
   {
     return static_cast<size_t>(((_x % _m) + _m) % _m);
   };
-  static constexpr float cellsize = 1.2f;
-  auto x = static_cast<int>(glm::floor(_coord.x / cellsize));
-  auto y = static_cast<int>(glm::floor(_coord.y / cellsize));
-  auto z = static_cast<int>(glm::floor(_coord.z / cellsize));
+
   static constexpr int primes[] = {73856093, 19349663, 83492791};
-  return posMod((x * primes[0]) ^ (y * primes[1]) ^ (z * primes[2]), 999);
+  return posMod((_cell.x * primes[0]) ^ (_cell.y * primes[1]) ^ (_cell.z * primes[2]), 999);
+}
+
+size_t CSBmesh::hashPoint (const glm::vec3& _coord) const
+{
+  hashCell(calcCell(_coord));
 }
 
 void CSBmesh::hashVerts()
@@ -63,13 +75,41 @@ void CSBmesh::hashVerts()
   }
 }
 
+void CSBmesh::hashTris()
+{
+  const auto size = m_triangleVertHash.size();
+  for (size_t i = 0; i < size; ++i)
+  {
+    const size_t index = i * 3;
+    const auto& p1 = m_points[m_indices[index]];
+    const auto& p2 = m_points[m_indices[index + 1]];
+    const auto& p3 = m_points[m_indices[index + 2]];
+
+    const auto min = calcCell(glm::min(glm::min(p1.m_pos, p2.m_pos), p3.m_pos));
+    const auto max = calcCell(glm::max(glm::max(p1.m_pos, p2.m_pos), p3.m_pos));
+
+    // hash all cells within the bounding box of this triangle
+    for (int x = min.x; x < max.x; ++x)
+      for (int y = min.y; y < max.y; ++y)
+        for (int z = min.z; z < max.z; ++z)
+        {
+          m_triangleVertHash[i].push_back(hashCell({x,y,z}));
+        }
+  }
+}
+
+void CSBmesh::generateCollisionConstraints()
+{
+
+}
+
 void CSBmesh::init()
 {
+  m_triangleVertHash.resize(m_indices.size() / 3);
   m_hashTable.resize(999);
   m_points.reserve(m_vertices.size());
   for (auto& vert : m_vertices)
     m_points.emplace_back(vert, 1.f);
-
 
   m_points[0].m_invMass = 0.f;
   m_points[60].m_invMass = 0.f;
@@ -115,8 +155,6 @@ void CSBmesh::init()
       }
     }
   }
-
-
 }
 
 void CSBmesh::update(const float _time)
@@ -131,6 +169,7 @@ void CSBmesh::update(const float _time)
     point.m_pos = newPos;
   }
   hashVerts();
+  hashTris();
   for (int i = 0; i < 5; ++i)
   for (auto& constraint : m_constraints)
   {

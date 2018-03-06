@@ -30,16 +30,20 @@ private:
   friend struct std::hash<CSBmesh::EdgePair>;
 
   void hashVerts();
+  void hashTris();
   std::unordered_set<EdgePair> getEdges();
   std::vector<GLushort> getConnectedVertices(const GLushort _vert);
 
   std::vector<CSBpoint> m_points;
   std::vector<std::unique_ptr<CSBconstraint>> m_constraints;
 
-
+  glm::ivec3 calcCell(const glm::vec3& _coord) const;
+  size_t hashCell (const glm::ivec3& _cell) const;
   size_t hashPoint(const glm::vec3& _coord) const;
+  void generateCollisionConstraints();
 
   std::vector<std::vector<GLushort>> m_hashTable;
+  std::vector<std::vector<size_t>> m_triangleVertHash;
 };
 
 
