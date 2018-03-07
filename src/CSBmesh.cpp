@@ -42,7 +42,7 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
 
 glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
-  static constexpr float cellsize = 1.2f;
+  static constexpr float cellsize = 0.8f;
   return glm::ivec3(
         static_cast<int>(glm::floor(_coord.x / cellsize)),
         static_cast<int>(glm::floor(_coord.y / cellsize)),
@@ -98,8 +98,9 @@ void CSBmesh::hashTris()
   }
 }
 
-void CSBmesh::generateCollisionConstraints()
+std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
 {
+  std::vector<PinConstraint> constraints;
   static constexpr auto fcomp = [](const float& _a, const float& _b)
   {
     return std::abs(_a - _b) < (0.001f * std::max(1.0f, std::max(std::abs(_a), std::abs(_b))));
@@ -120,26 +121,32 @@ void CSBmesh::generateCollisionConstraints()
       // Loop over all points in the cell
       for (const auto& pid : m_hashTable[hash])
       {
+        // skip the points in this face
+        if ((pid == m_indices[index]) || (pid == m_indices[index] + 1) || (pid == m_indices[index + 2]))
+          continue;
         const auto& point = m_points[pid];
         const auto& L1 = point.m_prevPos;
-        const auto& L2 = point.m_prevPos;
+        const auto& L2 = point.m_pos;
         const auto DistStart = glm::dot(L1 - T1, norm);
         const auto DistEnd = glm::dot(L2 - T1, norm);
 
         auto intersection = L1 + (L2 - L1) * (-DistStart / (DistEnd - DistStart));
 
         if (!((DistStart * DistEnd >= 0.0f) // Check not same side of triangle
-            && (!fcomp(DistStart, DistEnd)) // Check not parallel to triangle
-            && (glm::dot(glm::cross(norm, T2 - T1), intersection - T1) < 0.0f) // Check within triangle edges
-            && (glm::dot(glm::cross(norm, T3 - T2), intersection - T2) < 0.0f)
-            && (glm::dot(glm::cross(norm, T1 - T3), intersection - T1) < 0.0f)
+            || (fcomp(DistStart, DistEnd)) // Check not parallel to triangle
+            || (glm::dot(glm::cross(norm, T2 - T1), intersection - T1) < 0.0f) // Check within triangle edges
+            || (glm::dot(glm::cross(norm, T3 - T2), intersection - T2) < 0.0f)
+            || (glm::dot(glm::cross(norm, T1 - T3), intersection - T1) < 0.0f)
               ))
         {
           // Add constraint here
+          constraints.emplace_back(pid, intersection);
+         // point.m_pos = point.m_prevPos;
         }
       }
     }
   }
+  return constraints;
 }
 
 void CSBmesh::init()
@@ -151,7 +158,7 @@ void CSBmesh::init()
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
-  m_points[60].m_invMass = 0.f;
+  m_points[m_points.size() - 1].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
   for (const auto & edge : edgeSet)
@@ -209,7 +216,10 @@ void CSBmesh::update(const float _time)
   }
   hashVerts();
   hashTris();
-  generateCollisionConstraints();
+  auto collisionConstraints = generateCollisionConstraints();
+  for (auto& collisionConstraint : collisionConstraints)
+
+    collisionConstraint.project(m_points);
   for (int i = 0; i < 5; ++i)
     for (auto& constraint : m_constraints)
     {
