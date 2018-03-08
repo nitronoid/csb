@@ -42,13 +42,14 @@ void CSBscene::init()
   {
     using namespace SceneMatrices;
     m_matrices[MODEL_VIEW] = glm::translate(m_matrices[MODEL_VIEW], glm::vec3(0.0f, 0.0f, -2.0f));
+    m_matrices[MODEL_VIEW] = glm::rotate(m_matrices[MODEL_VIEW], glm::radians(45.0f), glm::vec3(0.0f, 1.0f, 0.0f));
   }
 }
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::initGeo()
 {
 //  m_meshes[0].load("models/cube.obj");
-  m_meshes[0].load("models/hdPlane.obj");
+  m_meshes[0].load("models/bigPlane.obj");
   for (auto& mesh : m_meshes) mesh.init();
   // Create and bind our Vertex Array Object
   m_vao->create();
