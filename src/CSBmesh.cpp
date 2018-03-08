@@ -89,9 +89,9 @@ void CSBmesh::hashTris()
     const auto max = calcCell(glm::max(glm::max(p1.m_pos, p2.m_pos), p3.m_pos));
 
     // hash all cells within the bounding box of this triangle
-    for (int x = min.x; x < max.x; ++x)
-      for (int y = min.y; y < max.y; ++y)
-        for (int z = min.z; z < max.z; ++z)
+    for (int x = min.x; x <= max.x; ++x)
+      for (int y = min.y; y <= max.y; ++y)
+        for (int z = min.z; z <= max.z; ++z)
         {
           m_triangleVertHash[i].push_back(hashCell({x,y,z}));
         }
@@ -106,7 +106,7 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
     return std::abs(_a - _b) < (0.001f * std::max(1.0f, std::max(std::abs(_a), std::abs(_b))));
   };
   const auto size = m_triangleVertHash.size();
-  // Loop over all faces
+  //   Loop over all faces
   for (size_t i = 0; i < size; ++i)
   {
     const size_t index = i * 3;
@@ -122,7 +122,7 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
       for (const auto& pid : m_hashTable[hash])
       {
         // skip the points in this face
-        if ((pid == m_indices[index]) || (pid == m_indices[index] + 1) || (pid == m_indices[index + 2]))
+        if ((pid == m_indices[index]) || (pid == m_indices[index + 1]) || (pid == m_indices[index + 2]))
           continue;
         const auto& point = m_points[pid];
         const auto& L1 = point.m_prevPos;
@@ -134,13 +134,13 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
 
         auto X1 = glm::cross(T2-T1, intersection-T1);
         auto X2 = glm::cross(T3-T2, intersection-T2);
-        auto X3 = glm::cross(T1-T3, intersection-T3);
+        auto X3 = glm::cross(T1-T3, intersection-T1);
 
 
         if (!((DistStart * DistEnd >= 0.0f) // Check not same side of triangle
               || (fcomp(DistStart, DistEnd)) // Check not parallel to triangle
               || (
-                   (glm::length(glm::cross(X1, X2)) == 0.0f)
+                (glm::length(glm::cross(X1, X2)) == 0.0f)
                 && (glm::length(glm::cross(X1, X3)) == 0.0f)
                 )
               ))
@@ -153,6 +153,8 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
       }
     }
   }
+
+
   return constraints;
 }
 
@@ -165,7 +167,7 @@ void CSBmesh::init()
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
-  m_points[m_points.size() - 1].m_invMass = 0.f;
+  //m_points[m_points.size() - 1].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
   for (const auto & edge : edgeSet)
@@ -224,8 +226,10 @@ void CSBmesh::update(const float _time)
   hashVerts();
   hashTris();
 
-  auto collisionConstraints = generateCollisionConstraints();
+//  auto collisionConstraints = generateCollisionConstraints();
 
+//  for (auto& collisionConstraint : collisionConstraints)
+//    collisionConstraint.project(m_points);
 
   for (int i = 0; i < 5; ++i)
   {
@@ -233,7 +237,5 @@ void CSBmesh::update(const float _time)
     {
       constraint->project(m_points);
     }
-    for (auto& collisionConstraint : collisionConstraints)
-      collisionConstraint.project(m_points);
   }
 }
