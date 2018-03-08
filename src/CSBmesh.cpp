@@ -42,7 +42,8 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
 
 glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
-  static constexpr float cellsize = 0.8f;
+  // THIS MUST BE AVERAGE EDGE LENGTH!!!!!!!!!!
+  static constexpr float cellsize = 0.038f;
   return glm::ivec3(
         static_cast<int>(glm::floor(_coord.x / cellsize)),
         static_cast<int>(glm::floor(_coord.y / cellsize)),
@@ -107,14 +108,17 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
     return std::abs(_a - _b) < (0.001f * std::max(1.0f, std::max(std::abs(_a), std::abs(_b))));
   };
   const auto size = m_triangleVertHash.size();
-  //   Loop over all faces
+  //     Loop over all faces
   for (size_t i = 0; i < size; ++i)
   {
     const size_t index = i * 3;
     const auto& T1 = m_points[m_indices[index]].m_pos;
     const auto& T2 = m_points[m_indices[index + 1]].m_pos;
     const auto& T3 = m_points[m_indices[index + 2]].m_pos;
-    const auto norm = glm::normalize(glm::cross(T3 - T1, T2 - T1));
+    const auto edge1 = T2 - T1;
+    const auto edge2 = T3 - T1;
+    const auto edge3 = T3 - T2;
+    const auto norm = glm::normalize(glm::cross(edge1, edge2));
 
     // Loop over all hashed cells for this face
     for (const auto& hash : m_triangleVertHash[i])
@@ -126,114 +130,32 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
         if ((pid == m_indices[index]) || (pid == m_indices[index + 1]) || (pid == m_indices[index + 2]))
           continue;
         const auto& point = m_points[pid];
-        const auto& L1 = point.m_pos;
-        const auto& L2 = L1 + (point.m_prevPos - L1);
-
-        if (fcomp(glm::distance(L1, L2), 0.0f))
-          continue;
+        const auto& L1 = point.m_prevPos;
+        const auto& L2 = point.m_pos;
 
         const auto DistStart = glm::dot(L1 - T1, norm);
         const auto DistEnd = glm::dot(L2 - T1, norm);
 
         const auto intersection = L1 + (L2 - L1) * (-DistStart / (DistEnd - DistStart));
 
-        const auto v0 = T2 - T1, v1 = T3 - T1, v2 = intersection - T1;
-        const auto d00 = glm::dot(v0, v0);
-        const auto d01 = glm::dot(v0, v1);
-        const auto d11 = glm::dot(v1, v1);
-        const auto d20 = glm::dot(v2, v0);
-        const auto d21 = glm::dot(v2, v1);
-        const auto invDenom = 1.0f / (d00 * d11 - d01 * d01);
-        const auto s = (d11 * d20 - d01 * d21) * invDenom;
-        const auto t = (d00 * d21 - d01 * d20) * invDenom;
-        const auto u = 1.0f - s - t;
+        const auto X1 = glm::dot(glm::cross(norm, edge1), intersection - T1);
+        const auto X2 = glm::dot(glm::cross(norm, edge3), intersection - T2);
+        const auto X3 = glm::dot(glm::cross(norm, -edge2), intersection - T1);
 
-        bool insideTri = ((0.f <= s) && (s <= 1.f) && ((0.f <= t) && (t <= 1.f)) && (u <= 1.f));
+        bool insideTri = (X1 >= 0.0f) && (X2 >= 0.0f) && (X3 >= 0.0f);
 
-
-        const auto dist = glm::distance(L1, intersection);
         // Check not same side of triangle
         if ((DistStart * DistEnd < 0.0f) && insideTri)
         {
           // Add constraint here
-                    constraints.emplace_back(pid, point.m_prevPos);
-//          std::swap(m_points[pid].m_pos, m_points[pid].m_prevPos);
-//          m_points[pid].m_pos = point.m_prevPos;
-//          m_points[pid].m_prevPos = intersection;
-          // point.m_pos = point.m_prevPos;
+          std::swap(m_points[m_indices[index]].m_pos, m_points[m_indices[index]].m_prevPos);
+          std::swap(m_points[m_indices[index + 1]].m_pos, m_points[m_indices[index + 1]].m_prevPos);
+          std::swap(m_points[m_indices[index + 2]].m_pos, m_points[m_indices[index + 2]].m_prevPos);
+          std::swap(m_points[pid].m_pos, m_points[pid].m_prevPos);
         }
       }
     }
   }
-
-  //  for (size_t i = 0; i < size; ++i)
-  //  {
-  //    const size_t index = i * 3;
-  //    const auto& T1 = m_points[m_indices[index]].m_pos;
-  //    const auto& T2 = m_points[m_indices[index + 1]].m_pos;
-  //    const auto& T3 = m_points[m_indices[index + 2]].m_pos;
-  //    const auto& edge1 = T2 - T1;
-  //    const auto& edge2 = T3 - T1;
-  //    const auto norm = glm::normalize(glm::cross(edge2, edge1));
-
-  //    // Loop over all hashed cells for this face
-  //    for (const auto& hash : m_triangleVertHash[i])
-  //    {
-  //      // Loop over all points in the cell
-  //      for (const auto& pid : m_hashTable[hash])
-  //      {
-  //        // skip the points in this face
-  //        if ((pid == m_indices[index]) || (pid == m_indices[index + 1]) || (pid == m_indices[index + 2]))
-  //          continue;
-
-  //        const auto& point = m_points[pid];
-  //        const auto& rayStart = point.m_prevPos;
-  //        const auto& rayEnd = point.m_pos;
-  //        const auto rayDir = rayEnd - rayStart;
-
-
-  //        const auto DistStart = glm::dot(rayStart - T1, norm);
-  //        const auto DistEnd = glm::dot(rayEnd - T1, norm);
-
-  //        const auto pvec = glm::cross(rayDir, edge2);
-  //        const auto det = glm::dot(edge1, pvec);
-
-  //        if (det > -0.00001f && det < 0.00001f)
-  //          continue;
-
-  //        const auto invDet = 1.f / det;
-  //        const auto tvec = rayStart - T1;
-  //        const auto u = glm::dot(tvec, pvec) * invDet;
-
-  //        if (u < -0.001f || u > 1.001f)
-  //          continue;
-
-  //        const auto qvec = glm::cross(tvec, edge1);
-  //        const auto v = glm::dot(rayDir, qvec) * invDet;
-
-  //        if (v < -0.001f || u + v > 1.001f)
-  //          continue;
-
-  //        const auto w = glm::dot(edge2, qvec) * invDet;
-
-  //        if (!((DistStart * DistEnd >= 0.0f) // Check not same side of triangle
-  //              || (fcomp(DistStart, DistEnd)) // Check not parallel to triangle
-  //              || (w <= 0.f)
-  //              ))
-  //        {
-  //          const auto a = -glm::dot(norm, tvec);
-  //          const auto b = glm::dot(norm, rayDir);
-  //          const auto intersection = rayStart + (a/b) * rayDir;
-  //          // Add constraint here
-  //          constraints.emplace_back(pid, rayStart);
-  //          //m_points[pid].m_invMass = 0.f;
-  //          // point.m_pos = point.m_prevPos;
-  //        }
-  //      }
-  //    }
-  //  }
-
-
   return constraints;
 }
 
@@ -246,7 +168,7 @@ void CSBmesh::init()
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
-//  m_points[24].m_invMass = 0.f;
+  //  m_points[24].m_invMass = 0.f;
   m_points[m_points.size() - 3].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
@@ -286,7 +208,7 @@ void CSBmesh::init()
         constexpr float third = 1.0f / 3.0f;
         auto centre = third * (m_vertices[vi] + m_vertices[bestV] + m_vertices[v]);
         auto rest = glm::fastDistance(m_vertices[v], centre);
-//        m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest, m_points));
+        m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest, m_points));
       }
     }
   }
@@ -317,7 +239,7 @@ void CSBmesh::update(const float _time)
 
   auto collisionConstraints = generateCollisionConstraints();
 
-  for (auto& collisionConstraint : collisionConstraints)
-    collisionConstraint.project(m_points);
+//  for (auto& collisionConstraint : collisionConstraints)
+//    collisionConstraint.project(m_points);
 
 }
