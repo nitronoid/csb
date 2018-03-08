@@ -132,16 +132,23 @@ std::vector<PinConstraint> CSBmesh::generateCollisionConstraints()
 
         auto intersection = L1 + (L2 - L1) * (-DistStart / (DistEnd - DistStart));
 
+        auto X1 = glm::cross(T2-T1, intersection-T1);
+        auto X2 = glm::cross(T3-T2, intersection-T2);
+        auto X3 = glm::cross(T1-T3, intersection-T3);
+
+
         if (!((DistStart * DistEnd >= 0.0f) // Check not same side of triangle
-            || (fcomp(DistStart, DistEnd)) // Check not parallel to triangle
-            || (glm::dot(glm::cross(norm, T2 - T1), intersection - T1) < 0.0f) // Check within triangle edges
-            || (glm::dot(glm::cross(norm, T3 - T2), intersection - T2) < 0.0f)
-            || (glm::dot(glm::cross(norm, T1 - T3), intersection - T1) < 0.0f)
+              || (fcomp(DistStart, DistEnd)) // Check not parallel to triangle
+              || (
+                   (glm::length(glm::cross(X1, X2)) == 0.0f)
+                && (glm::length(glm::cross(X1, X3)) == 0.0f)
+                )
               ))
         {
           // Add constraint here
-          constraints.emplace_back(pid, intersection);
-         // point.m_pos = point.m_prevPos;
+          constraints.emplace_back(pid, point.m_prevPos);
+          //m_points[pid].m_invMass = 0.f;
+          // point.m_pos = point.m_prevPos;
         }
       }
     }
@@ -205,7 +212,7 @@ void CSBmesh::init()
 
 void CSBmesh::update(const float _time)
 {
-  const auto gravity = glm::vec3(0.f,-4.95f,0.f);
+  const auto gravity = glm::vec3(0.f,-2.f,0.f);
   const auto size = m_points.size();
   for (size_t i = 0; i < size; ++i)
   {
@@ -216,13 +223,17 @@ void CSBmesh::update(const float _time)
   }
   hashVerts();
   hashTris();
-  auto collisionConstraints = generateCollisionConstraints();
-  for (auto& collisionConstraint : collisionConstraints)
 
-    collisionConstraint.project(m_points);
+  auto collisionConstraints = generateCollisionConstraints();
+
+
   for (int i = 0; i < 5; ++i)
+  {
     for (auto& constraint : m_constraints)
     {
       constraint->project(m_points);
     }
+    for (auto& collisionConstraint : collisionConstraints)
+      collisionConstraint.project(m_points);
+  }
 }
