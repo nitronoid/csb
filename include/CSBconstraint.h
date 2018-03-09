@@ -68,7 +68,7 @@ private:
 class PinConstraint : public CSBconstraint
 {
 public:
-  PinConstraint(const size_t _p, const glm::vec3 &_pin) :
+  PinConstraint(const size_t &_p, const glm::vec3 &_pin) :
     m_pin(_pin),
     m_p(_p)
   {}
@@ -82,6 +82,30 @@ public:
 private:
   glm::vec3 m_pin;
   size_t m_p;
+};
+
+
+class SelfCollisionConstraint : public CSBconstraint
+{
+public:
+  SelfCollisionConstraint(const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2) :
+    m_p(_p),
+    m_t0(_t0),
+    m_t1(_t1),
+    m_t2(_t2)
+  {}
+  SelfCollisionConstraint(const SelfCollisionConstraint&) = default;
+  SelfCollisionConstraint& operator=(const SelfCollisionConstraint&) = default;
+  SelfCollisionConstraint(SelfCollisionConstraint&&) = default;
+  SelfCollisionConstraint& operator=(SelfCollisionConstraint&&) = default;
+  virtual ~SelfCollisionConstraint() override = default;
+  virtual void project(std::vector<CSBpoint> &_positions) override;
+
+private:
+  size_t m_p;
+  size_t m_t0;
+  size_t m_t1;
+  size_t m_t2;
 };
 
 
