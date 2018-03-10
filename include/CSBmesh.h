@@ -40,7 +40,9 @@ private:
   glm::ivec3 calcCell(const glm::vec3& _coord) const;
   size_t hashCell (const glm::ivec3& _cell) const;
   size_t hashPoint(const glm::vec3& _coord) const;
-  std::vector<SelfCollisionConstraint> generateCollisionConstraints();
+  void resolveSelfCollision_rays();
+
+  void resolveSelfCollision_spheres();
 
   std::vector<std::vector<GLushort>> m_hashTable;
   std::vector<std::vector<size_t>> m_triangleVertHash;

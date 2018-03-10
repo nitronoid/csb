@@ -44,6 +44,7 @@ glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
   // THIS MUST BE AVERAGE EDGE LENGTH!!!!!!!!!!
   static constexpr float cellsize = 0.038f;
+//  static constexpr float cellsize = 0.019f;
   return glm::ivec3(
         static_cast<int>(glm::floor(_coord.x / cellsize)),
         static_cast<int>(glm::floor(_coord.y / cellsize)),
@@ -100,13 +101,38 @@ void CSBmesh::hashTris()
   }
 }
 
-std::vector<SelfCollisionConstraint> CSBmesh::generateCollisionConstraints()
+void CSBmesh::resolveSelfCollision_spheres()
 {
-  std::vector<SelfCollisionConstraint> constraints;
-  static constexpr auto fcomp = [](const float& _a, const float& _b)
+  const auto size = m_points.size();
+  for (size_t i = 0; i < size; ++i)
   {
-    return std::abs(_a - _b) < (0.001f * std::max(1.0f, std::max(std::abs(_a), std::abs(_b))));
-  };
+    auto& P = m_points[i];
+    glm::vec3 offset(0.f);
+    int count = 0;
+    for (const auto& pid : m_hashTable[hashPoint(P.m_pos)])
+    {
+      if (pid == i) continue;
+
+      const auto Q = m_points[pid];
+      const auto disp = P.m_pos - Q.m_pos;
+      const auto dist = glm::length(disp);
+
+      static constexpr auto double_radius = 0.02f;
+      if (dist < double_radius)
+      {
+        const auto move = double_radius - dist;
+        offset += (glm::normalize(disp) * move);
+        ++count;
+      }
+    }
+
+    if (count)
+      P.m_pos += offset/static_cast<float>(count);
+  }
+}
+
+void CSBmesh::resolveSelfCollision_rays()
+{
   const auto size = m_triangleVertHash.size();
   //     Loop over all faces
   for (size_t i = 0; i < size; ++i)
@@ -147,24 +173,21 @@ std::vector<SelfCollisionConstraint> CSBmesh::generateCollisionConstraints()
         // Check not same side of triangle
         if ((DistStart * DistEnd < 0.0f) && insideTri)
         {
-
           // Add constraint here
-          constraints.emplace_back(pid, m_indices[index], m_indices[index + 1], m_indices[index + 2]);
-//          std::swap(m_points[m_indices[index]].m_pos, m_points[m_indices[index]].m_prevPos);
-//          std::swap(m_points[m_indices[index + 1]].m_pos, m_points[m_indices[index + 1]].m_prevPos);
-//          std::swap(m_points[m_indices[index + 2]].m_pos, m_points[m_indices[index + 2]].m_prevPos);
-//          std::swap(m_points[pid].m_pos, m_points[pid].m_prevPos);
+          std::swap(m_points[m_indices[index]].m_pos, m_points[m_indices[index]].m_prevPos);
+          std::swap(m_points[m_indices[index + 1]].m_pos, m_points[m_indices[index + 1]].m_prevPos);
+          std::swap(m_points[m_indices[index + 2]].m_pos, m_points[m_indices[index + 2]].m_prevPos);
+          std::swap(m_points[pid].m_pos, m_points[pid].m_prevPos);
         }
       }
     }
   }
-  return constraints;
 }
 
 void CSBmesh::init()
 {
   m_triangleVertHash.resize(m_indices.size() / 3);
-  m_hashTable.resize(999);
+  m_hashTable.resize(3999);
   m_points.reserve(m_vertices.size());
   for (auto& vert : m_vertices)
     m_points.emplace_back(vert, 1.f);
@@ -218,21 +241,12 @@ void CSBmesh::init()
 
 void CSBmesh::update(const float _time)
 {
-  hashVerts();
-  hashTris();
-
-  auto collisionConstraints = generateCollisionConstraints();
-
   for (int i = 0; i < 5; ++i)
-  {
     for (auto& constraint : m_constraints)
     {
       constraint->project(m_points);
     }
 
-    for (auto& collisionConstraint : collisionConstraints)
-      collisionConstraint.project(m_points);
-  }
 
   const auto gravity = glm::vec3(0.f,-2.f,0.f);
   const auto size = m_points.size();
@@ -243,5 +257,15 @@ void CSBmesh::update(const float _time)
     point.m_prevPos = point.m_pos;
     point.m_pos = newPos;
   }
+
+  hashVerts();
+  hashTris();
+
+  resolveSelfCollision_rays();
+
+//  hashVerts();
+//  hashTris();
+
+  resolveSelfCollision_spheres();
 
 }

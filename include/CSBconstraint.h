@@ -88,12 +88,17 @@ private:
 class SelfCollisionConstraint : public CSBconstraint
 {
 public:
-  SelfCollisionConstraint(const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2) :
-    m_p(_p),
-    m_t0(_t0),
-    m_t1(_t1),
-    m_t2(_t2)
-  {}
+  SelfCollisionConstraint(const glm::vec3 &_intersectionP, const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2, const std::vector<CSBpoint>&_points) :
+    m_t({{_t0, _t1, _t2}}),
+    m_intersectionP(_intersectionP),
+    m_p(_p)
+  {
+    static constexpr float third = 1.f / 3.f;
+    const auto W = (_points[_t0].m_invMass + _points[_t1].m_invMass + _points[_t2].m_invMass) * third;
+    for (unsigned int i = 0; i < m_w.size(); ++i)
+      m_w[i] = _points[m_t[i]].m_invMass / W;
+
+  }
   SelfCollisionConstraint(const SelfCollisionConstraint&) = default;
   SelfCollisionConstraint& operator=(const SelfCollisionConstraint&) = default;
   SelfCollisionConstraint(SelfCollisionConstraint&&) = default;
@@ -102,10 +107,10 @@ public:
   virtual void project(std::vector<CSBpoint> &_positions) override;
 
 private:
+  std::array<size_t, 3> m_t;
+  std::array<float, 3> m_w;
+  glm::vec3 m_intersectionP;
   size_t m_p;
-  size_t m_t0;
-  size_t m_t1;
-  size_t m_t2;
 };
 
 

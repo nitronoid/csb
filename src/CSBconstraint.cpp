@@ -47,19 +47,17 @@ void PinConstraint::project(std::vector<CSBpoint> &_positions)
 
 void SelfCollisionConstraint::project(std::vector<CSBpoint> &_positions)
 {
-  auto& T0 = _positions[m_t0].m_pos;
-  auto& T1 = _positions[m_t1].m_pos;
-  auto& T2 = _positions[m_t2].m_pos;
+  auto& T0 = _positions[m_t[0]].m_pos;
+  auto& T1 = _positions[m_t[1]].m_pos;
+  auto& T2 = _positions[m_t[2]].m_pos;
   auto& P  = _positions[m_p ].m_pos;
 
-  const auto PT = P - T0;
+  const auto delta = P - m_intersectionP;
 
-  const auto norm = glm::cross(T1 - T0, T2 - T0);
-  const auto delta = glm::dot(PT, norm);
 
-  P  += (delta * PT);
+  P  = m_intersectionP;
 
-  T0 -= (delta * PT);
-  T1 -= (delta * PT);
-  T2 -= (delta * PT);
+  T0 += ( delta);
+  T1 += ( delta);
+  T2 += ( delta);
 }
