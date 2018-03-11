@@ -94,7 +94,10 @@ protected:
   /// @brief m_indices contains the indices
   //-----------------------------------------------------------------------------------------------------
   std::vector<GLushort> m_indices;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief m_adjacency stores the adjacent vertex indices for any vertex
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::vector<GLushort>> m_adjacency;
 };
 
 #endif // MESH_H

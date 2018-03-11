@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include <unordered_set>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -46,6 +47,8 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
     m_uvs.insert(m_uvs.end(), {uv.x, uv.y});
   }
 
+  m_adjacency.resize(numVerts);
+  std::vector<std::unordered_set<GLushort>> adjacencySets(numVerts);
   // Get the number of faces on the mesh
   size_t numFaces = mesh->mNumFaces;
   // We iterate through faces not vertices,
@@ -53,14 +56,24 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
   for (size_t faceIndex = 0; faceIndex < numFaces; ++faceIndex)
   {
     auto& face = mesh->mFaces[faceIndex];
+    const auto numIndices = face.mNumIndices;
     // Iterate over the vertices of this face
-    for (size_t i = 0; i < face.mNumIndices; ++i)
+    for (size_t i = 0; i < numIndices; ++i)
     {
       // Get the index of the vertex, we use this for it's normals and UV's too
       size_t vertInFace = face.mIndices[i];
-      m_indices.push_back(vertInFace);
+      m_indices.push_back(static_cast<GLushort>(vertInFace));
+
+      GLushort otherV1 = static_cast<GLushort>(face.mIndices[(i + 1) % numIndices]);
+      GLushort otherV2 = static_cast<GLushort>(face.mIndices[(i + 2) % numIndices]);
+      auto& adjacencyList = adjacencySets[vertInFace];
+      adjacencyList.insert(otherV1);
+      adjacencyList.insert(otherV2);
     }
   }
+  // copy the contents of the sets into vector form
+  for (size_t i = 0; i < numVerts; ++i)
+    m_adjacency[i].insert(m_adjacency[i].end(), adjacencySets[i].begin(), adjacencySets[i].end());
 }
 
 void Mesh::reset()

@@ -23,28 +23,14 @@ std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
 
 std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
 {
-  std::unordered_set<GLushort> connected;
-
-  const auto last = m_indices.size() - 2;
-  for (size_t i = 0; i < last; i+=3)
-  {
-    std::unordered_set<GLushort> facePoints = {m_indices[i], m_indices[i + 1], m_indices[i + 2]};
-
-    if (facePoints.count(_vert))
-    {
-      facePoints.erase(_vert);
-      connected.insert(facePoints.begin(), facePoints.end());
-    }
-  }
-
-  return std::vector<GLushort>{connected.begin(), connected.end()};
+  return m_adjacency[_vert];
 }
 
 glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
   // THIS MUST BE AVERAGE EDGE LENGTH!!!!!!!!!!
   static constexpr float cellsize = 0.038f;
-//  static constexpr float cellsize = 0.019f;
+  //  static constexpr float cellsize = 0.019f;
   return glm::ivec3(
         static_cast<int>(glm::floor(_coord.x / cellsize)),
         static_cast<int>(glm::floor(_coord.y / cellsize)),
@@ -104,20 +90,37 @@ void CSBmesh::hashTris()
 void CSBmesh::resolveSelfCollision_spheres()
 {
   const auto size = m_points.size();
-  for (size_t i = 0; i < size; ++i)
+  for (GLushort i = 0; i < size; ++i)
   {
     auto& P = m_points[i];
     glm::vec3 offset(0.f);
     int count = 0;
-    for (const auto& pid : m_hashTable[hashPoint(P.m_pos)])
-    {
-      if (pid == i) continue;
 
+
+    auto ignored = getConnectedVertices(i);
+    ignored.push_back(i);
+    std::sort(ignored.begin(), ignored.end());
+
+    auto considered = m_hashTable[hashPoint(P.m_pos)];
+    std::sort(considered.begin(), considered.end());
+
+    // Scope the using declaration
+    {
+      // I think this is more readable
+      using namespace std;
+      considered.erase(
+            remove_if(begin(considered), end(considered),
+              [&ignored](const auto x) { return binary_search(begin(ignored), end(ignored),x); }), end(considered)
+            );
+    }
+
+    for (const auto& pid : considered)
+    {
       const auto Q = m_points[pid];
       const auto disp = P.m_pos - Q.m_pos;
       const auto dist = glm::length(disp);
 
-      static constexpr auto double_radius = 0.02f;
+      static constexpr auto double_radius = 0.03f;
       if (dist < double_radius)
       {
         const auto move = double_radius - dist;
@@ -178,6 +181,7 @@ void CSBmesh::resolveSelfCollision_rays()
           std::swap(m_points[m_indices[index + 1]].m_pos, m_points[m_indices[index + 1]].m_prevPos);
           std::swap(m_points[m_indices[index + 2]].m_pos, m_points[m_indices[index + 2]].m_prevPos);
           std::swap(m_points[pid].m_pos, m_points[pid].m_prevPos);
+          //          m_points[pid].m_pos = intersection + glm::normalize(intersection - L1) * 0.02f;
         }
       }
     }
@@ -187,7 +191,7 @@ void CSBmesh::resolveSelfCollision_rays()
 void CSBmesh::init()
 {
   m_triangleVertHash.resize(m_indices.size() / 3);
-  m_hashTable.resize(3999);
+  m_hashTable.resize(999);
   m_points.reserve(m_vertices.size());
   for (auto& vert : m_vertices)
     m_points.emplace_back(vert, 1.f);
@@ -263,8 +267,8 @@ void CSBmesh::update(const float _time)
 
   resolveSelfCollision_rays();
 
-//  hashVerts();
-//  hashTris();
+  //  hashVerts();
+  //  hashTris();
 
   resolveSelfCollision_spheres();
 
