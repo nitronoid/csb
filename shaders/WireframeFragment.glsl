@@ -4,12 +4,6 @@
 // This is no longer a built-in variable
 layout(location=0) out vec4 FragColor;
 
-out vec2 TexCoords;
-out vec3 WorldPos;
-out vec3 Normal;
-
-
-
 in FragData
 {
     vec3 vert;

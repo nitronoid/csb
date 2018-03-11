@@ -20,10 +20,6 @@ out FragData
     noperspective vec3 wireframeDist;
 } outData;
 
-out vec2 outUV;
-out vec3 outVert;
-out vec3 outNormal;
-
 
 void main()
 {

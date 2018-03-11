@@ -46,6 +46,8 @@ private:
 
   std::vector<std::vector<GLushort>> m_hashTable;
   std::vector<std::vector<size_t>> m_triangleVertHash;
+
+  float m_avgEdgeLength = 0.0f;
 };
 
 

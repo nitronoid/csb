@@ -13,7 +13,9 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
   // propably to request more postprocessing than we do in this example.
   const aiScene* scene = importer.ReadFile(
         _fname,
-        aiProcessPreset_TargetRealtime_MaxQuality |
+        aiProcess_Triangulate            |
+        aiProcess_JoinIdenticalVertices  |
+        aiProcess_SortByPType |
         aiProcess_FlipUVs
         );
   const aiMesh* mesh = scene->mMeshes[_meshNum];
@@ -66,9 +68,15 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
 
       GLushort otherV1 = static_cast<GLushort>(face.mIndices[(i + 1) % numIndices]);
       GLushort otherV2 = static_cast<GLushort>(face.mIndices[(i + 2) % numIndices]);
-      auto& adjacencyList = adjacencySets[vertInFace];
-      adjacencyList.insert(otherV1);
-      adjacencyList.insert(otherV2);
+
+      adjacencySets[vertInFace].insert(otherV1);
+      adjacencySets[vertInFace].insert(otherV2);
+
+      adjacencySets[otherV1].insert(vertInFace);
+      adjacencySets[otherV1].insert(otherV2);
+
+      adjacencySets[otherV2].insert(otherV1);
+      adjacencySets[otherV2].insert(vertInFace);
     }
   }
   // copy the contents of the sets into vector form

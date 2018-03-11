@@ -29,12 +29,13 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
 glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
   // THIS MUST BE AVERAGE EDGE LENGTH!!!!!!!!!!
-  static constexpr float cellsize = 0.038f;
-  //  static constexpr float cellsize = 0.019f;
+//  static constexpr float cellsize = 0.038f;
+//    static constexpr float cellsize = 0.0269f;
+  // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
-        static_cast<int>(glm::floor(_coord.x / cellsize)),
-        static_cast<int>(glm::floor(_coord.y / cellsize)),
-        static_cast<int>(glm::floor(_coord.z / cellsize))
+        static_cast<int>(glm::floor(_coord.x / m_avgEdgeLength)),
+        static_cast<int>(glm::floor(_coord.y / m_avgEdgeLength)),
+        static_cast<int>(glm::floor(_coord.z / m_avgEdgeLength))
         );
 }
 
@@ -120,7 +121,7 @@ void CSBmesh::resolveSelfCollision_spheres()
       const auto disp = P.m_pos - Q.m_pos;
       const auto dist = glm::length(disp);
 
-      static constexpr auto double_radius = 0.03f;
+      static constexpr auto double_radius = 0.02f;
       if (dist < double_radius)
       {
         const auto move = double_radius - dist;
@@ -130,7 +131,10 @@ void CSBmesh::resolveSelfCollision_spheres()
     }
 
     if (count)
+    {
       P.m_pos += offset/static_cast<float>(count);
+      P.m_prevPos = P.m_pos;
+    }
   }
 }
 
@@ -191,23 +195,34 @@ void CSBmesh::resolveSelfCollision_rays()
 void CSBmesh::init()
 {
   m_triangleVertHash.resize(m_indices.size() / 3);
-  m_hashTable.resize(999);
+
+  // Calculate optimal hash table size
+  const auto numVerts = m_vertices.size();
+  const size_t multiple = pow10(floor(log10(numVerts)));
+  const auto hashTableSize = ((numVerts + multiple - 1) / multiple) * multiple - 1;
+  m_hashTable.resize(hashTableSize);
   m_points.reserve(m_vertices.size());
+
   for (auto& vert : m_vertices)
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
+//  m_points[90].m_invMass = 0.f;
   //  m_points[24].m_invMass = 0.f;
   m_points[m_points.size() - 3].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
+  float totalEdgeDist = 0.0f;
   for (const auto & edge : edgeSet)
   {
-    auto p1 = edge.p.first;
-    auto p2 = edge.p.second;
-    float distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
+    const auto p1 = edge.p.first;
+    const auto p2 = edge.p.second;
+    const auto distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
+    totalEdgeDist += distance;
     m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
   }
+
+  m_avgEdgeLength = totalEdgeDist / edgeSet.size();
 
   const auto size = m_vertices.size();
   std::unordered_set<EdgePair> connections;
@@ -267,8 +282,8 @@ void CSBmesh::update(const float _time)
 
   resolveSelfCollision_rays();
 
-  //  hashVerts();
-  //  hashTris();
+//  hashVerts();
+//  hashTris();
 
   resolveSelfCollision_spheres();
 

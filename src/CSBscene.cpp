@@ -1,7 +1,8 @@
 #include "CSBscene.h"
 #include "MaterialWireframe.h"
 #include "MaterialPBR.h"
-#include "MaterialPhong.h"
+#include "MaterialCSBpbr.h"
+#include "MaterialEnvMap.h"
 #include "MaterialFractal.h"
 #include <QOpenGLContext>
 
@@ -49,7 +50,7 @@ void CSBscene::init()
 void CSBscene::initGeo()
 {
 //  m_meshes[0].load("models/cube.obj");
-  m_meshes[0].load("models/hdPlane.obj");
+  m_meshes[0].load("models/hdxPlane.obj");
   for (auto& mesh : m_meshes) mesh.init();
   // Create and bind our Vertex Array Object
   m_vao->create();
@@ -71,8 +72,8 @@ void CSBscene::initMaterials()
   m_materials.reserve(5);
 
   m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
-  m_materials.emplace_back(new MaterialPhong(m_camera, m_shaderLib, &m_matrices));
-  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
+  m_materials.emplace_back(new MaterialEnvMap(m_camera, m_shaderLib, &m_matrices));
+  m_materials.emplace_back(new MaterialCSBpbr(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
   m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
   m_materials.emplace_back(new MaterialFractal(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)

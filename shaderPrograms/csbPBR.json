@@ -1,0 +1,6 @@
+{
+    "Name" : "csb_pbr_hard",
+    "Vertex" : "shaders/csb_pbr_vertex.glsl",
+    "Geometry" : "shaders/csb_hard_normals.glsl",
+    "Fragment" : "shaders/csb_pbr_frag.glsl"
+}

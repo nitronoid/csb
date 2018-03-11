@@ -48,7 +48,8 @@ HEADERS += \
     include/CSBmesh.h \
     include/MaterialEnvMap.h \
     include/CSBconstraint.h \
-    include/csbpoint.h
+    include/csbpoint.h \
+    include/MaterialCSBpbr.h
 
 SOURCES += \
     src/main.cpp \
@@ -69,7 +70,8 @@ SOURCES += \
     src/CSBscene.cpp \
     src/CSBmesh.cpp \
     src/MaterialEnvMap.cpp \
-    src/CSBconstraint.cpp
+    src/CSBconstraint.cpp \
+    src/MaterialCSBpbr.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \
@@ -88,4 +90,7 @@ linux:{
 DISTFILES += \
     shaders/WireframeGeometry.glsl \
     shaders/WireframeVertex.glsl \
-    shaders/WireframeFragment.glsl
+    shaders/WireframeFragment.glsl \
+    shaders/csb_hard_normals.glsl \
+    shaders/csb_pbr_vertex.glsl \
+    shaders/csb_pbr_frag.glsl
