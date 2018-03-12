@@ -121,10 +121,10 @@ void CSBmesh::resolveSelfCollision_spheres()
       const auto disp = P.m_pos - Q.m_pos;
       const auto dist = glm::length(disp);
 
-      static constexpr auto double_radius = 0.02f;
+      const auto double_radius = m_avgEdgeLength * 1.2f;
       if (dist < double_radius)
       {
-        const auto move = double_radius - dist;
+        const auto move = (double_radius - dist) * 0.5f;
         offset += (glm::normalize(disp) * move);
         ++count;
       }
@@ -133,6 +133,7 @@ void CSBmesh::resolveSelfCollision_spheres()
     if (count)
     {
       P.m_pos += offset/static_cast<float>(count);
+      // zero the velocity
       P.m_prevPos = P.m_pos;
     }
   }
@@ -198,7 +199,7 @@ void CSBmesh::init()
 
   // Calculate optimal hash table size
   const auto numVerts = m_vertices.size();
-  const size_t multiple = pow10(floor(log10(numVerts)));
+  const size_t multiple = static_cast<size_t>(pow10(floor(log10(numVerts))));
   const auto hashTableSize = ((numVerts + multiple - 1) / multiple) * multiple - 1;
   m_hashTable.resize(hashTableSize);
   m_points.reserve(m_vertices.size());
@@ -260,7 +261,7 @@ void CSBmesh::init()
 
 void CSBmesh::update(const float _time)
 {
-  for (int i = 0; i < 5; ++i)
+  for (int i = 0; i < 10; ++i)
     for (auto& constraint : m_constraints)
     {
       constraint->project(m_points);

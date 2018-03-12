@@ -49,8 +49,8 @@ void CSBscene::init()
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::initGeo()
 {
-  //  m_meshes[0].load("models/cube.obj");
-  m_meshes[0].load("models/hdPlane.obj");
+    m_meshes[0].load("models/hdPlane.obj");
+//  m_meshes[0].load("models/hdCube.obj");
   for (auto& mesh : m_meshes) mesh.init();
   // Create and bind our Vertex Array Object
   m_vao->create();
@@ -129,14 +129,14 @@ void CSBscene::renderScene()
   m_materials[m_currentMaterial]->update();
   using namespace std::chrono;
 
-  static constexpr float dt = 1.f/60.f;
+  static constexpr float dt = 1.f/30.f;
   static float accum = 0.0f;
   static auto currentTime = high_resolution_clock::now();
 
   const auto time = high_resolution_clock::now();
 
   float ft = duration_cast<milliseconds>(time - currentTime).count() / 1000.0f;
-  ft = std::min(0.25f, ft);
+//  ft = std::min(0.05f, ft);
   currentTime = time;
   accum += ft;
 

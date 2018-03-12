@@ -13,8 +13,10 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
   // propably to request more postprocessing than we do in this example.
   const aiScene* scene = importer.ReadFile(
         _fname,
+        aiProcess_RemoveComponent |
         aiProcess_Triangulate            |
-        aiProcess_JoinIdenticalVertices  |
+        aiProcess_JoinIdenticalVertices|
+//        aiProcess_GenSmoothNormals |
         aiProcess_SortByPType |
         aiProcess_FlipUVs
         );
@@ -34,19 +36,25 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
   auto& texCoords = mesh->mTextureCoords[0];
   // Some meshes don't have UV's
   bool hasTexCoords = mesh->HasTextureCoords(0);
+  bool hasNormals = mesh->HasNormals();
 
   for (size_t i = 0; i < numVerts; ++i)
   {
     auto& vert = vertices[i];
     m_vertices.insert(m_vertices.end(), {vert.x,vert.y,vert.z});
 
-    auto& norm = normals[i];
-    m_normals.insert(m_normals.end(), {norm.x,norm.y,norm.z});
+    if (hasNormals)
+    {
+      auto& norm = normals[i];
+      m_normals.insert(m_normals.end(), {norm.x,norm.y,norm.z});
+    }
 
-    if (!hasTexCoords) continue;
-    // UV's only use the first two members
-    const auto& uv = hasTexCoords ? texCoords[i] : aiVector3D(0.0f, 0.0f, 0.0f);
-    m_uvs.insert(m_uvs.end(), {uv.x, uv.y});
+    if (hasTexCoords)
+    {
+      // UV's only use the first two members
+      const auto& uv = hasTexCoords ? texCoords[i] : aiVector3D(0.0f, 0.0f, 0.0f);
+      m_uvs.insert(m_uvs.end(), {uv.x, uv.y});
+    }
   }
 
   m_adjacency.resize(numVerts);
