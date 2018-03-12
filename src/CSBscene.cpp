@@ -49,8 +49,8 @@ void CSBscene::init()
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::initGeo()
 {
-//  m_meshes[0].load("models/cube.obj");
-  m_meshes[0].load("models/hdxPlane.obj");
+  //  m_meshes[0].load("models/cube.obj");
+  m_meshes[0].load("models/hdPlane.obj");
   for (auto& mesh : m_meshes) mesh.init();
   // Create and bind our Vertex Array Object
   m_vao->create();
@@ -74,7 +74,6 @@ void CSBscene::initMaterials()
   m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialEnvMap(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialCSBpbr(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
-  m_materials.emplace_back(new MaterialPBR(m_camera, m_shaderLib, &m_matrices, {0.1f, 0.2f, 0.5f}, 0.5f, 1.0f, 0.4f, 0.2f));
   m_materials.emplace_back(new MaterialFractal(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {
@@ -129,10 +128,24 @@ void CSBscene::renderScene()
 
   m_materials[m_currentMaterial]->update();
   using namespace std::chrono;
-  static auto lastTime = high_resolution_clock::now();
-  float elapsed = duration_cast<milliseconds>(high_resolution_clock::now() - lastTime).count() / 1000.0f;
-  lastTime = high_resolution_clock::now();
-  m_meshes[m_meshIndex].update(elapsed);
+
+  static constexpr float dt = 1.f/60.f;
+  static float accum = 0.0f;
+  static auto currentTime = high_resolution_clock::now();
+
+  const auto time = high_resolution_clock::now();
+
+  float ft = duration_cast<milliseconds>(time - currentTime).count() / 1000.0f;
+  ft = std::min(0.25f, ft);
+  currentTime = time;
+  accum += ft;
+
+  while(accum >= dt)
+  {
+    m_meshes[m_meshIndex].update(dt);
+    accum -=dt;
+  }
+
   writeMeshAttributes();
 
   glDrawElements(GL_TRIANGLES, m_meshes[m_meshIndex].getNIndicesData(), GL_UNSIGNED_SHORT, nullptr);

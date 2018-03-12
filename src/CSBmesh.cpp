@@ -29,8 +29,8 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
 glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
   // THIS MUST BE AVERAGE EDGE LENGTH!!!!!!!!!!
-//  static constexpr float cellsize = 0.038f;
-//    static constexpr float cellsize = 0.0269f;
+  //  static constexpr float cellsize = 0.038f;
+  //    static constexpr float cellsize = 0.0269f;
   // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
         static_cast<int>(glm::floor(_coord.x / m_avgEdgeLength)),
@@ -111,7 +111,7 @@ void CSBmesh::resolveSelfCollision_spheres()
       using namespace std;
       considered.erase(
             remove_if(begin(considered), end(considered),
-              [&ignored](const auto x) { return binary_search(begin(ignored), end(ignored),x); }), end(considered)
+                      [&ignored](const auto x) { return binary_search(begin(ignored), end(ignored),x); }), end(considered)
             );
     }
 
@@ -207,7 +207,7 @@ void CSBmesh::init()
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
-//  m_points[90].m_invMass = 0.f;
+//    m_points[90].m_invMass = 0.f;
   //  m_points[24].m_invMass = 0.f;
   m_points[m_points.size() - 3].m_invMass = 0.f;
 
@@ -266,9 +266,10 @@ void CSBmesh::update(const float _time)
       constraint->project(m_points);
     }
 
-
   const auto gravity = glm::vec3(0.f,-2.f,0.f);
   const auto size = m_points.size();
+
+
   for (size_t i = 0; i < size; ++i)
   {
     auto& point = m_points[i];
@@ -277,13 +278,14 @@ void CSBmesh::update(const float _time)
     point.m_pos = newPos;
   }
 
+
   hashVerts();
   hashTris();
 
   resolveSelfCollision_rays();
 
-//  hashVerts();
-//  hashTris();
+  //  hashVerts();
+  //  hashTris();
 
   resolveSelfCollision_spheres();
 
