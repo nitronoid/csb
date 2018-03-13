@@ -1,5 +1,6 @@
 #include "CSBmesh.h"
 #include "gtx/fast_square_root.hpp"
+#include "gtx/norm.hpp"
 
 std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
 {
@@ -28,9 +29,6 @@ std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
 
 glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
 {
-  // THIS MUST BE AVERAGE EDGE LENGTH!!!!!!!!!!
-  //  static constexpr float cellsize = 0.038f;
-  //    static constexpr float cellsize = 0.0269f;
   // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
         static_cast<int>(glm::floor(_coord.x / m_avgEdgeLength)),
@@ -94,8 +92,6 @@ void CSBmesh::resolveSelfCollision_spheres()
   for (GLushort i = 0; i < size; ++i)
   {
     auto& P = m_points[i];
-    glm::vec3 offset(0.f);
-    int count = 0;
 
 
     auto ignored = getConnectedVertices(i);
@@ -111,21 +107,26 @@ void CSBmesh::resolveSelfCollision_spheres()
       using namespace std;
       considered.erase(
             remove_if(begin(considered), end(considered),
-                      [&ignored](const auto x) { return binary_search(begin(ignored), end(ignored),x); }), end(considered)
+                      [&ignored](const auto x) { return binary_search(begin(ignored), end(ignored),x); }),
+            end(considered)
             );
     }
 
+
+    glm::vec3 offset(0.f);
+    int count = 0;
     for (const auto& pid : considered)
     {
-      const auto Q = m_points[pid];
+      const auto& Q = m_points[pid];
       const auto disp = P.m_pos - Q.m_pos;
-      const auto dist = glm::length(disp);
+      const auto dist = glm::length2(disp);
 
-      const auto double_radius = m_avgEdgeLength * 1.2f;
-      if (dist < double_radius)
+      auto double_radius_sqr = (m_avgEdgeLength * 1.2f);
+      double_radius_sqr *= double_radius_sqr;
+      if (dist < double_radius_sqr)
       {
-        const auto move = (double_radius - dist) * 0.5f;
-        offset += (glm::normalize(disp) * move);
+        const auto move = (glm::fastSqrt(double_radius_sqr) - glm::fastSqrt(dist)) * 0.5f;
+        offset += (glm::fastNormalize(disp) * move);
         ++count;
       }
     }
@@ -152,7 +153,7 @@ void CSBmesh::resolveSelfCollision_rays()
     const auto edge1 = T1 - T0;
     const auto edge2 = T2 - T0;
     const auto edge3 = T2 - T1;
-    const auto norm = glm::normalize(glm::cross(edge1, edge2));
+    const auto norm = glm::fastNormalize(glm::cross(edge1, edge2));
 
     // Loop over all hashed cells for this face
     for (const auto& hash : m_triangleVertHash[i])
@@ -210,7 +211,7 @@ void CSBmesh::init()
   m_points[0].m_invMass = 0.f;
 //    m_points[90].m_invMass = 0.f;
   //  m_points[24].m_invMass = 0.f;
-  m_points[m_points.size() - 3].m_invMass = 0.f;
+  m_points[m_points.size() - 1].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
   float totalEdgeDist = 0.0f;
@@ -250,7 +251,7 @@ void CSBmesh::init()
       if (!connections.count(connection))
       {
         connections.insert(connection);
-        constexpr float third = 1.0f / 3.0f;
+        static constexpr float third = 1.0f / 3.0f;
         auto centre = third * (m_vertices[vi] + m_vertices[bestV] + m_vertices[v]);
         auto rest = glm::fastDistance(m_vertices[v], centre);
         m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest, m_points));
@@ -267,7 +268,7 @@ void CSBmesh::update(const float _time)
       constraint->project(m_points);
     }
 
-  const auto gravity = glm::vec3(0.f,-2.f,0.f);
+  const auto gravity = glm::vec3(0.f,-1.f,0.f);
   const auto size = m_points.size();
 
 
