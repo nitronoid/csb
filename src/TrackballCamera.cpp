@@ -1,5 +1,5 @@
 #include "TrackballCamera.h"
-#include <gtx/norm.hpp>
+#include <gtc/quaternion.hpp>
 #include <gtc/constants.hpp>
 #include <cmath>
 

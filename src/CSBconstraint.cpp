@@ -1,5 +1,7 @@
 #include "CSBconstraint.h"
-#include "gtx/fast_square_root.hpp"
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/fast_square_root.hpp"
+//#undef GLM_ENABLE_EXPERIMENTAL
 
 CSBconstraint::~CSBconstraint() = default;
 
@@ -8,7 +10,7 @@ void DistanceConstraint::project(std::vector<CSBpoint> &_positions)
   auto& p1 = _positions[m_p1];
   auto& p2 = _positions[m_p2];
   auto delta = p2.m_pos - p1.m_pos;
-  auto deltaLen = glm::fastLength(delta);
+  auto deltaLen = glm::length(delta);
   auto diff = (deltaLen - m_rest) / (deltaLen * (p1.m_invMass + p2.m_invMass));
   delta *= diff;
 
@@ -24,7 +26,7 @@ void BendingConstraint::project(std::vector<CSBpoint> &_positions)
 
   static constexpr float third = 1.0f / 3.0f;
   auto centre = third * (p1.m_pos + p2.m_pos + p3.m_pos);
-  auto dirCentre = p3.m_pos - centre;
+  glm::vec3 dirCentre = p3.m_pos - centre;
 
   auto distCentre = glm::fastLength(dirCentre);
 

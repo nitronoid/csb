@@ -1,6 +1,9 @@
 #include "CSBmesh.h"
+#define GLM_ENABLE_EXPERIMENTAL
 #include "gtx/fast_square_root.hpp"
 #include "gtx/norm.hpp"
+#include "gtx/intersect.hpp"
+//#undef GLM_ENABLE_EXPERIMENTAL
 #include <random>
 #include <algorithm>
 
@@ -153,10 +156,6 @@ void CSBmesh::resolveSelfCollision_rays()
     const auto& T0 = m_points[m_indices[index]].m_pos;
     const auto& T1 = m_points[m_indices[index + 1]].m_pos;
     const auto& T2 = m_points[m_indices[index + 2]].m_pos;
-    const auto edge1 = T1 - T0;
-    const auto edge2 = T2 - T0;
-    const auto edge3 = T2 - T1;
-    const auto norm = glm::fastNormalize(glm::cross(edge1, edge2));
 
     // Loop over all hashed cells for this face
     for (const auto& hash : m_triangleVertHash[i])
@@ -170,27 +169,20 @@ void CSBmesh::resolveSelfCollision_rays()
         const auto& point = m_points[pid];
         const auto& L0 = point.m_prevPos;
         const auto& L1 = point.m_pos;
+        const auto dir = L1 - L0;
 
-        const auto DistStart = glm::dot(L0 - T0, norm);
-        const auto DistEnd = glm::dot(L1 - T0, norm);
 
-        const auto intersection = L0 + (L1 - L0) * (-DistStart / (DistEnd - DistStart));
+        glm::vec3 intersection;
 
-        const auto X1 = glm::dot(glm::cross(norm, edge1), intersection - T0);
-        const auto X2 = glm::dot(glm::cross(norm, edge3), intersection - T1);
-        const auto X3 = glm::dot(glm::cross(norm, -edge2), intersection - T0);
+        auto hit = glm::intersectLineTriangle(L0, dir, T0, T1, T2, intersection);
 
-        bool insideTri = (X1 >= 0.0f) && (X2 >= 0.0f) && (X3 >= 0.0f);
+        const auto DistStart = glm::fastDistance(intersection, L0);
+        const auto DistEnd = glm::fastDistance(intersection, L1);
 
-        // Check not same side of triangle
-        if ((DistStart * DistEnd < 0.0f) && insideTri)
+        // Check not same side of triangle, and an intersection is present
+        if (hit && (DistStart * DistEnd < 0.0f))
         {
           // We swap the past and current positions to reverse velocity giving a slight bounce to the cloth
-          //          m_points[m_indices[index]].m_pos = m_points[m_indices[index]].m_prevPos;
-          //          m_points[m_indices[index + 1]].m_pos = m_points[m_indices[index + 1]].m_prevPos;
-          //          m_points[m_indices[index + 2]].m_pos = m_points[m_indices[index + 2]].m_prevPos;
-          //          m_points[pid].m_pos = m_points[pid].m_prevPos;
-
           std::swap(m_points[m_indices[index]].m_pos, m_points[m_indices[index]].m_prevPos);
           std::swap(m_points[m_indices[index + 1]].m_pos, m_points[m_indices[index + 1]].m_prevPos);
           std::swap(m_points[m_indices[index + 2]].m_pos, m_points[m_indices[index + 2]].m_prevPos);
