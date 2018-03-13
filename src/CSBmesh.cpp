@@ -262,7 +262,7 @@ void CSBmesh::init()
 
 void CSBmesh::update(const float _time)
 {
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < 20; ++i)
     for (auto& constraint : m_constraints)
     {
       constraint->project(m_points);
@@ -276,7 +276,7 @@ void CSBmesh::update(const float _time)
   resolveSelfCollision_spheres();
 
 
-  const auto force = glm::vec3(0.f,-4.95f,0.f);
+  const auto force = glm::vec3(0.f,-2.f,0.f);
   const auto size = m_points.size();
   static constexpr auto damping = 0.9f;
 
