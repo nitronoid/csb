@@ -25,13 +25,13 @@ void MeshVBO::reset(const unsigned char _indicesSize, const int _nIndices, const
   m_dataSize = _dataSize;
   // For all the buffers, we bind them then clear the data pointer
   m_vbo.bind();
-  m_vbo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  m_vbo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
   m_vbo.allocate(m_dataSize * m_totalAmountOfData);
 
   m_numIndices = _nIndices;
   m_indicesSize = _indicesSize;
   m_ebo.bind();
-  m_ebo.setUsagePattern(QOpenGLBuffer::StaticDraw);
+  m_ebo.setUsagePattern(QOpenGLBuffer::DynamicDraw);
   m_ebo.allocate(_nIndices * m_indicesSize);
 }
 //-----------------------------------------------------------------------------------------------------
