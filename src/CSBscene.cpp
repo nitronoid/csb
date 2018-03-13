@@ -49,7 +49,7 @@ void CSBscene::init()
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::initGeo()
 {
-    m_meshes[0].load("models/hdPlane.obj");
+  m_meshes[0].load("models/hdPlane.obj");
 //  m_meshes[0].load("models/hdCube.obj");
   for (auto& mesh : m_meshes) mesh.init();
   // Create and bind our Vertex Array Object

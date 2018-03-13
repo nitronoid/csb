@@ -18,12 +18,9 @@ out FragData
   vec2 uv;
 } outData;
 
-uniform mat4 N;             // normal matrix calculated in the app
-
 void main(void)
 {
-
-  vec3 norm = normalize(mat3(N) * cross((gl_in[2].gl_Position - gl_in[0].gl_Position).xyz, (gl_in[1].gl_Position - gl_in[0].gl_Position).xyz));
+  vec3 norm = normalize( cross((gl_in[2].gl_Position - gl_in[0].gl_Position).xyz, (gl_in[1].gl_Position - gl_in[0].gl_Position).xyz));
 
   for (int i = 0; i < 3; ++i)
   {
