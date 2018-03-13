@@ -121,11 +121,11 @@ void CSBmesh::resolveSelfCollision_spheres()
       const auto disp = P.m_pos - Q.m_pos;
       const auto dist = glm::length2(disp);
 
-      auto double_radius_sqr = (m_avgEdgeLength * 1.2f);
-      double_radius_sqr *= double_radius_sqr;
-      if (dist < double_radius_sqr)
+      auto radius_sqr = (m_shortestEdgeDist);
+      radius_sqr *= radius_sqr;
+      if (dist < radius_sqr)
       {
-        const auto move = (glm::fastSqrt(double_radius_sqr) - glm::fastSqrt(dist)) * 0.5f;
+        const auto move = (glm::fastSqrt(radius_sqr) - glm::fastSqrt(dist)) * 0.5f;
         offset += (glm::fastNormalize(disp) * move);
         ++count;
       }
@@ -133,6 +133,7 @@ void CSBmesh::resolveSelfCollision_spheres()
 
     if (count)
     {
+      offset = glm::min(offset, m_shortestEdgeDist * 0.1f);
       P.m_pos += offset/static_cast<float>(count);
       // zero the velocity
       P.m_prevPos = P.m_pos;
@@ -209,17 +210,20 @@ void CSBmesh::init()
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
-//    m_points[90].m_invMass = 0.f;
+  //    m_points[90].m_invMass = 0.f;
   //  m_points[24].m_invMass = 0.f;
   m_points[m_points.size() - 1].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
   float totalEdgeDist = 0.0f;
+  const auto& firstEdge = edgeSet.begin()->p;
+  m_shortestEdgeDist = glm::fastDistance(m_vertices[m_indices[firstEdge.first]], m_vertices[m_indices[firstEdge.second]]);
   for (const auto & edge : edgeSet)
   {
     const auto p1 = edge.p.first;
     const auto p2 = edge.p.second;
     const auto distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
+    m_shortestEdgeDist = std::min(m_shortestEdgeDist, distance);
     totalEdgeDist += distance;
     m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
   }
@@ -268,7 +272,14 @@ void CSBmesh::update(const float _time)
       constraint->project(m_points);
     }
 
-  const auto gravity = glm::vec3(0.f,-1.f,0.f);
+  hashVerts();
+  hashTris();
+
+  resolveSelfCollision_rays();
+
+  resolveSelfCollision_spheres();
+
+  const auto gravity = glm::vec3(0.f,-0.5f,0.f);
   const auto size = m_points.size();
 
 
@@ -281,14 +292,6 @@ void CSBmesh::update(const float _time)
   }
 
 
-  hashVerts();
-  hashTris();
 
-  resolveSelfCollision_rays();
-
-  //  hashVerts();
-  //  hashTris();
-
-  resolveSelfCollision_spheres();
 
 }
