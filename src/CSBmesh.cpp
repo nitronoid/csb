@@ -1,6 +1,8 @@
 #include "CSBmesh.h"
 #include "gtx/fast_square_root.hpp"
 #include "gtx/norm.hpp"
+#include <random>
+#include <algorithm>
 
 std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
 {
@@ -183,12 +185,16 @@ void CSBmesh::resolveSelfCollision_rays()
         // Check not same side of triangle
         if ((DistStart * DistEnd < 0.0f) && insideTri)
         {
-          // Add constraint here
+          // We swap the past and current positions to reverse velocity giving a slight bounce to the cloth
+          //          m_points[m_indices[index]].m_pos = m_points[m_indices[index]].m_prevPos;
+          //          m_points[m_indices[index + 1]].m_pos = m_points[m_indices[index + 1]].m_prevPos;
+          //          m_points[m_indices[index + 2]].m_pos = m_points[m_indices[index + 2]].m_prevPos;
+          //          m_points[pid].m_pos = m_points[pid].m_prevPos;
+
           std::swap(m_points[m_indices[index]].m_pos, m_points[m_indices[index]].m_prevPos);
           std::swap(m_points[m_indices[index + 1]].m_pos, m_points[m_indices[index + 1]].m_prevPos);
           std::swap(m_points[m_indices[index + 2]].m_pos, m_points[m_indices[index + 2]].m_prevPos);
           std::swap(m_points[pid].m_pos, m_points[pid].m_prevPos);
-          //          m_points[pid].m_pos = intersection + glm::normalize(intersection - L1) * 0.02f;
         }
       }
     }
@@ -210,8 +216,6 @@ void CSBmesh::init()
     m_points.emplace_back(vert, 1.f);
 
   m_points[0].m_invMass = 0.f;
-  //    m_points[90].m_invMass = 0.f;
-  //  m_points[24].m_invMass = 0.f;
   m_points[m_points.size() - 1].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
@@ -279,14 +283,16 @@ void CSBmesh::update(const float _time)
 
   resolveSelfCollision_spheres();
 
-  const auto gravity = glm::vec3(0.f,-0.5f,0.f);
+
+  const auto force = glm::vec3(0.f,-4.95f,0.f);
   const auto size = m_points.size();
+  static constexpr auto damping = 0.9f;
 
 
   for (size_t i = 0; i < size; ++i)
   {
     auto& point = m_points[i];
-    glm::vec3 newPos = point.m_pos * 2.0f - point.m_prevPos + (point.m_invMass * gravity * _time * _time);
+    glm::vec3 newPos = point.m_pos + (point.m_pos - point.m_prevPos ) * damping + (point.m_invMass * force * _time * _time);
     point.m_prevPos = point.m_pos;
     point.m_pos = newPos;
   }
