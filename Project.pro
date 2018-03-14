@@ -47,8 +47,9 @@ HEADERS += \
     include/CSBmesh.h \
     include/MaterialEnvMap.h \
     include/CSBconstraint.h \
-    include/csbpoint.h \
-    include/MaterialCSBpbr.h
+    include/MaterialCSBpbr.h \
+    include/CSBsolver.h \
+    include/CSBparticle.h
 
 SOURCES += \
     src/main.cpp \
@@ -69,7 +70,8 @@ SOURCES += \
     src/CSBmesh.cpp \
     src/MaterialEnvMap.cpp \
     src/CSBconstraint.cpp \
-    src/MaterialCSBpbr.cpp
+    src/MaterialCSBpbr.cpp \
+    src/CSBsolver.cpp
 
 OTHER_FILES += \
     $$files(shaders/*, true) \

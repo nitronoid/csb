@@ -5,7 +5,7 @@
 
 CSBconstraint::~CSBconstraint() = default;
 
-void DistanceConstraint::project(std::vector<CSBpoint> &_positions)
+void DistanceConstraint::project(std::vector<CSBparticle> &_positions)
 {
   auto& p1 = _positions[m_p1];
   auto& p2 = _positions[m_p2];
@@ -18,7 +18,7 @@ void DistanceConstraint::project(std::vector<CSBpoint> &_positions)
   p2.m_pos -= (delta * p2.m_invMass);
 }
 
-void BendingConstraint::project(std::vector<CSBpoint> &_positions)
+void BendingConstraint::project(std::vector<CSBparticle> &_positions)
 {
   auto& p1 = _positions[m_p[0]];
   auto& p2 = _positions[m_p[1]];
@@ -42,12 +42,12 @@ void BendingConstraint::project(std::vector<CSBpoint> &_positions)
   p3.m_pos += (k * m_w[2] * -4.f * force);
 }
 
-void PinConstraint::project(std::vector<CSBpoint> &_positions)
+void PinConstraint::project(std::vector<CSBparticle> &_positions)
 {
   _positions[m_p].m_pos = m_pin;
 }
 
-void SelfCollisionConstraint::project(std::vector<CSBpoint> &_positions)
+void SelfCollisionConstraint::project(std::vector<CSBparticle> &_positions)
 {
   auto& T0 = _positions[m_t[0]].m_pos;
   auto& T1 = _positions[m_t[1]].m_pos;

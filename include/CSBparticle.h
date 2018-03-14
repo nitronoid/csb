@@ -3,9 +3,9 @@
 
 #include "vec3.hpp"
 
-struct CSBpoint
+struct CSBparticle
 {
-  CSBpoint(glm::vec3 &_pos, const float &_invMass) :
+  CSBparticle(glm::vec3 &_pos, const float &_invMass) :
       m_pos(_pos),
       m_prevPos(_pos),
       m_invMass(_invMass)

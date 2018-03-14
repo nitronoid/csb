@@ -1,4 +1,5 @@
-#include "CSBmesh.h"
+#include "CSBsolver.h"
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gtx/fast_square_root.hpp"
 #include "gtx/norm.hpp"
@@ -8,18 +9,19 @@
 #include <random>
 #include <algorithm>
 
-std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
+std::unordered_set<CSBsolver::EdgePair> CSBsolver::getEdges(Mesh *_meshRef)
 {
   std::unordered_set<EdgePair> edgeSet;
-  auto numEdges = m_vertices.size() + (m_indices.size() / 3) - 2;
+  const auto& indices = _meshRef->getIndices();
+  auto numEdges = _meshRef->getNVerts() + (indices.size() / 3) - 2;
   edgeSet.reserve(numEdges);
 
-  const auto last = m_indices.size() - 2;
+  const auto last = indices.size() - 2;
   for (size_t i = 0; i < last; i+=3)
   {
-    const auto p1 = m_indices[i];
-    const auto p2 = m_indices[i + 1];
-    const auto p3 = m_indices[i + 2];
+    const auto p1 = indices[i];
+    const auto p2 = indices[i + 1];
+    const auto p3 = indices[i + 2];
     edgeSet.insert({p1, p2});
     edgeSet.insert({p2, p3});
     edgeSet.insert({p3, p1});
@@ -28,12 +30,12 @@ std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
 }
 
 
-std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
+std::vector<GLushort> CSBsolver::getConnectedVertices(Mesh *_meshRef, const GLushort _vert)
 {
-  return m_adjacency[_vert];
+  return _meshRef->getAdjacencyInfo()[_vert];
 }
 
-glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
+glm::ivec3 CSBsolver::calcCell(const glm::vec3& _coord) const
 {
   // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
@@ -43,7 +45,7 @@ glm::ivec3 CSBmesh::calcCell(const glm::vec3& _coord) const
         );
 }
 
-size_t CSBmesh::hashCell (const glm::ivec3& _cell) const
+size_t CSBsolver::hashCell (const glm::ivec3& _cell) const
 {
   static constexpr auto posMod = [](const auto _x, const auto _m)
   {
@@ -54,12 +56,12 @@ size_t CSBmesh::hashCell (const glm::ivec3& _cell) const
   return posMod((_cell.x * primes[0]) ^ (_cell.y * primes[1]) ^ (_cell.z * primes[2]), m_hashTable.size());
 }
 
-size_t CSBmesh::hashParticle (const glm::vec3& _coord) const
+size_t CSBsolver::hashParticle (const glm::vec3& _coord) const
 {
   return hashCell(calcCell(_coord));
 }
 
-void CSBmesh::hashVerts()
+void CSBsolver::hashVerts()
 {
   for (auto& cell : m_hashTable) cell.clear();
   for (GLushort i = 0; i < m_particles.size(); ++i)
@@ -68,7 +70,7 @@ void CSBmesh::hashVerts()
   }
 }
 
-void CSBmesh::hashTris()
+void CSBsolver::hashTris()
 {
   for (auto& hash : m_triangleVertHash) hash.clear();
   const auto size = m_triangleVertHash.size();
@@ -92,15 +94,18 @@ void CSBmesh::hashTris()
   }
 }
 
-void CSBmesh::resolveSelfCollision_spheres()
+void CSBsolver::resolveSelfCollision_spheres()
 {
   const auto size = m_particles.size();
   for (GLushort i = 0; i < size; ++i)
   {
     auto& P = m_particles[i];
 
+    //-------------------------------------------------------------------------------------------------------------------------------
+    //-----------------------------------------------TESTING ONLY!!!!!!!!!!!!!!------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------------------------------------
 
-    auto ignored = getConnectedVertices(i);
+    auto ignored = getConnectedVertices(m_referencedMeshes[0], i);
     ignored.push_back(i);
     std::sort(ignored.begin(), ignored.end());
 
@@ -152,7 +157,7 @@ void CSBmesh::resolveSelfCollision_spheres()
   }
 }
 
-void CSBmesh::resolveSelfCollision_rays()
+void CSBsolver::resolveSelfCollision_rays()
 {
   const auto size = m_triangleVertHash.size();
   //     Loop over all faces
@@ -198,32 +203,39 @@ void CSBmesh::resolveSelfCollision_rays()
   }
 }
 
-void CSBmesh::init()
+
+void CSBsolver::addTriangleMesh(Mesh &_mesh)
 {
+  m_referencedMeshes.push_back(&_mesh);
   m_triangleVertHash.resize(m_indices.size() / 3);
 
+  const auto& meshIndices = _mesh.getIndices();
+  m_indices.reserve(m_indices.size() + distance(meshIndices.begin(), meshIndices.end()));
+  m_indices.insert(m_indices.end(), meshIndices.begin(), meshIndices.end());
+
   // Calculate optimal hash table size
-  const auto numVerts = m_vertices.size();
+  const auto numVerts = _mesh.getNVerts();
   const size_t multiple = static_cast<size_t>(pow10(floor(log10(numVerts))));
   const auto hashTableSize = ((numVerts + multiple - 1) / multiple) * multiple - 1;
   m_hashTable.resize(hashTableSize);
-  m_particles.reserve(m_vertices.size());
+  m_particles.reserve(numVerts);
 
-  for (auto& vert : m_vertices)
+  auto& meshVerts = _mesh.getVertices();
+  for (auto& vert : meshVerts)
     m_particles.emplace_back(vert, 1.f);
 
   m_particles[0].m_invMass = 0.f;
   m_particles[m_particles.size() - 1].m_invMass = 0.f;
 
-  auto edgeSet = getEdges();
+  auto edgeSet = getEdges(&_mesh);
   float totalEdgeDist = 0.0f;
   const auto& firstEdge = edgeSet.begin()->p;
-  m_shortestEdgeDist = glm::fastDistance(m_vertices[m_indices[firstEdge.first]], m_vertices[m_indices[firstEdge.second]]);
+  m_shortestEdgeDist = glm::fastDistance(meshVerts[m_indices[firstEdge.first]], meshVerts[m_indices[firstEdge.second]]);
   for (const auto & edge : edgeSet)
   {
     const auto p1 = edge.p.first;
     const auto p2 = edge.p.second;
-    const auto distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
+    const auto distance = glm::fastDistance(meshVerts[p1], meshVerts[p2]);
     m_shortestEdgeDist = std::min(m_shortestEdgeDist, distance);
     totalEdgeDist += distance;
     m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
@@ -231,11 +243,10 @@ void CSBmesh::init()
 
   m_avgEdgeLength = totalEdgeDist / edgeSet.size();
 
-  const auto size = m_vertices.size();
   std::unordered_set<EdgePair> connections;
-  for (GLushort v = 0; v < size; ++v)
+  for (GLushort v = 0; v < numVerts; ++v)
   {
-    auto neighbours = getConnectedVertices(v);
+    auto neighbours = getConnectedVertices(&_mesh, v);
     for (const auto vi : neighbours)
     {
       float bestCosTheta = 0.0f;
@@ -243,8 +254,8 @@ void CSBmesh::init()
       for (const auto vj : neighbours)
       {
         if (vj == vi) continue;
-        auto a = m_vertices[vi] - m_vertices[v];
-        auto b = m_vertices[vj] - m_vertices[v];
+        auto a = meshVerts[vi] - meshVerts[v];
+        auto b = meshVerts[vj] - meshVerts[v];
         auto cosTheta = glm::dot(a, b) / (glm::fastLength(a) * glm::fastLength(b));
         if (cosTheta < bestCosTheta)
         {
@@ -257,15 +268,15 @@ void CSBmesh::init()
       {
         connections.insert(connection);
         static constexpr float third = 1.0f / 3.0f;
-        auto centre = third * (m_vertices[vi] + m_vertices[bestV] + m_vertices[v]);
-        auto rest = glm::fastDistance(m_vertices[v], centre);
+        auto centre = third * (meshVerts[vi] + meshVerts[bestV] + meshVerts[v]);
+        auto rest = glm::fastDistance(meshVerts[v], centre);
         m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest, m_particles));
       }
     }
   }
 }
 
-void CSBmesh::update(const float _time)
+void CSBsolver::update(const float _time)
 {
   for (int i = 0; i < 30; ++i)
     for (auto& constraint : m_constraints)
@@ -276,13 +287,11 @@ void CSBmesh::update(const float _time)
   hashVerts();
   hashTris();
 
-
-
   resolveSelfCollision_rays();
 
   resolveSelfCollision_spheres();
 
-  const auto force = glm::vec3(0.f,-9.f,0.f);
+  const auto force = glm::vec3(0.f, -9.f, 0.f);
   const auto size = m_particles.size();
   static constexpr auto damping = 0.6f;
 
@@ -290,7 +299,8 @@ void CSBmesh::update(const float _time)
   for (size_t i = 0; i < size; ++i)
   {
     auto& particle = m_particles[i];
-    glm::vec3 newPos = particle.m_pos + (particle.m_pos - particle.m_prevPos ) * damping + (particle.m_invMass * force * _time * _time);
+    const auto vel = (particle.m_pos - particle.m_prevPos ) * damping;
+    const auto newPos = particle.m_pos + vel + (particle.m_invMass * force * _time * _time);
     particle.m_prevPos = particle.m_pos;
     particle.m_pos = newPos;
   }

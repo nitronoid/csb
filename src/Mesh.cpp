@@ -134,6 +134,11 @@ const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) cons
   return data;
 }
 
+size_t Mesh::getNVerts() const noexcept
+{
+  return m_vertices.size();
+}
+
 int Mesh::getNIndicesData() const noexcept
 {
   return static_cast<int>(m_indices.size());
@@ -159,5 +164,19 @@ int Mesh::getNData() const noexcept
   return getNVertData() + getNNormData() + getNUVData();
 }
 
+std::vector<glm::vec3> &Mesh::getVertices() noexcept
+{
+  return m_vertices;
+}
+
+const std::vector<std::vector<GLushort>>& Mesh::getAdjacencyInfo() const noexcept
+{
+  return m_adjacency;
+}
+
+const std::vector<GLushort>& Mesh::getIndices() const noexcept
+{
+  return m_indices;
+}
 
 

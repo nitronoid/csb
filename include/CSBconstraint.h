@@ -4,7 +4,7 @@
 #include <vector>
 #include <array>
 #include "vec3.hpp"
-#include "csbpoint.h"
+#include "CSBparticle.h"
 
 class CSBconstraint
 {
@@ -15,7 +15,7 @@ public:
   CSBconstraint(CSBconstraint&&) = default;
   CSBconstraint& operator=(CSBconstraint&&) = default;
   virtual ~CSBconstraint();
-  virtual void project(std::vector<CSBpoint> &_positions) = 0;
+  virtual void project(std::vector<CSBparticle> &_positions) = 0;
 };
 
 class DistanceConstraint : public CSBconstraint
@@ -31,7 +31,7 @@ public:
   DistanceConstraint(DistanceConstraint&&) = default;
   DistanceConstraint& operator=(DistanceConstraint&&) = default;
   virtual ~DistanceConstraint() override = default;
-  virtual void project(std::vector<CSBpoint> &_positions) override;
+  virtual void project(std::vector<CSBparticle> &_positions) override;
 
 private:
   float m_rest;
@@ -43,7 +43,7 @@ private:
 class BendingConstraint : public CSBconstraint
 {
 public:
-  BendingConstraint(const size_t _p1, const size_t _p2, const size_t _p3, float _rest, const std::vector<CSBpoint>&_points) :
+  BendingConstraint(const size_t _p1, const size_t _p2, const size_t _p3, float _rest, const std::vector<CSBparticle>&_points) :
     m_p({{_p1, _p2, _p3}}),
     m_rest(_rest)
   {
@@ -57,7 +57,7 @@ public:
   BendingConstraint(BendingConstraint&&) = default;
   BendingConstraint& operator=(BendingConstraint&&) = default;
   virtual ~BendingConstraint() override = default;
-  virtual void project(std::vector<CSBpoint> &_positions) override;
+  virtual void project(std::vector<CSBparticle> &_positions) override;
 
 private:
   std::array<size_t, 3> m_p;
@@ -77,7 +77,7 @@ public:
   PinConstraint(PinConstraint&&) = default;
   PinConstraint& operator=(PinConstraint&&) = default;
   virtual ~PinConstraint() override = default;
-  virtual void project(std::vector<CSBpoint> &_positions) override;
+  virtual void project(std::vector<CSBparticle> &_positions) override;
 
 private:
   glm::vec3 m_pin;
@@ -88,7 +88,7 @@ private:
 class SelfCollisionConstraint : public CSBconstraint
 {
 public:
-  SelfCollisionConstraint(const glm::vec3 &_intersectionP, const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2, const std::vector<CSBpoint>&_points) :
+  SelfCollisionConstraint(const glm::vec3 &_intersectionP, const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2, const std::vector<CSBparticle>&_points) :
     m_t({{_t0, _t1, _t2}}),
     m_intersectionP(_intersectionP),
     m_p(_p)
@@ -104,7 +104,7 @@ public:
   SelfCollisionConstraint(SelfCollisionConstraint&&) = default;
   SelfCollisionConstraint& operator=(SelfCollisionConstraint&&) = default;
   virtual ~SelfCollisionConstraint() override = default;
-  virtual void project(std::vector<CSBpoint> &_positions) override;
+  virtual void project(std::vector<CSBparticle> &_positions) override;
 
 private:
   std::array<size_t, 3> m_t;

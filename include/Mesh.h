@@ -52,30 +52,41 @@ public:
   //-----------------------------------------------------------------------------------------------------
   const GLfloat* getAttribData(const MeshAttributes::Attribute _attrib) const noexcept;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the the amount of face indices.
+  /// @brief Used to the number of vertices.
+  /// @return The size of our vertex array.
+  //-----------------------------------------------------------------------------------------------------
+  size_t getNVerts() const noexcept;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the amount of face indices.
   /// @return The size of our indices array.
   //-----------------------------------------------------------------------------------------------------
   int getNIndicesData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the the amount of vertex data elements.
+  /// @brief Used to the amount of vertex data elements.
   /// @return The size of our vertex array.
   //-----------------------------------------------------------------------------------------------------
   int getNVertData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the the amount of normal data elements.
+  /// @brief Used to the amount of normal data elements.
   /// @return The size of our normal array.
   //-----------------------------------------------------------------------------------------------------
   int getNNormData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the the amount of UV data elements.
+  /// @brief Used to the amount of UV data elements.
   /// @return The size of our UV array.
   //-----------------------------------------------------------------------------------------------------
   int getNUVData() const noexcept;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the the amount of data elements across all arrays.
+  /// @brief Used to the amount of data elements across all arrays.
   /// @return The size of our data arrays combined.
   //-----------------------------------------------------------------------------------------------------
   int getNData() const noexcept;
+
+  std::vector<glm::vec3>& getVertices() noexcept;
+
+  const std::vector<GLushort>& getIndices() const noexcept;
+
+  const std::vector<std::vector<GLushort>>& getAdjacencyInfo() const noexcept;
 
 protected:
   //-----------------------------------------------------------------------------------------------------

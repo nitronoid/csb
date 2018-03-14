@@ -51,7 +51,7 @@ void CSBscene::initGeo()
 {
   m_meshes[0].load("models/hdxPlane.obj");
 //  m_meshes[0].load("models/hdCube.obj");
-  for (auto& mesh : m_meshes) mesh.init();
+  for (auto& mesh : m_meshes) m_solver.addTriangleMesh(mesh);
   // Create and bind our Vertex Array Object
   m_vao->create();
   m_vao->bind();
@@ -142,7 +142,8 @@ void CSBscene::renderScene()
 
   while(accum >= dt)
   {
-    m_meshes[m_meshIndex].update(dt);
+    m_solver.update(dt);
+//    m_meshes[m_meshIndex].update(dt);
     accum -=dt;
   }
 
