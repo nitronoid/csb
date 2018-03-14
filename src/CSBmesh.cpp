@@ -126,7 +126,11 @@ void CSBmesh::resolveSelfCollision_spheres()
       const auto disp = P.m_pos - Q.m_pos;
       const auto dist = glm::length2(disp);
 
-      auto radius_sqr = (m_shortestEdgeDist);
+
+      // By setting the distance to be larger than the distance between points
+      // we should cover the cloth surface, however we can't set them too big,
+      // otherwise conflicts with neighbours will occur and we'll see flickering
+      auto radius_sqr = (m_shortestEdgeDist * 1.1f);
       radius_sqr *= radius_sqr;
       if (dist < radius_sqr)
       {
@@ -138,7 +142,8 @@ void CSBmesh::resolveSelfCollision_spheres()
 
     if (count)
     {
-      offset = glm::min(offset, m_shortestEdgeDist * 0.1f);
+      // Set a lower bound for the offset to reduce flickering
+      offset *= glm::step(0.001f, offset);
       P.m_pos += offset/static_cast<float>(count);
       // zero the velocity
       P.m_prevPos = P.m_pos;
@@ -276,7 +281,7 @@ void CSBmesh::update(const float _time)
   resolveSelfCollision_spheres();
 
 
-  const auto force = glm::vec3(0.f,-2.f,0.f);
+  const auto force = glm::vec3(0.f,-5.f,0.f);
   const auto size = m_points.size();
   static constexpr auto damping = 0.9f;
 
