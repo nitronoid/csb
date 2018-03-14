@@ -1,7 +1,6 @@
 #include <QApplication>
 #include "MainWindow.h"
 #include "CSBscene.h"
-#include "DemoScene.h"
 #include "TrackballCamera.h"
 #include "ShaderLib.h"
 #include <random>

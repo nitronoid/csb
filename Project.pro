@@ -38,7 +38,6 @@ HEADERS += \
     include/MaterialPBR.h \
     include/Mesh.h \
     include/Scene.h \
-    include/DemoScene.h \
     include/MaterialPhong.h \
     include/ShaderLib.h \
     include/MeshVBO.h \
@@ -61,7 +60,6 @@ SOURCES += \
     src/Material.cpp \
     src/MaterialPBR.cpp \
     src/Scene.cpp \
-    src/DemoScene.cpp \
     src/MaterialPhong.cpp \
     src/ShaderLib.cpp \
     src/MeshVBO.cpp \
