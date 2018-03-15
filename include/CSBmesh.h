@@ -31,7 +31,7 @@ public:
 
   void init();
   void projectConstraints();
-
+  void translate(const glm::vec3 &_translation);
 
   float getTotalEdgeLength() const noexcept;
   float getShortestEdgeLength() const noexcept;

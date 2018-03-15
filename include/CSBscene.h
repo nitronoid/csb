@@ -135,7 +135,10 @@ private:
 
   std::vector<std::array<int, 3>> m_meshOffsets;
   std::vector<int> m_meshIndexStartPoints;
-  size_t m_numIndices = 0;
+//  size_t m_numIndices = 0;
+  std::vector<GLsizei> m_numIndices;
+  std::vector<GLvoid*> m_meshIndexStartPointsGL;
+  std::vector<GLint> m_meshBaseVert;
 
 };
 

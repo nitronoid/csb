@@ -56,17 +56,24 @@ void CSBscene::initGeo()
   m_meshes.resize(num);
   m_meshOffsets.resize(num);
   m_meshIndexStartPoints.resize(num);
-  m_meshes[0].load("models/Sphere.obj");
-  m_meshes[1].load("models/cube.obj");
+  m_meshIndexStartPointsGL.resize(num);
+  m_meshBaseVert.resize(num);
+  m_numIndices.reserve(num);
+  m_meshes[0].load("models/hdxPlane.obj");
+  m_meshes[1].load("models/Sphere.obj");
+  m_meshes[1].translate({0.f, 1.f, 0.f});
 
   m_meshIndexStartPoints[0] = 0;
   m_meshOffsets[0] = {{0,0,0}};
+  m_meshIndexStartPointsGL[0] = nullptr;
   for (size_t i = 1; i < num; ++i)
   {
     using namespace MeshAttributes;
     for (const auto buff : {VERTEX, UV, NORMAL})
       m_meshOffsets[i][buff] = m_meshes[i-1].getNAttribData(buff);
+    m_meshBaseVert[i] = m_meshes[i-1].getNVerts();
     m_meshIndexStartPoints[i] = m_meshes[i-1].getNIndices();
+    m_meshIndexStartPointsGL[i] = static_cast<unsigned char*>(0) + m_meshes[i-1].getNIndices() * sizeof(GLushort);
   }
 
   auto totalIndices = 0;
@@ -90,7 +97,7 @@ void CSBscene::initGeo()
   m_vao->bind();
   // Create and bind our Vertex Buffer Object
   m_meshVBO.init();
-  m_numIndex = totalIndices;
+
 
   m_meshVBO.reset(
         sizeof(GLushort),
@@ -172,27 +179,27 @@ void CSBscene::renderScene()
   }
 
   m_materials[m_currentMaterial]->update();
-//  using namespace std::chrono;
+  using namespace std::chrono;
 
-//  static constexpr float dt = 1.f/30.f;
-//  static float accum = 0.0f;
-//  static auto currentTime = high_resolution_clock::now();
+  static constexpr float dt = 1.f/30.f;
+  static float accum = 0.0f;
+  static auto currentTime = high_resolution_clock::now();
 
-//  const auto time = high_resolution_clock::now();
+  const auto time = high_resolution_clock::now();
 
-//  float ft = duration_cast<milliseconds>(time - currentTime).count() / 1000.0f;
-////  ft = std::min(0.05f, ft);
-//  currentTime = time;
-//  accum += ft;
+  float ft = duration_cast<milliseconds>(time - currentTime).count() / 1000.0f;
+//  ft = std::min(0.05f, ft);
+  currentTime = time;
+  accum += ft;
 
-//  while(accum >= dt)
-//  {
-//    m_solver.update(dt);
-//    accum -=dt;
-//  }
+  while(accum >= dt)
+  {
+    m_solver.update(dt);
+    accum -=dt;
+  }
 
-//  writeMeshAttributes();
-
-  glDrawElements(GL_TRIANGLES, m_numIndex, GL_UNSIGNED_SHORT, nullptr);
+  writeMeshAttributes();
+  context()->versionFunctions<QOpenGLFunctions_4_0_Core>()->glMultiDrawElementsBaseVertex(GL_TRIANGLES, m_numIndices.data(), GL_UNSIGNED_SHORT, m_meshIndexStartPointsGL.data(), 3, m_meshBaseVert.data());
+//  glDrawElementsBaseVertex(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_SHORT, nullptr);
 }
 //-----------------------------------------------------------------------------------------------------
