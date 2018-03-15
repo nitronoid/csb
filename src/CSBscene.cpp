@@ -51,7 +51,7 @@ void CSBscene::initGeo()
 {
   m_meshes.resize(2);
   m_meshes[0].load("models/hdxPlane.obj");
-  m_meshes[1].load("models/bigPlane.obj");
+  m_meshes[1].load("models/test2.obj");
   for (auto& mesh : m_meshes)
   {
     mesh.init();
