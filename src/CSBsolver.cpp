@@ -230,11 +230,11 @@ void CSBsolver::update(const float _time)
     hashTris(i);
   }
 
-//  for (size_t i = 0; i < numMeshes; ++i)
-//  {
-//    resolveContinuousCollision_rays(i);
-//    resolveContinuousCollision_spheres(i);
-//  }
+  for (size_t i = 0; i < numMeshes; ++i)
+  {
+    resolveContinuousCollision_rays(i);
+    resolveContinuousCollision_spheres(i);
+  }
 
   const auto force = glm::vec3(0.f, -10.f, 0.f);
   static constexpr auto damping = 0.9f;

@@ -5,7 +5,6 @@
 #include "MaterialEnvMap.h"
 #include "MaterialFractal.h"
 #include <QOpenGLContext>
-#include <QOpenGLFunctions_4_0_Core>
 
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::writeMeshAttributes()
@@ -16,7 +15,7 @@ void CSBscene::writeMeshAttributes()
     const auto& mesh = m_meshes[i];
     for (const auto buff : {VERTEX, UV, NORMAL})
     {
-      m_meshVBO.write(mesh.getAttribData(buff), buff, mesh.getNAttribData(buff), m_meshOffsets[i][buff]);
+      m_meshVBO.write(mesh.getAttribData(buff), buff, mesh.getNAttribData(buff), m_meshAttributeOffsets[i][buff]);
     }
     m_meshVBO.writeIndices(mesh.getIndicesData(), mesh.getNIndices(), m_meshIndexStartPoints[i]);
   }
@@ -39,6 +38,8 @@ void CSBscene::init()
 {
   Scene::init();
 
+  m_qogl_funcs = context()->versionFunctions<QOpenGLFunctions_4_0_Core>();
+
   initMaterials();
   initGeo();
 
@@ -52,45 +53,50 @@ void CSBscene::init()
 //-----------------------------------------------------------------------------------------------------
 void CSBscene::initGeo()
 {
-  size_t num = 2;
-  m_meshes.resize(num);
-  m_meshOffsets.resize(num);
-  m_meshIndexStartPoints.resize(num);
-  m_meshIndexStartPointsGL.resize(num);
-  m_meshBaseVert.resize(num);
-  m_numIndices.reserve(num);
+  // Resize for the amount of objects
+  m_meshes.resize(2);
+  // Resize all of our offset counters to the same size
+  const auto size = m_meshes.size();
+  m_meshAttributeOffsets.resize(size);
+  m_meshIndexStartPoints.resize(size);
+  m_meshIndexOffsets.resize(size);
+  m_meshBaseVert.resize(size);
+  m_numIndicesPerMesh.reserve(size);
+
+  // Load some meshes and apply constraints
   m_meshes[0].load("models/hdxPlane.obj");
-  m_meshes[1].load("models/Sphere.obj");
-  m_meshes[1].translate({0.f, 1.f, 0.f});
-
-  m_meshIndexStartPoints[0] = 0;
-  m_meshOffsets[0] = {{0,0,0}};
-  m_meshIndexStartPointsGL[0] = nullptr;
-  for (size_t i = 1; i < num; ++i)
-  {
-    using namespace MeshAttributes;
-    for (const auto buff : {VERTEX, UV, NORMAL})
-      m_meshOffsets[i][buff] = m_meshes[i-1].getNAttribData(buff);
-    m_meshBaseVert[i] = m_meshes[i-1].getNVerts();
-    m_meshIndexStartPoints[i] = m_meshes[i-1].getNIndices();
-    m_meshIndexStartPointsGL[i] = static_cast<unsigned char*>(0) + m_meshes[i-1].getNIndices() * sizeof(GLushort);
-  }
-
-  auto totalIndices = 0;
-  auto totalVerts = 0;
-  auto totalUVs = 0;
-  auto totalNorms = 0;
+  m_meshes[1].load("models/hdxPlane.obj");
+  m_meshes[1].translate({0.1f, 0.1f, 0.f});
 
   for (auto& mesh : m_meshes)
   {
     mesh.init();
     m_solver.addTriangleMesh(mesh);
+  }
 
+  m_meshIndexStartPoints[0] = 0;
+  m_meshAttributeOffsets[0] = {{0,0,0}};
+  m_meshIndexOffsets[0] = static_cast<unsigned char*>(nullptr);
+  for (size_t i = 1; i < size; ++i)
+  {
+    using namespace MeshAttributes;
+    for (const auto buff : {VERTEX, UV, NORMAL})
+      m_meshAttributeOffsets[i][buff] = m_meshes[i-1].getNAttribData(buff);
+    m_meshBaseVert[i] = static_cast<GLint>(m_meshes[i-1].getNVerts());
+    m_meshIndexStartPoints[i] = static_cast<GLsizei>(m_meshes[i-1].getNIndices());
+    m_meshIndexOffsets[i] = static_cast<unsigned char*>(nullptr) + m_meshes[i-1].getNIndices() * sizeof(GLushort);
+  }
+
+
+  int totalIndices = 0, totalVerts = 0, totalUVs = 0, totalNorms = 0;
+
+  for (auto& mesh : m_meshes)
+  {
     totalIndices += mesh.getNIndicesData();
     totalVerts += mesh.getNVertData();
     totalUVs += mesh.getNUVData();
     totalNorms +=  mesh.getNNormData();
-    m_numIndices.push_back(mesh.getNIndices());
+    m_numIndicesPerMesh.push_back(mesh.getNIndices());
   }
   // Create and bind our Vertex Array Object
   m_vao->create();
@@ -142,23 +148,6 @@ void CSBscene::rotating( const bool _rotating )
   m_rotating = _rotating;
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::generateNewGeometry()
-{
-  makeCurrent();
-  m_meshIndex = (m_meshIndex + 1) % m_meshes.size();
-  auto& mesh = m_meshes[m_meshIndex];
-  m_meshVBO.reset(
-        sizeof(GLushort),
-        mesh.getNIndicesData(),
-        sizeof(GLfloat),
-        mesh.getNVertData(),
-        mesh.getNUVData(),
-        mesh.getNNormData()
-        );
-  writeMeshAttributes();
-  setAttributeBuffers();
-}
-//-----------------------------------------------------------------------------------------------------
 void CSBscene::nextMaterial()
 {
   makeCurrent();
@@ -188,7 +177,7 @@ void CSBscene::renderScene()
   const auto time = high_resolution_clock::now();
 
   float ft = duration_cast<milliseconds>(time - currentTime).count() / 1000.0f;
-//  ft = std::min(0.05f, ft);
+  //  ft = std::min(0.05f, ft);
   currentTime = time;
   accum += ft;
 
@@ -199,7 +188,13 @@ void CSBscene::renderScene()
   }
 
   writeMeshAttributes();
-  context()->versionFunctions<QOpenGLFunctions_4_0_Core>()->glMultiDrawElementsBaseVertex(GL_TRIANGLES, m_numIndices.data(), GL_UNSIGNED_SHORT, m_meshIndexStartPointsGL.data(), 3, m_meshBaseVert.data());
-//  glDrawElementsBaseVertex(GL_TRIANGLES, m_numIndices, GL_UNSIGNED_SHORT, nullptr);
+  m_qogl_funcs->glMultiDrawElementsBaseVertex(
+        GL_TRIANGLES,
+        m_numIndicesPerMesh.data(),
+        GL_UNSIGNED_SHORT,
+        m_meshIndexOffsets.data(),
+        3,
+        m_meshBaseVert.data()
+        );
 }
 //-----------------------------------------------------------------------------------------------------

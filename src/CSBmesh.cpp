@@ -49,7 +49,7 @@ void CSBmesh::init()
     m_particles.emplace_back(vert, 1.f);
 
   m_particles[0].m_invMass = 0.f;
-//  m_particles[m_particles.size() - 1].m_invMass = 0.f;
+  m_particles[m_particles.size() - 1].m_invMass = 0.f;
 
   auto edgeSet = getEdges();
   const auto& firstEdge = edgeSet.begin()->p;

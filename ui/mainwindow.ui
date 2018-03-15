@@ -113,13 +113,6 @@
         </spacer>
        </item>
        <item row="0" column="1">
-        <widget class="QPushButton" name="generate">
-         <property name="text">
-          <string>Generate</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
         <widget class="QPushButton" name="material">
          <property name="text">
           <string>Material</string>
@@ -137,7 +130,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>26</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>

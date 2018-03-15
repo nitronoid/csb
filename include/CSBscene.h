@@ -6,7 +6,7 @@
 #include "ShaderLib.h"
 #include "CSBmesh.h"
 #include "CSBsolver.h"
-
+#include <QOpenGLFunctions_4_0_Core>
 
 class CSBscene : public Scene
 {
@@ -71,11 +71,6 @@ public slots:
   //-----------------------------------------------------------------------------------------------------
   void rotating(const bool _rotating);
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to link a Qt button to the scene, to allow switching between meshes in the scene, this
-  /// calls loadMesh.
-  //-----------------------------------------------------------------------------------------------------
-  void generateNewGeometry();
-  //-----------------------------------------------------------------------------------------------------
   /// @brief Used to link a Qt button to the scene, to cycle through the materials and apply them to
   /// the current Mesh.
   //-----------------------------------------------------------------------------------------------------
@@ -121,10 +116,6 @@ private:
   //-----------------------------------------------------------------------------------------------------
   std::vector<std::unique_ptr<Material>> m_materials;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Holds the index of the currently drawn mesh in our array of meshes.
-  //-----------------------------------------------------------------------------------------------------
-  size_t m_meshIndex = 0;
-  //-----------------------------------------------------------------------------------------------------
   /// @brief The current material.
   //-----------------------------------------------------------------------------------------------------
   size_t m_currentMaterial = 0;
@@ -133,12 +124,14 @@ private:
   //-----------------------------------------------------------------------------------------------------
   bool m_rotating = false;
 
-  std::vector<std::array<int, 3>> m_meshOffsets;
+  std::vector<std::array<int, 3>> m_meshAttributeOffsets;
   std::vector<int> m_meshIndexStartPoints;
-//  size_t m_numIndices = 0;
-  std::vector<GLsizei> m_numIndices;
-  std::vector<GLvoid*> m_meshIndexStartPointsGL;
+  std::vector<GLsizei> m_numIndicesPerMesh;
+  std::vector<GLvoid*> m_meshIndexOffsets;
   std::vector<GLint> m_meshBaseVert;
+
+
+  QOpenGLFunctions_4_0_Core *m_qogl_funcs;
 
 };
 
