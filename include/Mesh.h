@@ -20,7 +20,7 @@ public:
   /// @param [in] _fname is the path to the mesh file.
   /// @param [in] _meshNum is the index of the mesh in the file's scene.
   //-----------------------------------------------------------------------------------------------------
-  void load(const std::string &_fname, const size_t _meshNum = 0);
+  void load(const std::string &_fname, const size_t &_meshId = 0);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to reset the mesh arrays.
   //-----------------------------------------------------------------------------------------------------
@@ -94,6 +94,8 @@ public:
   const std::vector<std::vector<GLushort>>& getAdjacencyInfo() const noexcept;
 
   size_t getNEdges();
+
+  int getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept;
 
 
 protected:

@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 
 
-void Mesh::load(const std::string &_fname, const size_t _meshNum)
+void Mesh::load(const std::string &_fname, const size_t &_meshId)
 {
   Assimp::Importer importer;
   // And have it read the given file with some example postprocessing
@@ -20,7 +20,7 @@ void Mesh::load(const std::string &_fname, const size_t _meshNum)
         aiProcess_SortByPType |
         aiProcess_FlipUVs
         );
-  const aiMesh* mesh = scene->mMeshes[_meshNum];
+  const aiMesh* mesh = scene->mMeshes[_meshId];
 
   // Calculate the amount of vertices we will store (3 per face)
   size_t numVerts = mesh->mNumVertices;
@@ -129,6 +129,21 @@ const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) cons
     case VERTEX: data = getVertexData(); break;
     case NORMAL: data = getNormalsData(); break;
     case UV:     data = getUVsData(); break;
+    default: break;
+  }
+  return data;
+}
+
+
+int Mesh::getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept
+{
+  using namespace MeshAttributes;
+  int data = 0;
+  switch (_attrib)
+  {
+    case VERTEX: data = getNVertData(); break;
+    case NORMAL: data = getNNormData(); break;
+    case UV:     data = getNUVData(); break;
     default: break;
   }
   return data;

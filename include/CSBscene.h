@@ -133,8 +133,9 @@ private:
   //-----------------------------------------------------------------------------------------------------
   bool m_rotating = false;
 
-  std::vector<size_t> m_meshOffsets;
-
+  std::vector<std::array<int, 3>> m_meshOffsets;
+  std::vector<int> m_meshIndexStartPoints;
+  size_t m_numIndices = 0;
 
 };
 
