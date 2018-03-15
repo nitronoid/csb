@@ -57,6 +57,11 @@ public:
   //-----------------------------------------------------------------------------------------------------
   size_t getNVerts() const noexcept;
   //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to the number of indices.
+  /// @return The size of our index array.
+  //-----------------------------------------------------------------------------------------------------
+  size_t getNIndices() const noexcept;
+  //-----------------------------------------------------------------------------------------------------
   /// @brief Used to the amount of face indices.
   /// @return The size of our indices array.
   //-----------------------------------------------------------------------------------------------------
@@ -87,6 +92,9 @@ public:
   const std::vector<GLushort>& getIndices() const noexcept;
 
   const std::vector<std::vector<GLushort>>& getAdjacencyInfo() const noexcept;
+
+  size_t getNEdges();
+
 
 protected:
   //-----------------------------------------------------------------------------------------------------

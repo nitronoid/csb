@@ -9,64 +9,42 @@
 #include <memory>
 #include "CSBparticle.h"
 #include "CSBconstraint.h"
-#include "Mesh.h"
+#include "CSBmesh.h"
 
 class CSBsolver
 {
 public:
-  void addTriangleMesh(Mesh& _mesh);
+  void addTriangleMesh(CSBmesh& _mesh);
   void update(const float _time);
 
 private:
-  struct EdgePair
-  {
-    EdgePair(const GLushort _a, const GLushort _b) :
-      p(std::min(_a, _b), std::max(_a, _b))
-    {}
-    friend bool operator==(const EdgePair &_a, const EdgePair &_b)
-    {
-      return _a.p == _b.p;
-    }
-    std::pair<GLushort, GLushort> p;
-  };
-  friend struct std::hash<CSBsolver::EdgePair>;
 
-  void hashVerts();
-  void hashTris();
-  std::unordered_set<EdgePair> getEdges(Mesh* _meshRef);
-  std::vector<GLushort> getConnectedVertices(Mesh* _meshRef, const GLushort _vert);
+  void hashVerts(const size_t& _meshIndex);
+  void hashTris(const size_t &_meshIndex);
+  std::vector<GLushort> getConnectedVertices(CSBmesh* _meshRef, const GLushort _vert);
 
-  std::vector<CSBparticle> m_particles;
-  std::vector<std::unique_ptr<CSBconstraint>> m_constraints;
-  std::vector<Mesh*> m_referencedMeshes;
+  std::vector<CSBmesh*> m_referencedMeshes;
 
   glm::ivec3 calcCell(const glm::vec3& _coord) const;
   size_t hashCell (const glm::ivec3& _cell) const;
   size_t hashParticle(const glm::vec3& _coord) const;
-  void resolveSelfCollision_rays();
+  void resolveContinuousCollision_rays(const size_t &_meshIndex);
 
-  void resolveSelfCollision_spheres();
+  void resolveContinuousCollision_spheres(const size_t &_meshIndex);
 
-  std::vector<std::vector<GLushort>> m_hashTable;
+  std::vector<std::vector<std::pair<GLushort, GLushort>>> m_hashTable;
   std::vector<std::vector<size_t>> m_triangleVertHash;
-  std::vector<GLushort> m_indices;
+  std::vector<size_t> m_vertHashOffset;
+  std::vector<size_t> m_triHashOffset;
 
-  float m_shortestEdgeDist = 0.0f;
+  size_t m_numParticles = 0;
+  size_t m_numTris = 0;
+  size_t m_numEdges = 0;
+
+  float m_shortestEdgeDist = std::numeric_limits<float>::max();
   float m_avgEdgeLength = 0.0f;
+  float m_totalEdgeLength = 0.0f;
 };
-
-
-namespace std
-{
-template <>
-struct hash<CSBsolver::EdgePair>
-{
-  size_t operator()(const CSBsolver::EdgePair &_key) const
-  {
-    return std::hash<size_t>()(std::hash<GLushort>()(_key.p.first)) ^ std::hash<GLushort>()(_key.p.second);
-  }
-};
-}
 
 
 #endif // CSBSOLVER_H

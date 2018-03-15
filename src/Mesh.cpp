@@ -139,6 +139,11 @@ size_t Mesh::getNVerts() const noexcept
   return m_vertices.size();
 }
 
+size_t Mesh::getNIndices() const noexcept
+{
+  return m_indices.size();
+}
+
 int Mesh::getNIndicesData() const noexcept
 {
   return static_cast<int>(m_indices.size());
@@ -177,6 +182,11 @@ const std::vector<std::vector<GLushort>>& Mesh::getAdjacencyInfo() const noexcep
 const std::vector<GLushort>& Mesh::getIndices() const noexcept
 {
   return m_indices;
+}
+
+size_t Mesh::getNEdges()
+{
+  return m_vertices.size() + m_indices.size() / 3 - 2;
 }
 
 

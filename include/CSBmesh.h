@@ -12,8 +12,30 @@
 class CSBmesh : public Mesh
 {
 public:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default constructor.
+  //-----------------------------------------------------------------------------------------------------
+  CSBmesh() = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default move constructor.
+  //-----------------------------------------------------------------------------------------------------
+  CSBmesh(CSBmesh&&) = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default move assignment operator.
+  //-----------------------------------------------------------------------------------------------------
+  CSBmesh& operator=(CSBmesh&&) = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default destructor.
+  //-----------------------------------------------------------------------------------------------------
+  ~CSBmesh() = default;
+
   void init();
-  void update(const float _time);
+  void projectConstraints();
+
+
+  float getTotalEdgeLength() const noexcept;
+  float getShortestEdgeLength() const noexcept;
+  std::vector<CSBparticle> m_particles;
 
 private:
   struct EdgePair
@@ -29,26 +51,16 @@ private:
   };
   friend struct std::hash<CSBmesh::EdgePair>;
 
-  void hashVerts();
-  void hashTris();
   std::unordered_set<EdgePair> getEdges();
   std::vector<GLushort> getConnectedVertices(const GLushort _vert);
 
-  std::vector<CSBparticle> m_particles;
   std::vector<std::unique_ptr<CSBconstraint>> m_constraints;
 
-  glm::ivec3 calcCell(const glm::vec3& _coord) const;
-  size_t hashCell (const glm::ivec3& _cell) const;
-  size_t hashParticle(const glm::vec3& _coord) const;
-  void resolveSelfCollision_rays();
 
-  void resolveSelfCollision_spheres();
 
-  std::vector<std::vector<GLushort>> m_hashTable;
-  std::vector<std::vector<size_t>> m_triangleVertHash;
 
-  float m_shortestEdgeDist = 0.0f;
-  float m_avgEdgeLength = 0.0f;
+  float m_shortestEdgeLength = 0.0f;
+  float m_totalEdgeLength = 0.0f;
 };
 
 
