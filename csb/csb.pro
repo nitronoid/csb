@@ -13,7 +13,8 @@ HEADERS += \
     include/TriMesh.h \
     include/SimulatedMesh.h \
     include/Particle.h \
-    include/Solver.h
+    include/Solver.h \
+    include/Edge.h
 
 INCLUDEPATH += \
     /usr/local/include/glm/glm \

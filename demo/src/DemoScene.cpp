@@ -7,7 +7,7 @@
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::writeMeshAttributes()
 {
-  using namespace MeshAttributes;
+  using namespace csb;
   for (size_t i = 0; i < m_meshes.size(); ++i)
   {
     const auto& mesh = m_meshes[i];
@@ -24,7 +24,7 @@ void DemoScene::setAttributeBuffers()
   static constexpr int tupleSize[] = {3,2,3};
   auto prog = m_shaderLib->getCurrentShader();
 
-  using namespace MeshAttributes;
+  using namespace csb;
   for (const auto buff : {VERTEX, UV, NORMAL})
   {
     prog->enableAttributeArray(buff);
@@ -77,7 +77,7 @@ void DemoScene::initGeo()
   m_meshIndexOffsets[0] = static_cast<char*>(nullptr);
   for (size_t i = 1; i < size; ++i)
   {
-    using namespace MeshAttributes;
+    using namespace csb;
     for (const auto buff : {VERTEX, UV, NORMAL})
       m_meshAttributeOffsets[i][buff] = m_meshes[i-1].getNAttribData(buff);
     m_meshBaseVert[i] = static_cast<GLint>(m_meshes[i-1].getNVerts());

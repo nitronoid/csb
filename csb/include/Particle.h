@@ -3,6 +3,7 @@
 
 #include "vec3.hpp"
 
+
 namespace csb
 {
 
@@ -13,6 +14,10 @@ struct Particle
       m_prevPos(_pos),
       m_invMass(_invMass)
   {}
+
+  Particle(Particle&&) = default;
+  ~Particle() = default;
+
   glm::vec3& m_pos;
   glm::vec3 m_prevPos;
   float m_invMass;

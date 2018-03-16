@@ -5,7 +5,7 @@
 #include <assimp/postprocess.h>
 
 
-void TriMesh::load(const std::string &_fname, const size_t &_meshId)
+void csb::TriMesh::load(const std::string &_fname, const size_t &_meshId)
 {
   Assimp::Importer importer;
   // And have it read the given file with some example postprocessing
@@ -57,8 +57,6 @@ void TriMesh::load(const std::string &_fname, const size_t &_meshId)
     }
   }
 
-  m_adjacency.resize(numVerts);
-  std::vector<std::unordered_set<GLushort>> adjacencySets(numVerts);
   // Get the number of faces on the mesh
   size_t numFaces = mesh->mNumFaces;
   // We iterate through faces not vertices,
@@ -73,56 +71,57 @@ void TriMesh::load(const std::string &_fname, const size_t &_meshId)
       // Get the index of the vertex, we use this for it's normals and UV's too
       size_t vertInFace = face.mIndices[i];
       m_indices.push_back(static_cast<GLushort>(vertInFace));
-
-      GLushort otherV1 = static_cast<GLushort>(face.mIndices[(i + 1) % numIndices]);
-      GLushort otherV2 = static_cast<GLushort>(face.mIndices[(i + 2) % numIndices]);
-
-      adjacencySets[vertInFace].insert(otherV1);
-      adjacencySets[vertInFace].insert(otherV2);
-
-      adjacencySets[otherV1].insert(vertInFace);
-      adjacencySets[otherV1].insert(otherV2);
-
-      adjacencySets[otherV2].insert(otherV1);
-      adjacencySets[otherV2].insert(vertInFace);
     }
   }
+
+  calcEdges();
+
+  m_adjacency.resize(numVerts);
+  std::vector<std::unordered_set<GLushort>> adjacencySets(numVerts);
+  for (const auto& edge : m_edges)
+  {
+    adjacencySets[edge.p.first].insert(edge.p.second);
+    adjacencySets[edge.p.second].insert(edge.p.first);
+  }
+
   // copy the contents of the sets into vector form
   for (size_t i = 0; i < numVerts; ++i)
     m_adjacency[i].insert(m_adjacency[i].end(), adjacencySets[i].begin(), adjacencySets[i].end());
+
 }
 
-void TriMesh::reset()
+void csb::TriMesh::reset()
 {
   m_indices.clear();
   m_vertices.clear();
   m_normals.clear();
   m_uvs.clear();
+  m_edges.clear();
 }
 
-const GLushort *TriMesh::getIndicesData() const noexcept
+const GLushort *csb::TriMesh::getIndicesData() const noexcept
 {
   return &m_indices[0];
 }
 
-const GLfloat* TriMesh::getVertexData() const noexcept
+const GLfloat* csb::TriMesh::getVertexData() const noexcept
 {
   return &m_vertices[0].x;
 }
 
-const GLfloat* TriMesh::getNormalsData() const noexcept
+const GLfloat* csb::TriMesh::getNormalsData() const noexcept
 {
   return &m_normals[0].x;
 }
 
-const GLfloat *TriMesh::getUVsData() const noexcept
+const GLfloat *csb::TriMesh::getUVsData() const noexcept
 {
   return &m_uvs[0].x;
 }
 
-const GLfloat *TriMesh::getAttribData(const MeshAttributes::Attribute _attrib) const noexcept
+const GLfloat *csb::TriMesh::getAttribData(const csb::MeshAttribute _attrib) const noexcept
 {
-  using namespace MeshAttributes;
+  using namespace csb;
   const GLfloat * data = nullptr;
   switch (_attrib)
   {
@@ -135,9 +134,9 @@ const GLfloat *TriMesh::getAttribData(const MeshAttributes::Attribute _attrib) c
 }
 
 
-int TriMesh::getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept
+int csb::TriMesh::getNAttribData(const csb::MeshAttribute _attrib) const noexcept
 {
-  using namespace MeshAttributes;
+  using namespace csb;
   int data = 0;
   switch (_attrib)
   {
@@ -149,59 +148,97 @@ int TriMesh::getNAttribData(const MeshAttributes::Attribute _attrib) const noexc
   return data;
 }
 
-size_t TriMesh::getNVerts() const noexcept
+size_t csb::TriMesh::getNVerts() const noexcept
 {
   return m_vertices.size();
 }
 
-size_t TriMesh::getNIndices() const noexcept
+size_t csb::TriMesh::getNUVs() const noexcept
+{
+  return m_uvs.size();
+}
+
+size_t csb::TriMesh::getNNorms() const noexcept
+{
+  return m_normals.size();
+}
+
+size_t csb::TriMesh::getNIndices() const noexcept
 {
   return m_indices.size();
 }
 
-int TriMesh::getNIndicesData() const noexcept
+size_t csb::TriMesh::getNEdges() const noexcept
+{
+  return m_edges.size();
+}
+
+int csb::TriMesh::getNIndicesData() const noexcept
 {
   return static_cast<int>(m_indices.size());
 }
 
-int TriMesh::getNVertData() const noexcept
+int csb::TriMesh::getNVertData() const noexcept
 {
-  return static_cast<int>(m_vertices.size()) * 3;
+  return static_cast<int>(m_vertices.size() * 3);
 }
 
-int TriMesh::getNNormData() const noexcept
+int csb::TriMesh::getNNormData() const noexcept
 {
-  return static_cast<int>(m_normals.size()) * 3;
+  return static_cast<int>(m_normals.size() * 3);
 }
 
-int TriMesh::getNUVData() const noexcept
+int csb::TriMesh::getNUVData() const noexcept
 {
-  return static_cast<int>(m_uvs.size()) * 2;
+  return static_cast<int>(m_uvs.size() * 2);
 }
 
-int TriMesh::getNData() const noexcept
+int csb::TriMesh::getNData() const noexcept
 {
   return getNVertData() + getNNormData() + getNUVData();
 }
 
-std::vector<glm::vec3> &TriMesh::getVertices() noexcept
-{
-  return m_vertices;
-}
-
-const std::vector<std::vector<GLushort>>& TriMesh::getAdjacencyInfo() const noexcept
+const std::vector<std::vector<GLushort>>& csb::TriMesh::getAdjacencyInfo() const noexcept
 {
   return m_adjacency;
 }
 
-const std::vector<GLushort>& TriMesh::getIndices() const noexcept
+const std::vector<GLushort>& csb::TriMesh::getIndices() const noexcept
 {
   return m_indices;
 }
 
-size_t TriMesh::getNEdges()
+const std::vector<glm::vec3> &csb::TriMesh::getVertices() const noexcept
 {
-  return m_vertices.size() + m_indices.size() / 3 - 2;
+  return m_vertices;
 }
 
+const std::vector<glm::vec2> &csb::TriMesh::getUVs() const noexcept
+{
+  return m_uvs;
+}
 
+const std::vector<glm::vec3> &csb::TriMesh::getNormals() const noexcept
+{
+  return m_normals;
+}
+
+void csb::TriMesh::calcEdges()
+{
+  std::unordered_set<Edge> edgeSet;
+  // Roughly
+  auto numEdges = static_cast<size_t>(std::abs(static_cast<long>(m_vertices.size()) + (static_cast<long>(m_indices.size()) / 3l) - 2l));
+  edgeSet.reserve(numEdges);
+
+  const auto last = m_indices.size() - 2;
+  for (size_t i = 0; i < last; i+=3)
+  {
+    const auto p1 = m_indices[i];
+    const auto p2 = m_indices[i + 1];
+    const auto p3 = m_indices[i + 2];
+    edgeSet.insert({p1, p2});
+    edgeSet.insert({p2, p3});
+    edgeSet.insert({p3, p1});
+  }
+  std::copy(edgeSet.begin(), edgeSet.end(), std::back_inserter(m_edges));
+}

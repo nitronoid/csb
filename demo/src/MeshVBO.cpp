@@ -15,7 +15,7 @@ void MeshVBO::init()
 void MeshVBO::reset(const unsigned char _indicesSize, const int _nIndices, const unsigned char _dataSize, const int _nVert, const int _nUV, const int _nNorm)
 {
   {
-    using namespace MeshAttributes;
+    using namespace csb;
     // Track the amount of data being stored
     m_amountOfData[VERTEX] = _nVert;
     m_amountOfData[UV]     = _nUV;
@@ -39,7 +39,7 @@ void MeshVBO::reset(const unsigned char _indicesSize, const int _nIndices, const
 void MeshVBO::extend(const unsigned char _indicesSize, const int _nIndices, const int _nVert, const int _nUV, const int _nNorm)
 {
   {
-    using namespace MeshAttributes;
+    using namespace csb;
     // Track the amount of data being stored
     m_amountOfData[VERTEX] += _nVert;
     m_amountOfData[UV]     += _nUV;
@@ -58,7 +58,7 @@ void MeshVBO::extend(const unsigned char _indicesSize, const int _nIndices, cons
   m_ebo.allocate(m_numIndices * m_indicesSize);
 }
 //-----------------------------------------------------------------------------------------------------
-void MeshVBO::write(const void *_address, const MeshAttributes::Attribute _section, const int _amount, const int _offset)
+void MeshVBO::write(const void *_address, const csb::MeshAttribute _section, const int _amount, const int _offset)
 {
   assert(_amount <= m_amountOfData[_section]);
   // Bind the requested buffer, then set it's data pointer
@@ -85,13 +85,13 @@ int MeshVBO::dataAmount() const noexcept
   return m_totalAmountOfData;
 }
 //-----------------------------------------------------------------------------------------------------
-int MeshVBO::dataAmount(const MeshAttributes::Attribute _section) const noexcept
+int MeshVBO::dataAmount(const csb::MeshAttribute _section) const noexcept
 {
   // Returns the amount of data elements
   return m_amountOfData[_section];
 }
 //-----------------------------------------------------------------------------------------------------
-int MeshVBO::offset(const MeshAttributes::Attribute _section) const noexcept
+int MeshVBO::offset(const csb::MeshAttribute _section) const noexcept
 {
   int offset = 0;
   for (size_t i = 0; i < _section; ++i)

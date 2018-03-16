@@ -19,25 +19,6 @@ float csb::SimulatedMesh::getShortestEdgeLength() const noexcept
   return m_shortestEdgeLength;
 }
 
-std::unordered_set<csb::SimulatedMesh::EdgePair> csb::SimulatedMesh::getEdges()
-{
-  std::unordered_set<EdgePair> edgeSet;
-  auto numEdges = m_vertices.size() + (m_indices.size() / 3) - 2;
-  edgeSet.reserve(numEdges);
-
-  const auto last = m_indices.size() - 2;
-  for (size_t i = 0; i < last; i+=3)
-  {
-    const auto p1 = m_indices[i];
-    const auto p2 = m_indices[i + 1];
-    const auto p3 = m_indices[i + 2];
-    edgeSet.insert({p1, p2});
-    edgeSet.insert({p2, p3});
-    edgeSet.insert({p3, p1});
-  }
-  return edgeSet;
-}
-
 std::vector<GLushort> csb::SimulatedMesh::getConnectedVertices(const GLushort _vert)
 {
   return m_adjacency[_vert];
@@ -58,10 +39,9 @@ void csb::SimulatedMesh::init()
 
 void csb::SimulatedMesh::generateStructuralConstraints()
 {
-  auto edgeSet = getEdges();
-  const auto& firstEdge = edgeSet.begin()->p;
+  const auto& firstEdge = m_edges[0].p;
   m_shortestEdgeLength = glm::fastDistance(m_vertices[m_indices[firstEdge.first]], m_vertices[m_indices[firstEdge.second]]);
-  for (const auto & edge : edgeSet)
+  for (const auto & edge : m_edges)
   {
     const auto p1 = edge.p.first;
     const auto p2 = edge.p.second;
@@ -75,7 +55,7 @@ void csb::SimulatedMesh::generateStructuralConstraints()
 void csb::SimulatedMesh::generateBendingConstraints()
 {
   const auto size = m_vertices.size();
-  std::unordered_set<EdgePair> connections;
+  std::unordered_set<Edge> connections;
   for (GLushort v = 0; v < size; ++v)
   {
     auto neighbours = getConnectedVertices(v);
@@ -95,7 +75,7 @@ void csb::SimulatedMesh::generateBendingConstraints()
           bestV = vj;
         }
       }
-      EdgePair connection {bestV, vi};
+      Edge connection {bestV, vi};
       if (!connections.count(connection))
       {
         connections.insert(connection);

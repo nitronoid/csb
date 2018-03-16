@@ -60,7 +60,7 @@ public:
   /// @param [in] _address is a pointer to the data we want to store.
   /// @param [in] _section is the section of the buffer we should write our data to.
   //-----------------------------------------------------------------------------------------------------
-  void write(const void * _address, const MeshAttributes::Attribute _section, const int _amount, const int _offset = 0);
+  void write(const void * _address, const csb::MeshAttribute _section, const int _amount, const int _offset = 0);
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to get the size of each data element we are storing.
   /// @return the size of the data elements in our buffer
@@ -75,12 +75,12 @@ public:
   /// @brief called to get the amount of data elements we are storing for a specific section.
   /// @return the number of data elements in the _section of the buffer
   //-----------------------------------------------------------------------------------------------------
-  int dataAmount(const MeshAttributes::Attribute _section) const noexcept;
+  int dataAmount(const csb::MeshAttribute _section) const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to get the offset in bytes of the specified section of data in our buffer.
   /// @return the offset in bytes of _section.
   //-----------------------------------------------------------------------------------------------------
-  int offset(const MeshAttributes::Attribute _section) const noexcept;
+  int offset(const csb::MeshAttribute _section) const noexcept;
   //-----------------------------------------------------------------------------------------------------
   /// @brief called to bind our buffers.
   //-----------------------------------------------------------------------------------------------------
