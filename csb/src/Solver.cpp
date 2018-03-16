@@ -46,7 +46,7 @@ void csb::Solver::hashVerts(const size_t &_meshIndex)
   const auto size = mesh->getNVerts();
   for (GLushort i = 0; i < size; ++i)
   {
-    m_hashTable[hashParticle(mesh->m_particles[i].m_pos)].emplace_back(_meshIndex, i);
+    m_hashTable[hashParticle(*mesh->m_particles[i].m_pos)].emplace_back(_meshIndex, i);
   }
 }
 
@@ -63,8 +63,8 @@ void csb::Solver::hashTris(const size_t &_meshIndex)
     const auto& p2 = mesh->m_particles[indices[index + 1]];
     const auto& p3 = mesh->m_particles[indices[index + 2]];
 
-    const auto min = calcCell(glm::min(glm::min(p1.m_pos, p2.m_pos), p3.m_pos));
-    const auto max = calcCell(glm::max(glm::max(p1.m_pos, p2.m_pos), p3.m_pos));
+    const auto min = calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos));
+    const auto max = calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos));
 
     // hash all cells within the bounding box of this triangle
     for (int x = min.x; x <= max.x; ++x)
@@ -87,7 +87,7 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
     ignored.push_back(i);
     std::sort(ignored.begin(), ignored.end());
 
-    auto considered = m_hashTable[hashParticle(P.m_pos)];
+    auto considered = m_hashTable[hashParticle(*P.m_pos)];
     std::sort(considered.begin(), considered.end());
 
 
@@ -111,7 +111,7 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
     for (const auto& pid : considered)
     {
       const auto& Q = m_referencedMeshes[pid.first]->m_particles[pid.second];
-      const auto disp = P.m_pos - Q.m_pos;
+      const auto disp = *P.m_pos - *Q.m_pos;
       const auto dist = glm::length2(disp);
 
       // By setting the distance to be larger than the distance between particles
@@ -131,9 +131,9 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
     {
       // Set a lower bound for the offset to reduce flickering
       offset *= glm::step(0.001f, offset);
-      P.m_pos += offset/static_cast<float>(count);
+      (*P.m_pos) += offset/static_cast<float>(count);
       // zero the velocity
-      P.m_prevPos = P.m_pos;
+      P.m_prevPos = *P.m_pos;
     }
   }
 }
@@ -149,9 +149,9 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
   for (size_t i = 0; i < size; ++i)
   {
     const size_t index = i * 3;
-    const auto& T0 = particles[indices[index]].m_pos;
-    const auto& T1 = particles[indices[index + 1]].m_pos;
-    const auto& T2 = particles[indices[index + 2]].m_pos;
+    const auto& T0 = *particles[indices[index]].m_pos;
+    const auto& T1 = *particles[indices[index + 1]].m_pos;
+    const auto& T2 = *particles[indices[index + 2]].m_pos;
     const auto TNorm = glm::triangleNormal(T0, T1, T2);
 
     // Loop over all hashed cells for this face
@@ -168,7 +168,7 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
         auto& otherMesh = m_referencedMeshes[meshId];
         const auto& particle = otherMesh->m_particles[pid];
         const auto& L0 = particle.m_prevPos;
-        const auto& L1 = particle.m_pos;
+        const auto& L1 = *particle.m_pos;
         const auto dir = L1 - L0;
 
 
@@ -180,11 +180,11 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
         if (glm::intersectLineTriangle(L0, dir, T0, T1, T2, bary) && (distStart * distEnd < 0.0f))
         {
           // We swap the past and current positions to reverse velocity giving a slight bounce to the cloth
-          std::swap(particles[indices[index]].m_pos, particles[indices[index]].m_prevPos);
-          std::swap(particles[indices[index + 1]].m_pos, particles[indices[index + 1]].m_prevPos);
-          std::swap(particles[indices[index + 2]].m_pos, particles[indices[index + 2]].m_prevPos);
+          std::swap(*particles[indices[index]].m_pos, particles[indices[index]].m_prevPos);
+          std::swap(*particles[indices[index + 1]].m_pos, particles[indices[index + 1]].m_prevPos);
+          std::swap(*particles[indices[index + 2]].m_pos, particles[indices[index + 2]].m_prevPos);
           // this one belongs to the other mesh
-          std::swap(otherMesh->m_particles[pid].m_pos, otherMesh->m_particles[pid].m_prevPos);
+          std::swap(*otherMesh->m_particles[pid].m_pos, otherMesh->m_particles[pid].m_prevPos);
         }
       }
     }
@@ -281,10 +281,10 @@ void csb::Solver::step(const float _time)
   {
     for (auto& particle : mesh->m_particles)
     {
-      const auto vel = (particle.m_pos - particle.m_prevPos ) * damping;
-      const auto newPos = particle.m_pos + vel + (particle.m_invMass * force * _time * _time);
-      particle.m_prevPos = particle.m_pos;
-      particle.m_pos = newPos;
+      const auto vel = (*particle.m_pos - particle.m_prevPos) * damping;
+      const auto newPos = *particle.m_pos + vel + (particle.m_invMass * force * _time * _time);
+      particle.m_prevPos = *particle.m_pos;
+      *particle.m_pos = newPos;
     }
   }
 

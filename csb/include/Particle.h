@@ -9,18 +9,21 @@ namespace csb
 
 struct Particle
 {
+  Particle() = default;
+  Particle(const Particle&) = default;
+  Particle& operator=(const Particle&) = default;
+  Particle(Particle&&) = default;
+  Particle& operator=(Particle&&) = default;
+  ~Particle() = default;
   Particle(glm::vec3 &_pos, const float &_invMass) :
-      m_pos(_pos),
+      m_pos(&_pos),
       m_prevPos(_pos),
       m_invMass(_invMass)
   {}
 
-  Particle(Particle&&) = default;
-  ~Particle() = default;
-
-  glm::vec3& m_pos;
-  glm::vec3 m_prevPos;
-  float m_invMass;
+  glm::vec3* m_pos = nullptr;
+  glm::vec3 m_prevPos{0.f};
+  float m_invMass{0.f};
 };
 
 }

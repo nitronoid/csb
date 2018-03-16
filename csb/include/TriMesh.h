@@ -56,7 +56,7 @@ public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to reset the mesh arrays.
   //-----------------------------------------------------------------------------------------------------
-  void reset();
+  virtual void reset();
   //-----------------------------------------------------------------------------------------------------
   /// @brief Gets a pointer to the first data element in the indices array for use with openGL buffers.
   /// @return A pointer to the first element in the indices array.

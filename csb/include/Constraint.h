@@ -19,6 +19,7 @@ public:
   Constraint& operator=(Constraint&&) = default;
   virtual ~Constraint();
   virtual void project(std::vector<Particle> &_positions) = 0;
+  virtual Constraint* clone() const = 0;
 };
 
 }
@@ -40,6 +41,7 @@ public:
   DistanceConstraint& operator=(DistanceConstraint&&) = default;
   virtual ~DistanceConstraint() override = default;
   virtual void project(std::vector<Particle> &_positions) override;
+  virtual Constraint* clone() const override;
 
 private:
   float m_rest;
@@ -70,6 +72,7 @@ public:
   BendingConstraint& operator=(BendingConstraint&&) = default;
   virtual ~BendingConstraint() override = default;
   virtual void project(std::vector<Particle> &_positions) override;
+  virtual Constraint* clone() const override;
 
 private:
   std::array<size_t, 3> m_p;
@@ -95,6 +98,7 @@ public:
   PinConstraint& operator=(PinConstraint&&) = default;
   virtual ~PinConstraint() override = default;
   virtual void project(std::vector<Particle> &_positions) override;
+  virtual Constraint* clone() const override;
 
 private:
   glm::vec3 m_pin;
@@ -103,38 +107,6 @@ private:
 
 }
 
-namespace csb
-{
-
-class SelfCollisionConstraint : public Constraint
-{
-public:
-  SelfCollisionConstraint(const glm::vec3 &_intersectionP, const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2, const std::vector<Particle>&_points) :
-    m_t({{_t0, _t1, _t2}}),
-    m_intersectionP(_intersectionP),
-    m_p(_p)
-  {
-    static constexpr float third = 1.f / 3.f;
-    const auto W = (_points[_t0].m_invMass + _points[_t1].m_invMass + _points[_t2].m_invMass) * third;
-    for (unsigned int i = 0; i < m_w.size(); ++i)
-      m_w[i] = _points[m_t[i]].m_invMass / W;
-
-  }
-  SelfCollisionConstraint(const SelfCollisionConstraint&) = default;
-  SelfCollisionConstraint& operator=(const SelfCollisionConstraint&) = default;
-  SelfCollisionConstraint(SelfCollisionConstraint&&) = default;
-  SelfCollisionConstraint& operator=(SelfCollisionConstraint&&) = default;
-  virtual ~SelfCollisionConstraint() override = default;
-  virtual void project(std::vector<Particle> &_positions) override;
-
-private:
-  std::array<size_t, 3> m_t;
-  std::array<float, 3> m_w;
-  glm::vec3 m_intersectionP;
-  size_t m_p;
-};
-
-}
 
 
 

@@ -8,6 +8,35 @@
 #include <random>
 #include <algorithm>
 
+csb::SimulatedMesh::SimulatedMesh(const csb::SimulatedMesh &_rhs) :
+  csb::TriMesh(_rhs)
+{
+  m_particles = _rhs.m_particles;
+  m_shortestEdgeLength = _rhs.m_shortestEdgeLength;
+  m_totalEdgeLength = _rhs.m_totalEdgeLength;
+  for (const auto& constraint : _rhs.m_constraints)
+    m_constraints.emplace_back(constraint->clone());
+}
+
+csb::SimulatedMesh& csb::SimulatedMesh::operator=(const csb::SimulatedMesh &_rhs)
+{
+  TriMesh::operator=(_rhs);
+  m_particles = _rhs.m_particles;
+  m_shortestEdgeLength = _rhs.m_shortestEdgeLength;
+  m_totalEdgeLength = _rhs.m_totalEdgeLength;
+  for (const auto& constraint : _rhs.m_constraints)
+    m_constraints.emplace_back(constraint->clone());
+
+  return *this;
+}
+
+void csb::SimulatedMesh::reset()
+{
+  TriMesh::reset();
+  m_constraints.clear();
+  m_shortestEdgeLength = 0.f;
+  m_totalEdgeLength = 0.f;
+}
 
 float csb::SimulatedMesh::getTotalEdgeLength() const noexcept
 {

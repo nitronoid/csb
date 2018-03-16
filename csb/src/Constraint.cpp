@@ -9,14 +9,20 @@ void csb::DistanceConstraint::project(std::vector<Particle> &_positions)
 {
   auto& p1 = _positions[m_p1];
   auto& p2 = _positions[m_p2];
-  auto delta = p2.m_pos - p1.m_pos;
+  auto delta = *p2.m_pos - *p1.m_pos;
   auto deltaLen = glm::length(delta);
   auto diff = (deltaLen - m_rest) / (deltaLen * (p1.m_invMass + p2.m_invMass));
   delta *= diff;
 
-  p1.m_pos += (delta * p1.m_invMass);
-  p2.m_pos -= (delta * p2.m_invMass);
+  *p1.m_pos += (delta * p1.m_invMass);
+  *p2.m_pos -= (delta * p2.m_invMass);
 }
+
+csb::Constraint* csb::DistanceConstraint::clone() const
+{
+  return new DistanceConstraint(*this);
+}
+
 
 void csb::BendingConstraint::project(std::vector<Particle> &_positions)
 {
@@ -25,8 +31,8 @@ void csb::BendingConstraint::project(std::vector<Particle> &_positions)
   auto& p3 = _positions[m_p[2]];
 
   static constexpr float third = 1.0f / 3.0f;
-  auto centre = third * (p1.m_pos + p2.m_pos + p3.m_pos);
-  glm::vec3 dirCentre = p3.m_pos - centre;
+  auto centre = third * (*p1.m_pos + *p2.m_pos + *p3.m_pos);
+  glm::vec3 dirCentre = *p3.m_pos - centre;
 
   auto distCentre = glm::fastLength(dirCentre);
 
@@ -37,29 +43,28 @@ void csb::BendingConstraint::project(std::vector<Particle> &_positions)
   auto force = dirCentre * diff;
 
   static constexpr auto k = 0.05f;
-  p1.m_pos += (k * m_w[0] * 2.f * force);
-  p2.m_pos += (k * m_w[1] * 2.f * force);
-  p3.m_pos += (k * m_w[2] * -4.f * force);
+  *p1.m_pos += (k * m_w[0] * 2.f * force);
+  *p2.m_pos += (k * m_w[1] * 2.f * force);
+  *p3.m_pos += (k * m_w[2] * -4.f * force);
 }
+
+csb::Constraint* csb::BendingConstraint::clone() const
+{
+  return new BendingConstraint(*this);
+}
+
 
 void csb::PinConstraint::project(std::vector<Particle> &_positions)
 {
-  _positions[m_p].m_pos = m_pin;
+  *_positions[m_p].m_pos = m_pin;
 }
 
-void csb::SelfCollisionConstraint::project(std::vector<Particle> &_positions)
+csb::Constraint* csb::PinConstraint::clone() const
 {
-  auto& T0 = _positions[m_t[0]].m_pos;
-  auto& T1 = _positions[m_t[1]].m_pos;
-  auto& T2 = _positions[m_t[2]].m_pos;
-  auto& P  = _positions[m_p ].m_pos;
-
-  const auto delta = P - m_intersectionP;
-
-
-  P  = m_intersectionP;
-
-  T0 += ( delta);
-  T1 += ( delta);
-  T2 += ( delta);
+  return new PinConstraint(*this);
 }
+
+
+
+
+
