@@ -58,8 +58,8 @@ TEST(SimulatedMesh, reset)
   EXPECT_TRUE(0 == mesh.getNIndicesData());
   EXPECT_TRUE(0 == mesh.getNData());
   EXPECT_TRUE(0 == mesh.getNEdges());
-  EXPECT_FLOAT_EQ(0.f, mesh.getShortestEdgeLength());
-  EXPECT_FLOAT_EQ(0.f, mesh.getTotalEdgeLength());
+  EXPECT_EQ(10.f, mesh.getTotalEdgeLength());
+  EXPECT_TRUE(0.f == mesh.getShortestEdgeLength());
 }
 
 TEST(SimulatedMesh, copyAndMove)

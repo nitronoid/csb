@@ -3,18 +3,30 @@ TARGET = csb
 
 
 SOURCES += \
-    src/Constraint.cpp \
     src/TriMesh.cpp \
     src/SimulatedMesh.cpp \
-    src/Solver.cpp
+    src/Solver.cpp \
+    src/DistanceConstraint.cpp \
+    src/BendingConstraint.cpp \
+    src/PinConstraint.cpp \
+    src/PositionConstraint.cpp \
+    src/StaticCollisionConstraint.cpp \
+    src/SphereCollisionConstraint.cpp \
+    src/SpatialHash.cpp
 
 HEADERS += \
-    include/Constraint.h \
     include/TriMesh.h \
     include/SimulatedMesh.h \
     include/Particle.h \
     include/Solver.h \
-    include/Edge.h
+    include/Edge.h \
+    include/DistanceConstraint.h \
+    include/BendingConstraint.h \
+    include/PinConstraint.h \
+    include/PositionConstraint.h \
+    include/StaticCollisionConstraint.h \
+    include/SphereCollisionConstraint.h \
+    include/SpatialHash.h
 
 INCLUDEPATH += \
     /usr/local/include/glm/glm \

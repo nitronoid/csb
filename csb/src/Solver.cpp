@@ -5,39 +5,15 @@
 #include "gtx/norm.hpp"
 #include "gtx/normal.hpp"
 #include "gtx/intersect.hpp"
-//#undef GLM_ENABLE_EXPERIMENTAL
+#undef GLM_ENABLE_EXPERIMENTAL
 #include <random>
 #include <algorithm>
+#include "SpatialHash.h"
+#include "SphereCollisionConstraint.h"
 
 std::vector<GLushort> csb::Solver::getConnectedVertices(SimulatedMesh* io_meshRef, const GLushort _particle)
 {
   return io_meshRef->getAdjacencyInfo()[_particle];
-}
-
-glm::ivec3 csb::Solver::calcCell(const glm::vec3& _coord) const
-{
-  // cellsize is equal to the average edge length for max performance
-  return glm::ivec3(
-        static_cast<int>(glm::floor(_coord.x / m_averageEdgeLength)),
-        static_cast<int>(glm::floor(_coord.y / m_averageEdgeLength)),
-        static_cast<int>(glm::floor(_coord.z / m_averageEdgeLength))
-        );
-}
-
-size_t csb::Solver::hashCell (const glm::ivec3& _cell) const
-{
-  static constexpr auto posMod = [](const auto _x, const auto _m)
-  {
-    return ((static_cast<size_t>(_x) % _m) + _m) % _m;
-  };
-
-  static constexpr int primes[] = {73856093, 19349663, 83492791};
-  return posMod((_cell.x * primes[0]) ^ (_cell.y * primes[1]) ^ (_cell.z * primes[2]), m_hashTable.size());
-}
-
-size_t csb::Solver::hashParticle (const glm::vec3& _coord) const
-{
-  return hashCell(calcCell(_coord));
 }
 
 void csb::Solver::hashVerts(const size_t &_meshIndex)
@@ -46,7 +22,7 @@ void csb::Solver::hashVerts(const size_t &_meshIndex)
   const auto size = mesh->getNVerts();
   for (GLushort i = 0; i < size; ++i)
   {
-    m_hashTable[hashParticle(*mesh->m_particles[i].m_pos)].emplace_back(_meshIndex, i);
+    m_hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, m_hashTable.size(), m_averageEdgeLength)].emplace_back(_meshIndex, i);
   }
 }
 
@@ -63,15 +39,15 @@ void csb::Solver::hashTris(const size_t &_meshIndex)
     const auto& p2 = mesh->m_particles[indices[index + 1]];
     const auto& p3 = mesh->m_particles[indices[index + 2]];
 
-    const auto min = calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos));
-    const auto max = calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos));
+    const auto min = SpatialHash::calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_averageEdgeLength);
+    const auto max = SpatialHash::calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_averageEdgeLength);
 
     // hash all cells within the bounding box of this triangle
     for (int x = min.x; x <= max.x; ++x)
       for (int y = min.y; y <= max.y; ++y)
         for (int z = min.z; z <= max.z; ++z)
         {
-          m_triangleVertHash[i + hashOffset].push_back(hashCell({x,y,z}));
+          m_triangleVertHash[i + hashOffset].push_back(SpatialHash::hashCell({x,y,z}, m_hashTable.size()));
         }
   }
 }
@@ -87,7 +63,7 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
     ignored.push_back(i);
     std::sort(ignored.begin(), ignored.end());
 
-    auto considered = m_hashTable[hashParticle(*P.m_pos)];
+    auto considered = m_hashTable[SpatialHash::hashParticle(*P.m_pos, m_hashTable.size(), m_averageEdgeLength)];
     std::sort(considered.begin(), considered.end());
 
 
@@ -191,6 +167,14 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
   }
 }
 
+void csb::Solver::resolveStaticCollisions(const size_t &_meshIndex)
+{
+  for (auto& collisionConstraint : m_staticCollisions)
+  {
+    collisionConstraint->project(m_referencedMeshes[_meshIndex]->m_particles, m_hashTable);
+  }
+}
+
 
 void csb::Solver::addTriangleMesh(SimulatedMesh& io_mesh)
 {
@@ -210,6 +194,9 @@ void csb::Solver::addTriangleMesh(SimulatedMesh& io_mesh)
   const size_t multiple = static_cast<size_t>(pow10(floor(log10(m_numParticles))));
   const auto hashTableSize = ((m_numParticles + multiple - 1) / multiple) * multiple - 1;
   m_hashTable.resize(hashTableSize);
+
+
+  m_staticCollisions.emplace_back(new SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f, m_averageEdgeLength, m_hashTable.size()));
 
 }
 
@@ -272,10 +259,12 @@ void csb::Solver::step(const float _time)
     resolveContinuousCollision_spheres(i);
 
     resolveContinuousCollision_rays(i);
+
+    resolveStaticCollisions(i);
   }
 
-  const auto force = glm::vec3(0.f, -10.f, 0.f);
-  static constexpr auto damping = 0.99f;
+  const auto force = glm::vec3(0.f, -5.f, 0.f);
+  static constexpr auto damping = 0.9f;
 
   for (auto mesh : m_referencedMeshes)
   {

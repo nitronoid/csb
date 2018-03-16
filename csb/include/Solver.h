@@ -8,8 +8,9 @@
 #include <unordered_set>
 #include <memory>
 #include "Particle.h"
-#include "Constraint.h"
+#include "PositionConstraint.h"
 #include "SimulatedMesh.h"
+#include "StaticCollisionConstraint.h"
 
 namespace csb
 {
@@ -78,26 +79,6 @@ private:
   //-----------------------------------------------------------------------------------------------------
   std::vector<GLushort> getConnectedVertices(SimulatedMesh* io_meshRef, const GLushort _particle);
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Calculates the cell that the given co-ordinate lies within, this is used for spatial hahsing.
-  /// @param _coord is the 3D co-ordinate who's cell we want to calculate.
-  /// @return a 3D integer co-ordinate that represents a 3D cell in our simulation space.
-  //-----------------------------------------------------------------------------------------------------
-  glm::ivec3 calcCell(const glm::vec3& _coord) const;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Calculates the hash id for a given 3D cell, used for spatial hahsing.
-  /// @param _cell is the 3D cell that we want to hash.
-  /// @return a hash id for the given cell, that can be used to query all particles in this cell from the,
-  /// hash table.
-  //-----------------------------------------------------------------------------------------------------
-  size_t hashCell (const glm::ivec3& _cell) const;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Wraps the calcCell and hashCell functions, to hash a particle.
-  /// @param _coord is the 3D co-ordinate of the particle we want to hash.
-  /// @return a hash id for the given particle, that can be used to query all particles in this cell from,
-  /// the hash table.
-  //-----------------------------------------------------------------------------------------------------
-  size_t hashParticle(const glm::vec3& _coord) const;
-  //-----------------------------------------------------------------------------------------------------
   /// @brief Attempts to resolve cloth on cloth collisions by calculating line, triangle intersections.
   /// The intersecting points will have their velocities reversed, and their positions reverted to the,
   /// previous ones to simulate a bounce.
@@ -111,6 +92,9 @@ private:
   /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
   //-----------------------------------------------------------------------------------------------------
   void resolveContinuousCollision_spheres(const size_t &_meshIndex);
+
+
+  void resolveStaticCollisions(const size_t &_meshIndex);
 
 private:
   //-----------------------------------------------------------------------------------------------------
@@ -131,6 +115,8 @@ private:
   /// @brief Stores references to meshes involved in the simulation.
   //-----------------------------------------------------------------------------------------------------
   std::vector<SimulatedMesh*> m_referencedMeshes;
+
+  std::vector<std::unique_ptr<StaticCollisionConstraint>> m_staticCollisions;
   //-----------------------------------------------------------------------------------------------------
   /// @brief An internal timer that is used to ensure the timestep is fixed for the simulation, and that,
   /// the simulation keeps up with the app.

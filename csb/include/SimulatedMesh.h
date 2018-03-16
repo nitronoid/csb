@@ -6,7 +6,7 @@
 #include <tuple>
 #include <memory>
 #include "Particle.h"
-#include "Constraint.h"
+#include "PositionConstraint.h"
 
 
 namespace csb
@@ -58,7 +58,7 @@ private:
 
   std::vector<GLushort> getConnectedVertices(const GLushort _vert);
 
-  std::vector<std::unique_ptr<Constraint>> m_constraints;
+  std::vector<std::unique_ptr<PositionConstraint>> m_constraints;
 
 
   std::vector<Particle> m_particles;

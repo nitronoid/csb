@@ -4,3 +4,4 @@ Split constraints into separate files.
 TEST
 --
 Add static collision spheres and planes
+Change the param name from _positions to io_particles in constraints 

@@ -63,14 +63,17 @@ void DemoScene::initGeo()
 
   // Load some meshes and apply constraints
   m_meshes[0].load("models/hdxPlane.obj");
-  m_meshes[1].load("models/hdxPlane.obj");
-  m_meshes[1].translate({0.0f, 0.35f, 0.f});
+  m_meshes[1].load("models/Sphere.obj");
+  m_meshes[1].translate({0.0f, -0.7f, 0.f});
 
-  for (auto& mesh : m_meshes)
-  {
-    mesh.init();
-    m_solver.addTriangleMesh(mesh);
-  }
+//  for (auto& mesh : m_meshes)
+//  {
+//    mesh.init();
+//    m_solver.addTriangleMesh(mesh);
+//  }
+  m_meshes[0].init();
+  m_solver.addTriangleMesh(m_meshes[0]);
+
 
   m_meshIndexStartPoints[0] = 0;
   m_meshAttributeOffsets[0] = {{0,0,0}};

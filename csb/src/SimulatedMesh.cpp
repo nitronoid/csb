@@ -4,9 +4,12 @@
 #include "gtx/norm.hpp"
 #include "gtx/normal.hpp"
 #include "gtx/intersect.hpp"
-//#undef GLM_ENABLE_EXPERIMENTAL
+#undef GLM_ENABLE_EXPERIMENTAL
 #include <random>
 #include <algorithm>
+#include "BendingConstraint.h"
+#include "DistanceConstraint.h"
+#include "SphereCollisionConstraint.h"
 
 csb::SimulatedMesh::SimulatedMesh(const csb::SimulatedMesh &_rhs) :
   csb::TriMesh(_rhs)

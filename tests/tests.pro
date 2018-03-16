@@ -14,6 +14,6 @@ INCLUDEPATH += \
     /usr/local/include/glm/glm \
     /usr/local/include/glm
 
-LIBS += -L/usr/include/gtest -lgtest -pthread -L../csb -lcsb
+LIBS += -lgtest -pthread -L../csb -lcsb
 
-QMAKE_CXXFLAGS += -O0
+QMAKE_CXXFLAGS += -O3 -std=c++14
