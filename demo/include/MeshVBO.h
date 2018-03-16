@@ -6,14 +6,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
-
-//-------------------------------------------------------------------------------------------------------
-/// @brief used to refer to a section of buffer data
-//-------------------------------------------------------------------------------------------------------
-namespace MeshAttributes
-{
-enum Attribute { VERTEX, UV, NORMAL };
-}
+#include "TriMesh.h"
 
 class MeshVBO
 {

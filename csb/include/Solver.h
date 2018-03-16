@@ -7,42 +7,45 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <memory>
-#include "CSBparticle.h"
-#include "CSBconstraint.h"
-#include "CSBmesh.h"
+#include "Particle.h"
+#include "Constraint.h"
+#include "SimulatedMesh.h"
 
-class CSBsolver
+namespace csb
+{
+
+class Solver
 {
 public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default constructor.
   //-----------------------------------------------------------------------------------------------------
-  CSBsolver() = default;
+  Solver() = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
   //-----------------------------------------------------------------------------------------------------
-  CSBsolver(const CSBsolver&) = default;
+  Solver(const Solver&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  CSBsolver& operator=(const CSBsolver&) = default;
+  Solver& operator=(const Solver&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default move constructor.
   //-----------------------------------------------------------------------------------------------------
-  CSBsolver(CSBsolver&&) = default;
+  Solver(Solver&&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default move assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  CSBsolver& operator=(CSBsolver&&) = default;
+  Solver& operator=(Solver&&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default destructor.
   //-----------------------------------------------------------------------------------------------------
-  ~CSBsolver() = default;
+  ~Solver() = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Adds the given mesh to our simulation.
   /// @param io_mesh is the mesh to add.
   //-----------------------------------------------------------------------------------------------------
-  void addTriangleMesh(CSBmesh& io_mesh);
+  void addTriangleMesh(SimulatedMesh& io_mesh);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Progresses the simulation forwards by the given timestep.
   /// @param _time is the timestep to advance by
@@ -73,7 +76,7 @@ private:
   /// @param _particle is the index of the particle, who's neighbours we will retrieve.
   /// @return a list of particle indices, local to io_meshRef, which are neighbours to _vert.
   //-----------------------------------------------------------------------------------------------------
-  std::vector<GLushort> getConnectedVertices(CSBmesh* io_meshRef, const GLushort _particle);
+  std::vector<GLushort> getConnectedVertices(SimulatedMesh* io_meshRef, const GLushort _particle);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Calculates the cell that the given co-ordinate lies within, this is used for spatial hahsing.
   /// @param _coord is the 3D co-ordinate who's cell we want to calculate.
@@ -127,7 +130,7 @@ private:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Stores references to meshes involved in the simulation.
   //-----------------------------------------------------------------------------------------------------
-  std::vector<CSBmesh*> m_referencedMeshes;
+  std::vector<SimulatedMesh*> m_referencedMeshes;
   //-----------------------------------------------------------------------------------------------------
   /// @brief An internal timer that is used to ensure the timestep is fixed for the simulation, and that,
   /// the simulation keeps up with the app.
@@ -200,6 +203,8 @@ private:
   float m_averageEdgeLength = 0.0f;
 
 };
+
+}
 
 
 #endif // CSBSOLVER_H

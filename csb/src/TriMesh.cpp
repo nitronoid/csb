@@ -1,11 +1,11 @@
-#include "Mesh.h"
+#include "TriMesh.h"
 #include <unordered_set>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
 
-void Mesh::load(const std::string &_fname, const size_t &_meshId)
+void TriMesh::load(const std::string &_fname, const size_t &_meshId)
 {
   Assimp::Importer importer;
   // And have it read the given file with some example postprocessing
@@ -92,7 +92,7 @@ void Mesh::load(const std::string &_fname, const size_t &_meshId)
     m_adjacency[i].insert(m_adjacency[i].end(), adjacencySets[i].begin(), adjacencySets[i].end());
 }
 
-void Mesh::reset()
+void TriMesh::reset()
 {
   m_indices.clear();
   m_vertices.clear();
@@ -100,27 +100,27 @@ void Mesh::reset()
   m_uvs.clear();
 }
 
-const GLushort *Mesh::getIndicesData() const noexcept
+const GLushort *TriMesh::getIndicesData() const noexcept
 {
   return &m_indices[0];
 }
 
-const GLfloat* Mesh::getVertexData() const noexcept
+const GLfloat* TriMesh::getVertexData() const noexcept
 {
   return &m_vertices[0].x;
 }
 
-const GLfloat* Mesh::getNormalsData() const noexcept
+const GLfloat* TriMesh::getNormalsData() const noexcept
 {
   return &m_normals[0].x;
 }
 
-const GLfloat *Mesh::getUVsData() const noexcept
+const GLfloat *TriMesh::getUVsData() const noexcept
 {
   return &m_uvs[0].x;
 }
 
-const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) const noexcept
+const GLfloat *TriMesh::getAttribData(const MeshAttributes::Attribute _attrib) const noexcept
 {
   using namespace MeshAttributes;
   const GLfloat * data = nullptr;
@@ -135,7 +135,7 @@ const GLfloat *Mesh::getAttribData(const MeshAttributes::Attribute _attrib) cons
 }
 
 
-int Mesh::getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept
+int TriMesh::getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept
 {
   using namespace MeshAttributes;
   int data = 0;
@@ -149,57 +149,57 @@ int Mesh::getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept
   return data;
 }
 
-size_t Mesh::getNVerts() const noexcept
+size_t TriMesh::getNVerts() const noexcept
 {
   return m_vertices.size();
 }
 
-size_t Mesh::getNIndices() const noexcept
+size_t TriMesh::getNIndices() const noexcept
 {
   return m_indices.size();
 }
 
-int Mesh::getNIndicesData() const noexcept
+int TriMesh::getNIndicesData() const noexcept
 {
   return static_cast<int>(m_indices.size());
 }
 
-int Mesh::getNVertData() const noexcept
+int TriMesh::getNVertData() const noexcept
 {
   return static_cast<int>(m_vertices.size()) * 3;
 }
 
-int Mesh::getNNormData() const noexcept
+int TriMesh::getNNormData() const noexcept
 {
   return static_cast<int>(m_normals.size()) * 3;
 }
 
-int Mesh::getNUVData() const noexcept
+int TriMesh::getNUVData() const noexcept
 {
   return static_cast<int>(m_uvs.size()) * 2;
 }
 
-int Mesh::getNData() const noexcept
+int TriMesh::getNData() const noexcept
 {
   return getNVertData() + getNNormData() + getNUVData();
 }
 
-std::vector<glm::vec3> &Mesh::getVertices() noexcept
+std::vector<glm::vec3> &TriMesh::getVertices() noexcept
 {
   return m_vertices;
 }
 
-const std::vector<std::vector<GLushort>>& Mesh::getAdjacencyInfo() const noexcept
+const std::vector<std::vector<GLushort>>& TriMesh::getAdjacencyInfo() const noexcept
 {
   return m_adjacency;
 }
 
-const std::vector<GLushort>& Mesh::getIndices() const noexcept
+const std::vector<GLushort>& TriMesh::getIndices() const noexcept
 {
   return m_indices;
 }
 
-size_t Mesh::getNEdges()
+size_t TriMesh::getNEdges()
 {
   return m_vertices.size() + m_indices.size() / 3 - 2;
 }

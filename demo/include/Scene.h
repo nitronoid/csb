@@ -1,7 +1,7 @@
 #ifndef SCENE_H_
 #define SCENE_H_
 
-#include "Mesh.h"
+#include "TriMesh.h"
 #include <gtc/matrix_transform.hpp>
 #include <ext.hpp>
 #include <glm.hpp>

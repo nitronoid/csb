@@ -1,11 +1,11 @@
-#include "CSBconstraint.h"
+#include "Constraint.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/fast_square_root.hpp"
 //#undef GLM_ENABLE_EXPERIMENTAL
 
-CSBconstraint::~CSBconstraint() = default;
+csb::Constraint::~Constraint() = default;
 
-void DistanceConstraint::project(std::vector<CSBparticle> &_positions)
+void csb::DistanceConstraint::project(std::vector<Particle> &_positions)
 {
   auto& p1 = _positions[m_p1];
   auto& p2 = _positions[m_p2];
@@ -18,7 +18,7 @@ void DistanceConstraint::project(std::vector<CSBparticle> &_positions)
   p2.m_pos -= (delta * p2.m_invMass);
 }
 
-void BendingConstraint::project(std::vector<CSBparticle> &_positions)
+void csb::BendingConstraint::project(std::vector<Particle> &_positions)
 {
   auto& p1 = _positions[m_p[0]];
   auto& p2 = _positions[m_p[1]];
@@ -42,12 +42,12 @@ void BendingConstraint::project(std::vector<CSBparticle> &_positions)
   p3.m_pos += (k * m_w[2] * -4.f * force);
 }
 
-void PinConstraint::project(std::vector<CSBparticle> &_positions)
+void csb::PinConstraint::project(std::vector<Particle> &_positions)
 {
   _positions[m_p].m_pos = m_pin;
 }
 
-void SelfCollisionConstraint::project(std::vector<CSBparticle> &_positions)
+void csb::SelfCollisionConstraint::project(std::vector<Particle> &_positions)
 {
   auto& T0 = _positions[m_t[0]].m_pos;
   auto& T1 = _positions[m_t[1]].m_pos;

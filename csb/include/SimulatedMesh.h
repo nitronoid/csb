@@ -1,33 +1,38 @@
 #ifndef CSBMESH_H
 #define CSBMESH_H
 
-#include "Mesh.h"
+#include "TriMesh.h"
 #include "glm/common.hpp"
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
-#include "CSBparticle.h"
-#include "CSBconstraint.h"
+#include <memory>
+#include "Particle.h"
+#include "Constraint.h"
 
-class CSBmesh : public Mesh
+
+namespace csb
+{
+
+class SimulatedMesh : public TriMesh
 {
 public:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default constructor.
   //-----------------------------------------------------------------------------------------------------
-  CSBmesh() = default;
+  SimulatedMesh() = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default move constructor.
   //-----------------------------------------------------------------------------------------------------
-  CSBmesh(CSBmesh&&) = default;
+  SimulatedMesh(SimulatedMesh&&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default move assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  CSBmesh& operator=(CSBmesh&&) = default;
+  SimulatedMesh& operator=(SimulatedMesh&&) = default;
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default destructor.
   //-----------------------------------------------------------------------------------------------------
-  ~CSBmesh() = default;
+  ~SimulatedMesh() = default;
 
   void init();
   void generateStructuralConstraints();
@@ -39,7 +44,7 @@ public:
   float getShortestEdgeLength() const noexcept;
 
 private:
-  friend class CSBsolver;
+  friend class Solver;
   struct EdgePair
   {
     EdgePair(const GLushort _a, const GLushort _b) :
@@ -51,29 +56,29 @@ private:
     }
     std::pair<GLushort, GLushort> p;
   };
-  friend struct std::hash<CSBmesh::EdgePair>;
+  friend struct std::hash<SimulatedMesh::EdgePair>;
 
   std::unordered_set<EdgePair> getEdges();
   std::vector<GLushort> getConnectedVertices(const GLushort _vert);
 
-  std::vector<std::unique_ptr<CSBconstraint>> m_constraints;
+  std::vector<std::unique_ptr<Constraint>> m_constraints;
 
 
-  std::vector<CSBparticle> m_particles;
+  std::vector<Particle> m_particles;
 
 
   float m_shortestEdgeLength = 0.0f;
   float m_totalEdgeLength = 0.0f;
 };
 
-
+}
 
 namespace std
 {
 template <>
-struct hash<CSBmesh::EdgePair>
+struct hash<csb::SimulatedMesh::EdgePair>
 {
-  size_t operator()(const CSBmesh::EdgePair &_key) const
+  size_t operator()(const csb::SimulatedMesh::EdgePair &_key) const
   {
     return std::hash<size_t>()(std::hash<GLushort>()(_key.p.first)) ^ std::hash<GLushort>()(_key.p.second);
   }

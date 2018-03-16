@@ -4,21 +4,29 @@
 #include <vector>
 #include <array>
 #include "vec3.hpp"
-#include "CSBparticle.h"
+#include "Particle.h"
 
-class CSBconstraint
+namespace csb
+{
+
+class Constraint
 {
 public:
-  CSBconstraint() = default;
-  CSBconstraint(const CSBconstraint&) = default;
-  CSBconstraint& operator=(const CSBconstraint&) = default;
-  CSBconstraint(CSBconstraint&&) = default;
-  CSBconstraint& operator=(CSBconstraint&&) = default;
-  virtual ~CSBconstraint();
-  virtual void project(std::vector<CSBparticle> &_positions) = 0;
+  Constraint() = default;
+  Constraint(const Constraint&) = default;
+  Constraint& operator=(const Constraint&) = default;
+  Constraint(Constraint&&) = default;
+  Constraint& operator=(Constraint&&) = default;
+  virtual ~Constraint();
+  virtual void project(std::vector<Particle> &_positions) = 0;
 };
 
-class DistanceConstraint : public CSBconstraint
+}
+
+namespace csb
+{
+
+class DistanceConstraint : public Constraint
 {
 public:
   DistanceConstraint(const size_t _p1, const size_t _p2, float _rest) :
@@ -31,7 +39,7 @@ public:
   DistanceConstraint(DistanceConstraint&&) = default;
   DistanceConstraint& operator=(DistanceConstraint&&) = default;
   virtual ~DistanceConstraint() override = default;
-  virtual void project(std::vector<CSBparticle> &_positions) override;
+  virtual void project(std::vector<Particle> &_positions) override;
 
 private:
   float m_rest;
@@ -39,11 +47,15 @@ private:
   size_t m_p2;
 };
 
+}
 
-class BendingConstraint : public CSBconstraint
+namespace csb
+{
+
+class BendingConstraint : public Constraint
 {
 public:
-  BendingConstraint(const size_t _p1, const size_t _p2, const size_t _p3, float _rest, const std::vector<CSBparticle>&_points) :
+  BendingConstraint(const size_t _p1, const size_t _p2, const size_t _p3, float _rest, const std::vector<Particle>&_points) :
     m_p({{_p1, _p2, _p3}}),
     m_rest(_rest)
   {
@@ -57,7 +69,7 @@ public:
   BendingConstraint(BendingConstraint&&) = default;
   BendingConstraint& operator=(BendingConstraint&&) = default;
   virtual ~BendingConstraint() override = default;
-  virtual void project(std::vector<CSBparticle> &_positions) override;
+  virtual void project(std::vector<Particle> &_positions) override;
 
 private:
   std::array<size_t, 3> m_p;
@@ -65,7 +77,12 @@ private:
   float m_rest;
 };
 
-class PinConstraint : public CSBconstraint
+}
+
+namespace csb
+{
+
+class PinConstraint : public Constraint
 {
 public:
   PinConstraint(const size_t &_p, const glm::vec3 &_pin) :
@@ -77,18 +94,22 @@ public:
   PinConstraint(PinConstraint&&) = default;
   PinConstraint& operator=(PinConstraint&&) = default;
   virtual ~PinConstraint() override = default;
-  virtual void project(std::vector<CSBparticle> &_positions) override;
+  virtual void project(std::vector<Particle> &_positions) override;
 
 private:
   glm::vec3 m_pin;
   size_t m_p;
 };
 
+}
 
-class SelfCollisionConstraint : public CSBconstraint
+namespace csb
+{
+
+class SelfCollisionConstraint : public Constraint
 {
 public:
-  SelfCollisionConstraint(const glm::vec3 &_intersectionP, const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2, const std::vector<CSBparticle>&_points) :
+  SelfCollisionConstraint(const glm::vec3 &_intersectionP, const size_t &_p, const size_t &_t0, const size_t &_t1, const size_t &_t2, const std::vector<Particle>&_points) :
     m_t({{_t0, _t1, _t2}}),
     m_intersectionP(_intersectionP),
     m_p(_p)
@@ -104,7 +125,7 @@ public:
   SelfCollisionConstraint(SelfCollisionConstraint&&) = default;
   SelfCollisionConstraint& operator=(SelfCollisionConstraint&&) = default;
   virtual ~SelfCollisionConstraint() override = default;
-  virtual void project(std::vector<CSBparticle> &_positions) override;
+  virtual void project(std::vector<Particle> &_positions) override;
 
 private:
   std::array<size_t, 3> m_t;
@@ -112,6 +133,9 @@ private:
   glm::vec3 m_intersectionP;
   size_t m_p;
 };
+
+}
+
 
 
 #endif // CSBCONSTRAINT_H

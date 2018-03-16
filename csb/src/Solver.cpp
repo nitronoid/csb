@@ -1,4 +1,4 @@
-#include "CSBsolver.h"
+#include "Solver.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gtx/fast_square_root.hpp"
@@ -9,12 +9,12 @@
 #include <random>
 #include <algorithm>
 
-std::vector<GLushort> CSBsolver::getConnectedVertices(CSBmesh* io_meshRef, const GLushort _particle)
+std::vector<GLushort> csb::Solver::getConnectedVertices(SimulatedMesh* io_meshRef, const GLushort _particle)
 {
   return io_meshRef->getAdjacencyInfo()[_particle];
 }
 
-glm::ivec3 CSBsolver::calcCell(const glm::vec3& _coord) const
+glm::ivec3 csb::Solver::calcCell(const glm::vec3& _coord) const
 {
   // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
@@ -24,7 +24,7 @@ glm::ivec3 CSBsolver::calcCell(const glm::vec3& _coord) const
         );
 }
 
-size_t CSBsolver::hashCell (const glm::ivec3& _cell) const
+size_t csb::Solver::hashCell (const glm::ivec3& _cell) const
 {
   static constexpr auto posMod = [](const auto _x, const auto _m)
   {
@@ -35,12 +35,12 @@ size_t CSBsolver::hashCell (const glm::ivec3& _cell) const
   return posMod((_cell.x * primes[0]) ^ (_cell.y * primes[1]) ^ (_cell.z * primes[2]), m_hashTable.size());
 }
 
-size_t CSBsolver::hashParticle (const glm::vec3& _coord) const
+size_t csb::Solver::hashParticle (const glm::vec3& _coord) const
 {
   return hashCell(calcCell(_coord));
 }
 
-void CSBsolver::hashVerts(const size_t &_meshIndex)
+void csb::Solver::hashVerts(const size_t &_meshIndex)
 {
   const auto mesh = m_referencedMeshes[_meshIndex];
   const auto size = mesh->getNVerts();
@@ -50,7 +50,7 @@ void CSBsolver::hashVerts(const size_t &_meshIndex)
   }
 }
 
-void CSBsolver::hashTris(const size_t &_meshIndex)
+void csb::Solver::hashTris(const size_t &_meshIndex)
 {
   const auto mesh = m_referencedMeshes[_meshIndex];
   const auto hashOffset = m_triHashOffset[_meshIndex];
@@ -76,7 +76,7 @@ void CSBsolver::hashTris(const size_t &_meshIndex)
   }
 }
 
-void CSBsolver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
+void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
 {
   const auto mesh = m_referencedMeshes[_meshIndex];
   const auto size = mesh->getNVerts();
@@ -138,7 +138,7 @@ void CSBsolver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
   }
 }
 
-void CSBsolver::resolveContinuousCollision_rays(const size_t &_meshIndex)
+void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
 {
   const auto hashOffset = m_triHashOffset[_meshIndex];
   const auto mesh = m_referencedMeshes[_meshIndex];
@@ -192,7 +192,7 @@ void CSBsolver::resolveContinuousCollision_rays(const size_t &_meshIndex)
 }
 
 
-void CSBsolver::addTriangleMesh(CSBmesh& io_mesh)
+void csb::Solver::addTriangleMesh(SimulatedMesh& io_mesh)
 {
   // Store a reference pointer to the mesh
   m_referencedMeshes.push_back(&io_mesh);
@@ -213,7 +213,7 @@ void CSBsolver::addTriangleMesh(CSBmesh& io_mesh)
 
 }
 
-void CSBsolver::FixedTimestepManager::progress()
+void csb::Solver::FixedTimestepManager::progress()
 {
   const auto currentTime = hr_clock::now();
 
@@ -230,19 +230,19 @@ void CSBsolver::FixedTimestepManager::progress()
   m_accum += ft;
 }
 
-bool CSBsolver::FixedTimestepManager::consume()
+bool csb::Solver::FixedTimestepManager::consume()
 {
   const auto isBehind = m_accum >= m_timestep;
   if (isBehind) m_accum -= m_timestep;
   return isBehind;
 }
 
-const float& CSBsolver::FixedTimestepManager::deltaTime()
+const float& csb::Solver::FixedTimestepManager::deltaTime()
 {
   return m_timestep;
 }
 
-void CSBsolver::update()
+void csb::Solver::update()
 {
   m_timestepManager.progress();
   while (m_timestepManager.consume())
@@ -251,7 +251,7 @@ void CSBsolver::update()
   }
 }
 
-void CSBsolver::step(const float _time)
+void csb::Solver::step(const float _time)
 {
   for (auto mesh : m_referencedMeshes)
     mesh->projectConstraints();

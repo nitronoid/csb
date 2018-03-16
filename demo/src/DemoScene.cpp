@@ -1,11 +1,11 @@
-#include "CSBscene.h"
+#include "DemoScene.h"
 #include "MaterialWireframe.h"
 #include "MaterialCSBpbr.h"
 #include "MaterialFractal.h"
 #include <QOpenGLContext>
 
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::writeMeshAttributes()
+void DemoScene::writeMeshAttributes()
 {
   using namespace MeshAttributes;
   for (size_t i = 0; i < m_meshes.size(); ++i)
@@ -19,7 +19,7 @@ void CSBscene::writeMeshAttributes()
   }
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::setAttributeBuffers()
+void DemoScene::setAttributeBuffers()
 {
   static constexpr int tupleSize[] = {3,2,3};
   auto prog = m_shaderLib->getCurrentShader();
@@ -32,7 +32,7 @@ void CSBscene::setAttributeBuffers()
   }
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::init()
+void DemoScene::init()
 {
   Scene::init();
 
@@ -49,7 +49,7 @@ void CSBscene::init()
   }
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::initGeo()
+void DemoScene::initGeo()
 {
   // Resize for the amount of objects
   m_meshes.resize(2);
@@ -115,14 +115,14 @@ void CSBscene::initGeo()
   setAttributeBuffers();
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::keyPress(QKeyEvent* io_event)
+void DemoScene::keyPress(QKeyEvent* io_event)
 {
   makeCurrent();
   Scene::keyPress(io_event);
   m_materials[m_currentMaterial]->handleKey(io_event, context());
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::initMaterials()
+void DemoScene::initMaterials()
 {
   m_materials.reserve(5);
 
@@ -139,12 +139,12 @@ void CSBscene::initMaterials()
   m_materials[m_currentMaterial]->apply();
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::rotating( const bool _rotating )
+void DemoScene::rotating( const bool _rotating )
 {
   m_rotating = _rotating;
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::nextMaterial()
+void DemoScene::nextMaterial()
 {
   makeCurrent();
   m_currentMaterial = (m_currentMaterial + 1) % m_materials.size();
@@ -153,7 +153,7 @@ void CSBscene::nextMaterial()
   setAttributeBuffers();
 }
 //-----------------------------------------------------------------------------------------------------
-void CSBscene::renderScene()
+void DemoScene::renderScene()
 {
   Scene::renderScene();
 

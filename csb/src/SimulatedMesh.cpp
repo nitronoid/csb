@@ -1,4 +1,4 @@
-#include "CSBmesh.h"
+#include "SimulatedMesh.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "gtx/fast_square_root.hpp"
 #include "gtx/norm.hpp"
@@ -9,17 +9,17 @@
 #include <algorithm>
 
 
-float CSBmesh::getTotalEdgeLength() const noexcept
+float csb::SimulatedMesh::getTotalEdgeLength() const noexcept
 {
   return m_totalEdgeLength;
 }
 
-float CSBmesh::getShortestEdgeLength() const noexcept
+float csb::SimulatedMesh::getShortestEdgeLength() const noexcept
 {
   return m_shortestEdgeLength;
 }
 
-std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
+std::unordered_set<csb::SimulatedMesh::EdgePair> csb::SimulatedMesh::getEdges()
 {
   std::unordered_set<EdgePair> edgeSet;
   auto numEdges = m_vertices.size() + (m_indices.size() / 3) - 2;
@@ -38,12 +38,12 @@ std::unordered_set<CSBmesh::EdgePair> CSBmesh::getEdges()
   return edgeSet;
 }
 
-std::vector<GLushort> CSBmesh::getConnectedVertices(const GLushort _vert)
+std::vector<GLushort> csb::SimulatedMesh::getConnectedVertices(const GLushort _vert)
 {
   return m_adjacency[_vert];
 }
 
-void CSBmesh::init()
+void csb::SimulatedMesh::init()
 {
   for (auto& vert : m_vertices)
     m_particles.emplace_back(vert, 1.f);
@@ -56,7 +56,7 @@ void CSBmesh::init()
   generateBendingConstraints();
 }
 
-void CSBmesh::generateStructuralConstraints()
+void csb::SimulatedMesh::generateStructuralConstraints()
 {
   auto edgeSet = getEdges();
   const auto& firstEdge = edgeSet.begin()->p;
@@ -72,7 +72,7 @@ void CSBmesh::generateStructuralConstraints()
   }
 }
 
-void CSBmesh::generateBendingConstraints()
+void csb::SimulatedMesh::generateBendingConstraints()
 {
   const auto size = m_vertices.size();
   std::unordered_set<EdgePair> connections;
@@ -108,7 +108,7 @@ void CSBmesh::generateBendingConstraints()
   }
 }
 
-void CSBmesh::projectConstraints()
+void csb::SimulatedMesh::projectConstraints()
 {
   for (int i = 0; i < 30; ++i)
     for (auto& constraint : m_constraints)
@@ -117,7 +117,7 @@ void CSBmesh::projectConstraints()
     }
 }
 
-void CSBmesh::translate(const glm::vec3 &_translation)
+void csb::SimulatedMesh::translate(const glm::vec3 &_translation)
 {
   for (auto& v : m_vertices)
     v += _translation;

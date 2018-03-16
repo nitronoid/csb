@@ -1,124 +1,138 @@
-#ifndef MESH_H
-#define MESH_H
+#ifndef CSBSCENE_H
+#define CSBSCENE_H
 
-#include <QOpenGLFunctions>
-#include <vector>
-#include <string>
-#include "MeshVBO.h"
-#include "vec3.hpp"
-#include "vec2.hpp"
+#include "Scene.h"
+#include "Material.h"
+#include "ShaderLib.h"
+#include "SimulatedMesh.h"
+#include "Solver.h"
+#include <QOpenGLFunctions_4_1_Core>
 
-class Mesh
+class DemoScene : public Scene
 {
+  Q_OBJECT
 public:
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Virtual default destructor.
+  /// @brief Constructor for DemoScene.
+  /// @param [io] io_camera the camera used to view the scene.
+  /// @param [io] io_shaderLib the shader library to store and retrieve our shaders.
+  /// @param [io] io_parent the parent window to create the GL context in.
   //-----------------------------------------------------------------------------------------------------
-  virtual ~Mesh() = default;
+  DemoScene(
+      const std::shared_ptr<Camera> &io_camera,
+      const std::shared_ptr<ShaderLib> &io_shaderLib,
+      QWidget *_parent
+      ) :
+    Scene(io_camera, _parent),
+    m_shaderLib(io_shaderLib)
+  {}
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to load a mesh from a file path.
-  /// @param [in] _fname is the path to the mesh file.
-  /// @param [in] _meshNum is the index of the mesh in the file's scene.
+  /// @brief Default copy constructor.
   //-----------------------------------------------------------------------------------------------------
-  void load(const std::string &_fname, const size_t &_meshId = 0);
+  DemoScene(const DemoScene&) = default;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to reset the mesh arrays.
+  /// @brief Default copy assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  void reset();
+  DemoScene& operator=(const DemoScene&) = default;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Gets a pointer to the first data element in the indices array for use with openGL buffers.
-  /// @return A pointer to the first element in the indices array.
+  /// @brief Default move constructor.
   //-----------------------------------------------------------------------------------------------------
-  const GLushort *getIndicesData() const noexcept;
+  DemoScene(DemoScene&&) = default;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Gets a pointer to the first data element in the vertex array for use with openGL buffers.
-  /// @return A pointer to the first element in the vertex array.
+  /// @brief Default move assignment operator.
   //-----------------------------------------------------------------------------------------------------
-  const GLfloat* getVertexData() const noexcept;
+  DemoScene& operator=(DemoScene&&) = default;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Gets a pointer to the first data element in the normal array for use with openGL buffers.
-  /// @return A pointer to the first element in the normal array.
+  /// @brief Default destructor.
   //-----------------------------------------------------------------------------------------------------
-  const GLfloat* getNormalsData() const noexcept;
+  ~DemoScene() override = default;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Gets a pointer to the first data element in the UV array for use with openGL buffers.
-  /// @return A pointer to the first element in the UV array.
+  /// @brief Used to intialise the scene, must call the base class init.
   //-----------------------------------------------------------------------------------------------------
-  const GLfloat* getUVsData() const noexcept;
+  virtual void init() override;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Gets a pointer to the first data element in the specified attribute array for use with
-  /// openGL buffers.
-  /// @return A pointer to the first element in an attribute array.
+  /// @brief Used to intialise the models, vbo and vao.
   //-----------------------------------------------------------------------------------------------------
-  const GLfloat* getAttribData(const MeshAttributes::Attribute _attrib) const noexcept;
+  void initGeo();
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the number of vertices.
-  /// @return The size of our vertex array.
+  /// @brief Used to create our shader programs, or use exisiting ones if they have been loaded.
   //-----------------------------------------------------------------------------------------------------
-  size_t getNVerts() const noexcept;
+  void initMaterials();
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the number of indices.
-  /// @return The size of our index array.
+  /// @brief Receives and acts on a key event.
+  /// @param [io] io_event is the key event that was received.
   //-----------------------------------------------------------------------------------------------------
-  size_t getNIndices() const noexcept;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the amount of face indices.
-  /// @return The size of our indices array.
-  //-----------------------------------------------------------------------------------------------------
-  int getNIndicesData() const noexcept;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the amount of vertex data elements.
-  /// @return The size of our vertex array.
-  //-----------------------------------------------------------------------------------------------------
-  int getNVertData() const noexcept;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the amount of normal data elements.
-  /// @return The size of our normal array.
-  //-----------------------------------------------------------------------------------------------------
-  int getNNormData() const noexcept;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the amount of UV data elements.
-  /// @return The size of our UV array.
-  //-----------------------------------------------------------------------------------------------------
-  int getNUVData() const noexcept;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Used to the amount of data elements across all arrays.
-  /// @return The size of our data arrays combined.
-  //-----------------------------------------------------------------------------------------------------
-  int getNData() const noexcept;
+  virtual void keyPress(QKeyEvent* io_event) override;
 
-  std::vector<glm::vec3>& getVertices() noexcept;
+public slots:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to link a Qt button to the scene, to allow rotation of the model to be toggled.
+  /// @param [in] _rotating tells the scene whether it should rotate the model or not.
+  //-----------------------------------------------------------------------------------------------------
+  void rotating(const bool _rotating);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to link a Qt button to the scene, to cycle through the materials and apply them to
+  /// the current Mesh.
+  //-----------------------------------------------------------------------------------------------------
+  void nextMaterial();
 
-  const std::vector<GLushort>& getIndices() const noexcept;
+private:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to write our mesh data into the vbo.
+  //-----------------------------------------------------------------------------------------------------
+  void writeMeshAttributes();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to pass attribute pointers to the current shader program.
+  //-----------------------------------------------------------------------------------------------------
+  void setAttributeBuffers();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Must call the base class function, it then applies our shader and draws the current mesh.
+  //-----------------------------------------------------------------------------------------------------
+  virtual void renderScene() override;
 
-  const std::vector<std::vector<GLushort>>& getAdjacencyInfo() const noexcept;
+private:
+  csb::Solver m_solver;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Holds our test meshes.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<csb::SimulatedMesh> m_meshes;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Wraps up our OpenGL buffers and VAO.
+  //-----------------------------------------------------------------------------------------------------
+  MeshVBO m_meshVBO;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Vertex array object, default constructed with a pointer to this OpenGL widget,
+  /// a dynamic_cast is used due to Scene's multiple inheritence.
+  //-----------------------------------------------------------------------------------------------------
+  std::unique_ptr<QOpenGLVertexArrayObject> m_vao {
+    new QOpenGLVertexArrayObject(dynamic_cast<QObject*>(this))
+  };
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief A pointer to the shader library used by this scene.
+  //-----------------------------------------------------------------------------------------------------
+  std::shared_ptr<ShaderLib> m_shaderLib;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The materials used in this scene.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::unique_ptr<Material>> m_materials;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The current material.
+  //-----------------------------------------------------------------------------------------------------
+  size_t m_currentMaterial = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Is the mesh rotating.
+  //-----------------------------------------------------------------------------------------------------
+  bool m_rotating = false;
 
-  size_t getNEdges();
+  std::vector<std::array<int, 3>> m_meshAttributeOffsets;
+  std::vector<int> m_meshIndexStartPoints;
+  std::vector<GLsizei> m_numIndicesPerMesh;
+  std::vector<GLvoid*> m_meshIndexOffsets;
+  std::vector<GLint> m_meshBaseVert;
 
-  int getNAttribData(const MeshAttributes::Attribute _attrib) const noexcept;
 
+  QOpenGLFunctions_4_1_Core *m_qogl_funcs;
 
-protected:
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief m_vertices contains the vertices
-  //-----------------------------------------------------------------------------------------------------
-  std::vector<glm::vec3> m_vertices;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief m_normals contains the normals
-  //-----------------------------------------------------------------------------------------------------
-  std::vector<glm::vec3> m_normals;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief m_uvs contains the UVs
-  //-----------------------------------------------------------------------------------------------------
-  std::vector<glm::vec2> m_uvs;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief m_indices contains the indices
-  //-----------------------------------------------------------------------------------------------------
-  std::vector<GLushort> m_indices;
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief m_adjacency stores the adjacent vertex indices for any vertex
-  //-----------------------------------------------------------------------------------------------------
-  std::vector<std::vector<GLushort>> m_adjacency;
 };
 
-#endif // MESH_H
+#endif // CSBSCENE_H

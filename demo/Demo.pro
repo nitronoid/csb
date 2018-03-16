@@ -18,6 +18,8 @@ QMAKE_CXXFLAGS += -O3
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+DEPENDPATH += . ../csb
+INCLUDEPATH += ../csb/include
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -35,21 +37,13 @@ HEADERS += \
     include/TrackballCamera.h \
     include/CameraStates.h \
     include/Material.h \
-    include/MaterialPBR.h \
-    include/Mesh.h \
     include/Scene.h \
-    include/MaterialPhong.h \
+    include/DemoScene.h \
     include/ShaderLib.h \
     include/MeshVBO.h \
     include/MaterialWireframe.h \
     include/MaterialFractal.h \
-    include/CSBscene.h \
-    include/CSBmesh.h \
-    include/MaterialEnvMap.h \
-    include/CSBconstraint.h \
-    include/MaterialCSBpbr.h \
-    include/CSBsolver.h \
-    include/CSBparticle.h
+    include/MaterialCSBpbr.h 
 
 SOURCES += \
     src/main.cpp \
@@ -57,21 +51,15 @@ SOURCES += \
     src/Camera.cpp \
     src/TrackballCamera.cpp \
     src/CameraStates.cpp \
-    src/Mesh.cpp \
     src/Material.cpp \
-    src/MaterialPBR.cpp \
     src/Scene.cpp \
-    src/MaterialPhong.cpp \
+    src/DemoScene.cpp \
     src/ShaderLib.cpp \
     src/MeshVBO.cpp \
     src/MaterialWireframe.cpp \
     src/MaterialFractal.cpp \
-    src/CSBscene.cpp \
-    src/CSBmesh.cpp \
-    src/MaterialEnvMap.cpp \
-    src/CSBconstraint.cpp \
-    src/MaterialCSBpbr.cpp \
-    src/CSBsolver.cpp
+    src/MaterialCSBpbr.cpp 
+
 
 OTHER_FILES += \
     $$files(shaders/*, true) \
@@ -81,11 +69,9 @@ OTHER_FILES += \
 FORMS += ui/mainwindow.ui
 
 linux:{
-    LIBS += -lGL -lGLU -lGLEW -lassimp
+    LIBS += -lGL -lGLU -lGLEW -L../csb -lcsb
 }
 
-
-#DISTFILES +=
 
 DISTFILES += \
     shaders/WireframeGeometry.glsl \
