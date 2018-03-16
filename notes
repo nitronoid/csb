@@ -5,3 +5,4 @@ TEST
 --
 Add static collision spheres and planes
 Change the param name from _positions to io_particles in constraints 
+Add a create constraint template function to the solver
