@@ -1,8 +1,6 @@
 #include "CSBscene.h"
 #include "MaterialWireframe.h"
-#include "MaterialPBR.h"
 #include "MaterialCSBpbr.h"
-#include "MaterialEnvMap.h"
 #include "MaterialFractal.h"
 #include <QOpenGLContext>
 
@@ -17,7 +15,7 @@ void CSBscene::writeMeshAttributes()
     {
       m_meshVBO.write(mesh.getAttribData(buff), buff, mesh.getNAttribData(buff), m_meshAttributeOffsets[i][buff]);
     }
-    m_meshVBO.writeIndices(mesh.getIndicesData(), mesh.getNIndices(), m_meshIndexStartPoints[i]);
+    m_meshVBO.writeIndices(mesh.getIndicesData(), mesh.getNIndicesData(), m_meshIndexStartPoints[i]);
   }
 }
 //-----------------------------------------------------------------------------------------------------
@@ -38,7 +36,7 @@ void CSBscene::init()
 {
   Scene::init();
 
-  m_qogl_funcs = context()->versionFunctions<QOpenGLFunctions_4_0_Core>();
+  m_qogl_funcs = context()->versionFunctions<QOpenGLFunctions_4_1_Core>();
 
   initMaterials();
   initGeo();
@@ -66,7 +64,7 @@ void CSBscene::initGeo()
   // Load some meshes and apply constraints
   m_meshes[0].load("models/hdxPlane.obj");
   m_meshes[1].load("models/hdxPlane.obj");
-  m_meshes[1].translate({0.1f, 0.1f, 0.f});
+  m_meshes[1].translate({0.0f, 0.35f, 0.f});
 
   for (auto& mesh : m_meshes)
   {
@@ -76,7 +74,7 @@ void CSBscene::initGeo()
 
   m_meshIndexStartPoints[0] = 0;
   m_meshAttributeOffsets[0] = {{0,0,0}};
-  m_meshIndexOffsets[0] = static_cast<unsigned char*>(nullptr);
+  m_meshIndexOffsets[0] = static_cast<char*>(nullptr);
   for (size_t i = 1; i < size; ++i)
   {
     using namespace MeshAttributes;
@@ -84,7 +82,7 @@ void CSBscene::initGeo()
       m_meshAttributeOffsets[i][buff] = m_meshes[i-1].getNAttribData(buff);
     m_meshBaseVert[i] = static_cast<GLint>(m_meshes[i-1].getNVerts());
     m_meshIndexStartPoints[i] = static_cast<GLsizei>(m_meshes[i-1].getNIndices());
-    m_meshIndexOffsets[i] = static_cast<unsigned char*>(nullptr) + m_meshes[i-1].getNIndices() * sizeof(GLushort);
+    m_meshIndexOffsets[i] = static_cast<char*>(nullptr) + m_meshes[i-1].getNIndices() * sizeof(GLushort);
   }
 
 
@@ -96,14 +94,13 @@ void CSBscene::initGeo()
     totalVerts += mesh.getNVertData();
     totalUVs += mesh.getNUVData();
     totalNorms +=  mesh.getNNormData();
-    m_numIndicesPerMesh.push_back(mesh.getNIndices());
+    m_numIndicesPerMesh.push_back(static_cast<GLsizei>(mesh.getNIndices()));
   }
   // Create and bind our Vertex Array Object
   m_vao->create();
   m_vao->bind();
   // Create and bind our Vertex Buffer Object
   m_meshVBO.init();
-
 
   m_meshVBO.reset(
         sizeof(GLushort),
@@ -130,7 +127,6 @@ void CSBscene::initMaterials()
   m_materials.reserve(5);
 
   m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
-  m_materials.emplace_back(new MaterialEnvMap(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialCSBpbr(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
   m_materials.emplace_back(new MaterialFractal(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)
@@ -168,24 +164,8 @@ void CSBscene::renderScene()
   }
 
   m_materials[m_currentMaterial]->update();
-  using namespace std::chrono;
 
-  static constexpr float dt = 1.f/30.f;
-  static float accum = 0.0f;
-  static auto currentTime = high_resolution_clock::now();
-
-  const auto time = high_resolution_clock::now();
-
-  float ft = duration_cast<milliseconds>(time - currentTime).count() / 1000.0f;
-  //  ft = std::min(0.05f, ft);
-  currentTime = time;
-  accum += ft;
-
-  while(accum >= dt)
-  {
-    m_solver.update(dt);
-    accum -=dt;
-  }
+  m_solver.update();
 
   writeMeshAttributes();
   m_qogl_funcs->glMultiDrawElementsBaseVertex(

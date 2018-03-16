@@ -51,6 +51,13 @@ void CSBmesh::init()
   m_particles[0].m_invMass = 0.f;
   m_particles[m_particles.size() - 1].m_invMass = 0.f;
 
+  generateStructuralConstraints();
+
+  generateBendingConstraints();
+}
+
+void CSBmesh::generateStructuralConstraints()
+{
   auto edgeSet = getEdges();
   const auto& firstEdge = edgeSet.begin()->p;
   m_shortestEdgeLength = glm::fastDistance(m_vertices[m_indices[firstEdge.first]], m_vertices[m_indices[firstEdge.second]]);
@@ -63,7 +70,10 @@ void CSBmesh::init()
     m_totalEdgeLength += distance;
     m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
   }
+}
 
+void CSBmesh::generateBendingConstraints()
+{
   const auto size = m_vertices.size();
   std::unordered_set<EdgePair> connections;
   for (GLushort v = 0; v < size; ++v)

@@ -30,14 +30,16 @@ public:
   ~CSBmesh() = default;
 
   void init();
+  void generateStructuralConstraints();
+  void generateBendingConstraints();
   void projectConstraints();
   void translate(const glm::vec3 &_translation);
 
   float getTotalEdgeLength() const noexcept;
   float getShortestEdgeLength() const noexcept;
-  std::vector<CSBparticle> m_particles;
 
 private:
+  friend class CSBsolver;
   struct EdgePair
   {
     EdgePair(const GLushort _a, const GLushort _b) :
@@ -57,6 +59,7 @@ private:
   std::vector<std::unique_ptr<CSBconstraint>> m_constraints;
 
 
+  std::vector<CSBparticle> m_particles;
 
 
   float m_shortestEdgeLength = 0.0f;

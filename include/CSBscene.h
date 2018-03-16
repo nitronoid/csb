@@ -6,7 +6,7 @@
 #include "ShaderLib.h"
 #include "CSBmesh.h"
 #include "CSBsolver.h"
-#include <QOpenGLFunctions_4_0_Core>
+#include <QOpenGLFunctions_4_1_Core>
 
 class CSBscene : public Scene
 {
@@ -131,7 +131,7 @@ private:
   std::vector<GLint> m_meshBaseVert;
 
 
-  QOpenGLFunctions_4_0_Core *m_qogl_funcs;
+  QOpenGLFunctions_4_1_Core *m_qogl_funcs;
 
 };
 

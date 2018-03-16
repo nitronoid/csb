@@ -1,0 +1,6 @@
+Cloth to cloth collision can be observed clearly without bending constraints, could weaken them.
+Need to open stiffness to the constructor of bending constraints.
+Split constraints into separate files.
+TEST
+--
+Add static collision spheres and planes

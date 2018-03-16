@@ -9,18 +9,18 @@
 #include <random>
 #include <algorithm>
 
-std::vector<GLushort> CSBsolver::getConnectedVertices(CSBmesh* _meshRef, const GLushort _vert)
+std::vector<GLushort> CSBsolver::getConnectedVertices(CSBmesh* io_meshRef, const GLushort _particle)
 {
-  return _meshRef->getAdjacencyInfo()[_vert];
+  return io_meshRef->getAdjacencyInfo()[_particle];
 }
 
 glm::ivec3 CSBsolver::calcCell(const glm::vec3& _coord) const
 {
   // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
-        static_cast<int>(glm::floor(_coord.x / m_avgEdgeLength)),
-        static_cast<int>(glm::floor(_coord.y / m_avgEdgeLength)),
-        static_cast<int>(glm::floor(_coord.z / m_avgEdgeLength))
+        static_cast<int>(glm::floor(_coord.x / m_averageEdgeLength)),
+        static_cast<int>(glm::floor(_coord.y / m_averageEdgeLength)),
+        static_cast<int>(glm::floor(_coord.z / m_averageEdgeLength))
         );
 }
 
@@ -117,7 +117,7 @@ void CSBsolver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
       // By setting the distance to be larger than the distance between particles
       // we should cover the cloth surface, however we can't set them too big,
       // otherwise conflicts with neighbours will occur and we'll see flickering
-      auto radius_sqr = (m_shortestEdgeDist * 1.25f);
+      auto radius_sqr = (m_shortestEdgeLength * 1.5f);
       radius_sqr *= radius_sqr;
       if (dist < radius_sqr)
       {
@@ -171,11 +171,11 @@ void CSBsolver::resolveContinuousCollision_rays(const size_t &_meshIndex)
         const auto& L1 = particle.m_pos;
         const auto dir = L1 - L0;
 
-        glm::vec3 bary;
 
         const auto distStart = glm::dot(T0 - L0, TNorm);
         const auto distEnd = glm::dot(T0 - L1, TNorm);
 
+        glm::vec3 bary;
         // Check not same side of triangle, and an intersection is present
         if (glm::intersectLineTriangle(L0, dir, T0, T1, T2, bary) && (distStart * distEnd < 0.0f))
         {
@@ -192,19 +192,18 @@ void CSBsolver::resolveContinuousCollision_rays(const size_t &_meshIndex)
 }
 
 
-void CSBsolver::addTriangleMesh(CSBmesh& _mesh)
+void CSBsolver::addTriangleMesh(CSBmesh& io_mesh)
 {
   // Store a reference pointer to the mesh
-  m_referencedMeshes.push_back(&_mesh);
-  m_vertHashOffset.push_back(m_numParticles);
+  m_referencedMeshes.push_back(&io_mesh);
   m_triHashOffset.push_back(m_numTris);
   // Update our stored counters
-  m_numParticles += _mesh.getNVerts();
-  m_numTris += _mesh.getNIndices() / 3;
-  m_totalEdgeLength += _mesh.getTotalEdgeLength();
-  m_numEdges += _mesh.getNEdges();
-  m_avgEdgeLength = (m_totalEdgeLength + _mesh.getTotalEdgeLength()) / m_numEdges;
-  m_shortestEdgeDist = std::min(m_shortestEdgeDist, _mesh.getShortestEdgeLength());
+  m_numParticles += io_mesh.getNVerts();
+  m_numTris += io_mesh.getNIndices() / 3;
+  m_totalEdgeLength += io_mesh.getTotalEdgeLength();
+  m_numEdges += io_mesh.getNEdges();
+  m_averageEdgeLength = (m_totalEdgeLength + io_mesh.getTotalEdgeLength()) / m_numEdges;
+  m_shortestEdgeLength = std::min(m_shortestEdgeLength, io_mesh.getShortestEdgeLength());
 
   // Calculate optimal hash table size
   m_triangleVertHash.resize(m_numTris);
@@ -214,7 +213,45 @@ void CSBsolver::addTriangleMesh(CSBmesh& _mesh)
 
 }
 
-void CSBsolver::update(const float _time)
+void CSBsolver::FixedTimestepManager::progress()
+{
+  const auto currentTime = hr_clock::now();
+
+  // Lazy initialise current time to avoid a spike when the sim begins
+  if (!m_isUsed)
+  {
+    m_lastTime = currentTime;
+    m_isUsed = true;
+  }
+
+  using namespace std::chrono;
+  float ft = duration_cast<milliseconds>(currentTime - m_lastTime).count() / 1000.0f;
+  m_lastTime = currentTime;
+  m_accum += ft;
+}
+
+bool CSBsolver::FixedTimestepManager::consume()
+{
+  const auto isBehind = m_accum >= m_timestep;
+  if (isBehind) m_accum -= m_timestep;
+  return isBehind;
+}
+
+const float& CSBsolver::FixedTimestepManager::deltaTime()
+{
+  return m_timestep;
+}
+
+void CSBsolver::update()
+{
+  m_timestepManager.progress();
+  while (m_timestepManager.consume())
+  {
+    step(m_timestepManager.deltaTime());
+  }
+}
+
+void CSBsolver::step(const float _time)
 {
   for (auto mesh : m_referencedMeshes)
     mesh->projectConstraints();
@@ -232,12 +269,13 @@ void CSBsolver::update(const float _time)
 
   for (size_t i = 0; i < numMeshes; ++i)
   {
-    resolveContinuousCollision_rays(i);
     resolveContinuousCollision_spheres(i);
+
+    resolveContinuousCollision_rays(i);
   }
 
   const auto force = glm::vec3(0.f, -10.f, 0.f);
-  static constexpr auto damping = 0.9f;
+  static constexpr auto damping = 0.99f;
 
   for (auto mesh : m_referencedMeshes)
   {
