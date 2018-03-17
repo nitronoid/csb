@@ -36,9 +36,9 @@ public:
   virtual ~PositionConstraint();
   //-----------------------------------------------------------------------------------------------------
   /// @brief This projects the constraint onto the particles.
-  /// @param _particles is a reference to the particles that this constraint is to be projected on to.
+  /// @param io_particles is a reference to the particles that this constraint is to be projected on to.
   //-----------------------------------------------------------------------------------------------------
-  virtual void project(std::vector<Particle> &_particles) = 0;
+  virtual void project(std::vector<Particle> &io_particles) = 0;
   //-----------------------------------------------------------------------------------------------------
   /// @brief This is used by classes that contain constraints to implement copy constructors.
   /// @return A raw pointer to a newly allocated clone of the derived class.

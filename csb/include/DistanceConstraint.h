@@ -19,7 +19,7 @@ public:
   DistanceConstraint(DistanceConstraint&&) = default;
   DistanceConstraint& operator=(DistanceConstraint&&) = default;
   virtual ~DistanceConstraint() override = default;
-  virtual void project(std::vector<Particle> &_particles) override;
+  virtual void project(std::vector<Particle> &io_particles) override;
   virtual PositionConstraint* clone() const override;
 
 private:
