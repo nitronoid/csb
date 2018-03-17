@@ -2,6 +2,7 @@
 #include "MaterialWireframe.h"
 #include "MaterialCSBpbr.h"
 #include "MaterialFractal.h"
+#include "SphereCollisionConstraint.h"
 #include <QOpenGLContext>
 
 //-----------------------------------------------------------------------------------------------------
@@ -73,8 +74,8 @@ void DemoScene::initGeo()
 //    mesh.init();
 //    m_solver.addTriangleMesh(mesh);
 //  }
-  m_meshes[0]->initParticles();
-  m_meshes[0]->generateClothConstraints();
+  m_meshes[0]->init();
+  m_meshes[0]->generateClothConstraints(0.02f);
   m_solver.addTriangleMesh(m_meshes[0]);
 
 
@@ -119,6 +120,9 @@ void DemoScene::initGeo()
 
   writeMeshAttributes();
   setAttributeBuffers();
+
+  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f));
+  m_solver.addForce({0.f, -5.f, 0.f});
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::keyPress(QKeyEvent* io_event)

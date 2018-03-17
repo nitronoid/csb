@@ -19,33 +19,11 @@ TEST(SimulatedMesh, constructor)
   EXPECT_EQ(0.f, mesh.getTotalEdgeLength());
 }
 
-
-TEST(SimulatedMesh, loadcube)
-{
-  csb::SimulatedMesh mesh;
-  mesh.load("../demo/models/cube.obj");
-
-  // Data compared to stats reported by Maya.
-  EXPECT_EQ(8, mesh.getNVerts());
-  EXPECT_EQ(24, mesh.getNVertData());
-  EXPECT_EQ(mesh.getNVertData(), mesh.getNAttribData(csb::VERTEX));
-  EXPECT_EQ(0, mesh.getNUVs());
-  EXPECT_EQ(0, mesh.getNUVData());
-  EXPECT_EQ(mesh.getNUVData(), mesh.getNAttribData(csb::UV));
-  EXPECT_EQ(0 , mesh.getNNorms());
-  EXPECT_EQ(0, mesh.getNNormData());
-  EXPECT_EQ(mesh.getNNormData(), mesh.getNAttribData(csb::NORMAL));
-  EXPECT_EQ(36, mesh.getNIndices());
-  EXPECT_EQ(36, mesh.getNIndicesData());
-  EXPECT_EQ(24, mesh.getNData());
-  EXPECT_EQ(18, mesh.getNEdges());
-
-}
-
 TEST(SimulatedMesh, reset)
 {
   csb::SimulatedMesh mesh;
   mesh.load("../demo/models/cube.obj");
+  mesh.init();
   mesh.reset();
 
   EXPECT_TRUE(0 == mesh.getNVerts());
@@ -58,8 +36,8 @@ TEST(SimulatedMesh, reset)
   EXPECT_TRUE(0 == mesh.getNIndicesData());
   EXPECT_TRUE(0 == mesh.getNData());
   EXPECT_TRUE(0 == mesh.getNEdges());
-  EXPECT_EQ(10.f, mesh.getTotalEdgeLength());
-  EXPECT_TRUE(0.f == mesh.getShortestEdgeLength());
+  EXPECT_EQ(0.f, mesh.getTotalEdgeLength());
+  EXPECT_EQ(0.f, mesh.getShortestEdgeLength());
 }
 
 TEST(SimulatedMesh, copyAndMove)
@@ -119,11 +97,36 @@ TEST(SimulatedMesh, copyAndMove)
   EXPECT_EQ(copy.getNEdges(), move.getNEdges());
 }
 
+TEST(SimulatedMesh, loadcube)
+{
+  csb::SimulatedMesh mesh;
+  mesh.load("../demo/models/cube.obj");
+  mesh.init();
+
+  // Data compared to stats reported by Maya.
+  EXPECT_EQ(8, mesh.getNVerts());
+  EXPECT_EQ(24, mesh.getNVertData());
+  EXPECT_EQ(mesh.getNVertData(), mesh.getNAttribData(csb::VERTEX));
+  EXPECT_EQ(0, mesh.getNUVs());
+  EXPECT_EQ(0, mesh.getNUVData());
+  EXPECT_EQ(mesh.getNUVData(), mesh.getNAttribData(csb::UV));
+  EXPECT_EQ(0 , mesh.getNNorms());
+  EXPECT_EQ(0, mesh.getNNormData());
+  EXPECT_EQ(mesh.getNNormData(), mesh.getNAttribData(csb::NORMAL));
+  EXPECT_EQ(36, mesh.getNIndices());
+  EXPECT_EQ(36, mesh.getNIndicesData());
+  EXPECT_EQ(24, mesh.getNData());
+  EXPECT_EQ(18, mesh.getNEdges());
+  EXPECT_NEAR(41.0, mesh.getTotalEdgeLength(), 0.1);
+  EXPECT_FLOAT_EQ(2.f, mesh.getShortestEdgeLength());
+
+}
 
 TEST(SimulatedMesh, loadplane)
 {
   csb::SimulatedMesh mesh;
   mesh.load("../demo/models/hdPlane.obj");
+  mesh.init();
 
   // Data compared to stats reported by Maya.
   EXPECT_EQ(961, mesh.getNVerts());
@@ -139,6 +142,8 @@ TEST(SimulatedMesh, loadplane)
   EXPECT_EQ(5400, mesh.getNIndicesData());
   EXPECT_EQ(7688, mesh.getNData());
   EXPECT_EQ(2760, mesh.getNEdges());
+  EXPECT_NEAR(104.5, mesh.getTotalEdgeLength(), 0.1);
+  EXPECT_NEAR(0.03333, mesh.getShortestEdgeLength(), 0.0001);
 }
 
 TEST(SimulatedMesh, adjacency)

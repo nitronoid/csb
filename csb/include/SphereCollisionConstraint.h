@@ -38,10 +38,8 @@ public:
   /// @brief Constructor.
   /// @param _centre is the origin of the sphere.
   /// @param _radius is the radius of the sphere and difines it's size.
-  /// @param _cellSize is the cell size that is used for spatial hashing.
-  /// @param _hashTableSize is the hash table size used by the spatial hash.
   //-----------------------------------------------------------------------------------------------------
-  SphereCollisionConstraint(const glm::vec3 &_centre, const float _radius, const float _cellSize, const size_t& _hashTableSize);
+  SphereCollisionConstraint(const glm::vec3 &_centre, const float _radius);
   //-----------------------------------------------------------------------------------------------------
   /// @brief This projects particles that enter the sphere away from the centre and onto the surface.
   /// @param io_particles is a reference to the particles that this constraint is to be projected on to.
@@ -54,6 +52,11 @@ public:
   /// @return A raw pointer to a newly allocated clone of the derived class.
   //-----------------------------------------------------------------------------------------------------
   virtual StaticCollisionConstraint* clone() const override;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief This init function will be called post setting the cell and hash table sizes, inside of the,
+  /// solver, so any calculations involving them for spatial hashing should take place here.
+  //-----------------------------------------------------------------------------------------------------
+  virtual void init() override;
 
 private:
   //-----------------------------------------------------------------------------------------------------

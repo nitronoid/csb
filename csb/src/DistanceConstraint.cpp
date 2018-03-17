@@ -20,3 +20,34 @@ csb::PositionConstraint* csb::DistanceConstraint::clone() const
 {
   return new DistanceConstraint(*this);
 }
+
+float  csb::DistanceConstraint::getRest() const noexcept
+{
+  return m_rest;
+}
+
+size_t csb::DistanceConstraint::getParticleIndex1() const noexcept
+{
+  return m_p1;
+}
+
+size_t csb::DistanceConstraint::getParticleIndex2() const noexcept
+{
+  return m_p2;
+}
+
+void csb::DistanceConstraint::setRest(const float _rest)
+{
+  m_rest = _rest;
+}
+
+void csb::DistanceConstraint::setParticleIndex1(const size_t &_p1)
+{
+  m_p1 = _p1;
+}
+
+void csb::DistanceConstraint::setParticleIndex2(const size_t &_p2)
+{
+  m_p2 = _p2;
+}
+

@@ -12,7 +12,6 @@
 #include "SphereCollisionConstraint.h"
 #include "Particle.h"
 #include "PositionConstraint.h"
-#include "StaticCollisionConstraint.h"
 #include "glm/common.hpp"
 #include <tuple>
 #include <unordered_map>
@@ -80,6 +79,10 @@ struct csb::Solver::SolverImpl
   //-----------------------------------------------------------------------------------------------------
   size_t m_numEdges = 0;
   //-----------------------------------------------------------------------------------------------------
+  /// @brief The force that should be used to calculate accel during the intergration step..
+  //-----------------------------------------------------------------------------------------------------
+  glm::vec3 m_totalForce {0.f};
+  //-----------------------------------------------------------------------------------------------------
   /// @brief The shortest edge length, used for sphere collision.
   //-----------------------------------------------------------------------------------------------------
   float m_shortestEdgeLength = std::numeric_limits<float>::max();
@@ -91,6 +94,10 @@ struct csb::Solver::SolverImpl
   /// @brief The average edge length, used for optimal spatial hashing cell size.
   //-----------------------------------------------------------------------------------------------------
   float m_averageEdgeLength = 0.0f;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The amount of velocity damping to apply during the integration step.
+  //-----------------------------------------------------------------------------------------------------
+  float m_damping = 0.f;
 };
 
 csb::Solver::SolverImpl::SolverImpl(const SolverImpl&_rhs) :
@@ -341,7 +348,7 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
         const auto& L1 = *particle.m_pos;
         const auto dir = L1 - L0;
 
-
+        // Use these vectors to determine whether the line is entirely on one side of the tri
         const auto distStart = glm::dot(T0 - L0, TNorm);
         const auto distEnd = glm::dot(T0 - L1, TNorm);
 
@@ -369,6 +376,13 @@ void csb::Solver::resolveStaticCollisions(const size_t &_meshIndex)
   }
 }
 
+void csb::Solver::addStaticCollision(StaticCollisionConstraint* _newConstraint)
+{
+  _newConstraint->setCellSize(m_impl->m_averageEdgeLength);
+  _newConstraint->setHashTableSize(m_impl->m_hashTable.size());
+  _newConstraint->init();
+  m_impl->m_staticCollisions.emplace_back(_newConstraint);
+}
 
 void csb::Solver::addTriangleMesh(const std::shared_ptr<SimulatedMesh> &io_mesh)
 {
@@ -388,9 +402,6 @@ void csb::Solver::addTriangleMesh(const std::shared_ptr<SimulatedMesh> &io_mesh)
   const size_t multiple = static_cast<size_t>(pow10(floor(log10(m_impl->m_numParticles))));
   const auto hashTableSize = ((m_impl->m_numParticles + multiple - 1) / multiple) * multiple - 1;
   m_impl->m_hashTable.resize(hashTableSize);
-
-
-  m_impl->m_staticCollisions.emplace_back(new SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f, m_impl->m_averageEdgeLength, m_impl->m_hashTable.size()));
 
 }
 
@@ -457,18 +468,39 @@ void csb::Solver::step(const float _time)
     resolveStaticCollisions(i);
   }
 
-  const auto force = glm::vec3(0.f, -5.f, 0.f);
-  static constexpr auto damping = 0.9f;
-
   for (auto mesh : m_impl->m_referencedMeshes)
   {
     for (auto& particle : mesh->m_particles)
     {
-      const auto vel = (*particle.m_pos - particle.m_prevPos) * damping;
-      const auto newPos = *particle.m_pos + vel + (particle.m_invMass * force * _time * _time);
+      const auto vel = (*particle.m_pos - particle.m_prevPos) * (1.f - m_impl->m_damping);
+      const auto newPos = *particle.m_pos + vel + (particle.m_invMass * m_impl->m_totalForce * _time * _time);
       particle.m_prevPos = *particle.m_pos;
       *particle.m_pos = newPos;
     }
   }
-
 }
+
+void csb::Solver::addForce(const glm::vec3 &_force)
+{
+  m_impl->m_totalForce += _force;
+}
+
+glm::vec3 csb::Solver::getTotalForce() const noexcept
+{
+  return m_impl->m_totalForce;
+}
+void csb::Solver::setTotalForce(const glm::vec3 &_force)
+{
+  m_impl->m_totalForce = _force;
+}
+
+void csb::Solver::setDamping(const float _damping)
+{
+  m_impl->m_damping = glm::clamp(0.0f, 1.f, _damping);
+}
+
+float csb::Solver::getDamping() const noexcept
+{
+  return m_impl->m_damping;
+}
+

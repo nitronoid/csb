@@ -10,14 +10,15 @@ namespace csb
 class BendingConstraint : public PositionConstraint
 {
 public:
-  BendingConstraint(const size_t _p1, const size_t _p2, const size_t _p3, float _rest, const std::vector<Particle>&_points) :
-    m_p({{_p1, _p2, _p3}}),
-    m_rest(_rest)
-  {
-    auto W = _points[_p1].m_invMass + _points[_p2].m_invMass + 2.f * _points[_p3].m_invMass;
-    for (unsigned int i = 0; i < m_w.size(); ++i)
-      m_w[i] = _points[m_p[i]].m_invMass / W;
-  }
+  BendingConstraint() = default;
+  BendingConstraint(
+      const size_t _p1,
+      const size_t _p2,
+      const size_t _p3,
+      const float _rest,
+      const float _stiffness,
+      const std::vector<Particle>&_particles
+      );
 
   BendingConstraint(const BendingConstraint&) = default;
   BendingConstraint& operator=(const BendingConstraint&) = default;
@@ -27,10 +28,21 @@ public:
   virtual void project(std::vector<Particle> &io_particles) override;
   virtual PositionConstraint* clone() const override;
 
+  size_t getParticleIndex(const unsigned short _index) const noexcept;
+  float  getParticleWeight(const unsigned short _index) const noexcept;
+  float  getRest() const noexcept;
+  float  getStiffness() const noexcept;
+
+  void setParticleIndex(const unsigned short _index, const size_t &_p);
+  void setParticleWeight(const unsigned short _index, const float _invMass);
+  void setRest(const float _rest);
+  void setStiffness(const float _stiffness);
+
 private:
-  std::array<size_t, 3> m_p;
-  std::array<float, 3> m_w;
-  float m_rest;
+  std::array<size_t, 3> m_p {{0ul, 0ul, 0ul}};
+  std::array<float, 3>  m_w {{0.f, 0.f, 0.f}};
+  float m_rest = 0.f;
+  float m_stiffness = 0.025f;
 };
 
 }

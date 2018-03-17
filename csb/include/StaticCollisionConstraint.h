@@ -47,6 +47,32 @@ public:
   /// @return A raw pointer to a newly allocated clone of the derived class.
   //-----------------------------------------------------------------------------------------------------
   virtual StaticCollisionConstraint* clone() const = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief This init function will be called post setting the cell and hash table sizes, inside of the,
+  /// solver, so any calculations involving them for spatial hashing should take place here.
+  //-----------------------------------------------------------------------------------------------------
+  virtual void init() = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the member that tracks the hash table size, used for spatial hashing.
+  /// @param _newSize is the size of the hash table.
+  //-----------------------------------------------------------------------------------------------------
+  void setHashTableSize(const size_t &_newSize);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the member that tracks the spatial cell size, used for spatial hashing.
+  /// @param _newSize is the cell size.
+  //-----------------------------------------------------------------------------------------------------
+  void setCellSize(const float _newSize);
+
+protected:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Tracks hash table size, used for spatial hashing.
+  //-----------------------------------------------------------------------------------------------------
+  size_t m_hashTableSize = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Tracks the spatial cell size, used for spatial hashing.
+  //-----------------------------------------------------------------------------------------------------
+  float m_cellSize = 0.f;
+
 };
 
 }

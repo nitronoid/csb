@@ -51,45 +51,46 @@ float csb::SimulatedMesh::getShortestEdgeLength() const noexcept
   return m_shortestEdgeLength;
 }
 
-std::vector<GLushort> csb::SimulatedMesh::getConnectedVertices(const GLushort _vert)
-{
-  return m_adjacency[_vert];
-}
-
-void csb::SimulatedMesh::initParticles()
+void csb::SimulatedMesh::init()
 {
   for (auto& vert : m_vertices)
     m_particles.emplace_back(vert, 1.f);
-}
 
-void csb::SimulatedMesh::generateClothConstraints()
-{
-  generateStructuralConstraints();
-  generateBendingConstraints();
-}
-
-void csb::SimulatedMesh::generateStructuralConstraints()
-{
   const auto& firstEdge = m_edges[0].p;
-  m_shortestEdgeLength = glm::fastDistance(m_vertices[m_indices[firstEdge.first]], m_vertices[m_indices[firstEdge.second]]);
-  for (const auto & edge : m_edges)
+  m_shortestEdgeLength = glm::fastDistance(m_vertices[m_indices[firstEdge.first]], m_vertices[m_indices[firstEdge.second]]);for (const auto & edge : m_edges)
   {
     const auto p1 = edge.p.first;
     const auto p2 = edge.p.second;
     const auto distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
     m_shortestEdgeLength = std::min(m_shortestEdgeLength, distance);
     m_totalEdgeLength += distance;
+  }
+}
+
+void csb::SimulatedMesh::generateClothConstraints(const float _bendingStiffness)
+{
+  generateStructuralConstraints();
+  generateBendingConstraints(_bendingStiffness);
+}
+
+void csb::SimulatedMesh::generateStructuralConstraints()
+{
+  for (const auto & edge : m_edges)
+  {
+    const auto p1 = edge.p.first;
+    const auto p2 = edge.p.second;
+    const auto distance = glm::fastDistance(m_vertices[p1], m_vertices[p2]);
     m_constraints.emplace_back(new DistanceConstraint(p1, p2, distance));
   }
 }
 
-void csb::SimulatedMesh::generateBendingConstraints()
+void csb::SimulatedMesh::generateBendingConstraints(const float _stiffness)
 {
   const auto size = m_vertices.size();
   std::unordered_set<Edge> connections;
   for (GLushort v = 0; v < size; ++v)
   {
-    auto neighbours = getConnectedVertices(v);
+    auto neighbours = m_adjacency[v];
     for (const auto vi : neighbours)
     {
       float bestCosTheta = 0.0f;
@@ -113,10 +114,16 @@ void csb::SimulatedMesh::generateBendingConstraints()
         static constexpr float third = 1.0f / 3.0f;
         auto centre = third * (m_vertices[vi] + m_vertices[bestV] + m_vertices[v]);
         auto rest = glm::fastDistance(m_vertices[v], centre);
-        m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest, m_particles));
+        m_constraints.emplace_back(new BendingConstraint(vi, bestV, v, rest, _stiffness, m_particles));
       }
     }
   }
+}
+
+
+void csb::SimulatedMesh::addConstraint(PositionConstraint* _newConstraint)
+{
+  m_constraints.emplace_back(_newConstraint);
 }
 
 void csb::SimulatedMesh::projectConstraints()

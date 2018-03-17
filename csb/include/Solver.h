@@ -4,6 +4,7 @@
 #include <QOpenGLFunctions>
 #include <memory>
 #include "SimulatedMesh.h"
+#include "StaticCollisionConstraint.h"
 
 namespace csb
 {
@@ -50,6 +51,18 @@ public:
   //-----------------------------------------------------------------------------------------------------
   void update();
 
+  void addStaticCollision(StaticCollisionConstraint* _newConstraint);
+
+  void addForce(const glm::vec3 &_force);
+
+  glm::vec3 getTotalForce() const noexcept;
+
+  void setTotalForce(const glm::vec3 &_force);
+
+  void setDamping(const float _damping);
+  float getDamping() const noexcept;
+
+
 private:
   //-----------------------------------------------------------------------------------------------------
   /// @brief Iterates over and stores particle indices in the hash table using the hashParticle function.
@@ -90,6 +103,7 @@ private:
   /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
   //-----------------------------------------------------------------------------------------------------
   void resolveStaticCollisions(const size_t &_meshIndex);
+
 
 private:
   //-----------------------------------------------------------------------------------------------------

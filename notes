@@ -1,9 +1,6 @@
 Cloth to cloth collision can be observed clearly without bending constraints, could weaken them.
-Need to open stiffness to the constructor of bending constraints.
 TEST
 --
 Add static collision planes
-Change the param name from _positions to io_particles in constraints 
-Add a create constraint template function to the solver
-Set gravity in solver
-Set damping in solver
+smooth shading
+configurable self collision

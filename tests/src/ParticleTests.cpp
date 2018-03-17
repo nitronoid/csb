@@ -9,7 +9,30 @@ TEST(Particle, constructor)
   EXPECT_EQ(position, *p.m_pos);
   EXPECT_EQ(0.f, p.m_invMass);
 
+  csb::Particle pCopy(p);
+  EXPECT_EQ(position, *pCopy.m_pos);
+  EXPECT_EQ(0.f, pCopy.m_invMass);
+
   csb::Particle pMove(std::move(p));
+  EXPECT_EQ(*p.m_pos, *pMove.m_pos);
+  EXPECT_EQ(p.m_invMass, pMove.m_invMass);
+}
+
+TEST(Particle, assignment)
+{
+  glm::vec3 position(0.f);
+
+  csb::Particle p(position, 0.f);
+  EXPECT_EQ(position, *p.m_pos);
+  EXPECT_EQ(0.f, p.m_invMass);
+
+  csb::Particle pCopy;
+  pCopy = p;
+  EXPECT_EQ(position, *pCopy.m_pos);
+  EXPECT_EQ(0.f, pCopy.m_invMass);
+
+  csb::Particle pMove;
+  pMove = std::move(p);
   EXPECT_EQ(*p.m_pos, *pMove.m_pos);
   EXPECT_EQ(p.m_invMass, pMove.m_invMass);
 }
