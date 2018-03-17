@@ -18,7 +18,7 @@ public:
   PinConstraint(PinConstraint&&) = default;
   PinConstraint& operator=(PinConstraint&&) = default;
   virtual ~PinConstraint() override = default;
-  virtual void project(std::vector<Particle> &_positions) override;
+  virtual void project(std::vector<Particle> &_particles) override;
   virtual PositionConstraint* clone() const override;
 
 private:

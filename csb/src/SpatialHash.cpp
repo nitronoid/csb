@@ -13,9 +13,11 @@ glm::ivec3 csb::SpatialHash::calcCell(const glm::vec3& _coord, const float _cell
 
 size_t csb::SpatialHash::hashCell (const glm::ivec3& _cell, const size_t &_tableSize)
 {
+  // C++ modulo doesn't always produce a positive output
   static constexpr auto posMod = [](const auto _x, const auto _m)
   {
-    return ((static_cast<size_t>(_x) % _m) + _m) % _m;
+    const auto m = static_cast<int>(_m);
+    return static_cast<size_t>(((_x % m) + m) % m);
   };
 
   static constexpr int primes[] = {73856093, 19349663, 83492791};

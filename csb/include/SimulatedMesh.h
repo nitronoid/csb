@@ -20,11 +20,11 @@ public:
   //-----------------------------------------------------------------------------------------------------
   SimulatedMesh() = default;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Default move constructor.
+  /// @brief Copy constructor.
   //-----------------------------------------------------------------------------------------------------
   SimulatedMesh(const SimulatedMesh &_rhs);
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Default move assignment operator.
+  /// @brief Copy assignment operator.
   //-----------------------------------------------------------------------------------------------------
   SimulatedMesh& operator=(const SimulatedMesh &_rhs);
   //-----------------------------------------------------------------------------------------------------
@@ -40,7 +40,9 @@ public:
   //-----------------------------------------------------------------------------------------------------
   virtual ~SimulatedMesh() override = default;
 
-  void init();
+  void initParticles();
+
+  void generateClothConstraints();
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to reset the mesh arrays.
   //-----------------------------------------------------------------------------------------------------
@@ -49,6 +51,8 @@ public:
   void generateBendingConstraints();
   void projectConstraints();
   void translate(const glm::vec3 &_translation);
+  void setParticleInverseMass(const GLushort _particleIndex, const float _inverseMass);
+  void setParticleMass(const GLushort _particleIndex, const float _mass);
 
   float getTotalEdgeLength() const noexcept;
   float getShortestEdgeLength() const noexcept;

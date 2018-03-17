@@ -25,7 +25,7 @@ csb::SphereCollisionConstraint::SphereCollisionConstraint(const glm::vec3 &_cent
       }
 }
 
-void csb::SphereCollisionConstraint::project(std::vector<Particle> &_positions, const std::vector<std::vector<std::pair<GLushort, GLushort>>> &_spatialHash)
+void csb::SphereCollisionConstraint::project(std::vector<Particle> &_particles, const std::vector<std::vector<std::pair<GLushort, GLushort>>> &_spatialHash)
 {
   // Get the particles within the spheres bounding box
   std::vector<size_t> intersectingParticles;
@@ -40,11 +40,11 @@ void csb::SphereCollisionConstraint::project(std::vector<Particle> &_positions, 
 
   for (const auto& p : intersectingParticles)
   {
-    const auto disp = *_positions[p].m_pos - m_centre;
+    const auto disp = *_particles[p].m_pos - m_centre;
     const auto distanceFromCentre = glm::fastLength(disp);
     if (distanceFromCentre <= m_radius)
     {
-      *_positions[p].m_pos = m_centre + glm::fastNormalize(disp) * m_radius;
+      *_particles[p].m_pos = m_centre + glm::fastNormalize(disp) * m_radius;
     }
   }
 }

@@ -13,9 +13,9 @@ void DemoScene::writeMeshAttributes()
     const auto& mesh = m_meshes[i];
     for (const auto buff : {VERTEX, UV, NORMAL})
     {
-      m_meshVBO.write(mesh.getAttribData(buff), buff, mesh.getNAttribData(buff), m_meshAttributeOffsets[i][buff]);
+      m_meshVBO.write(mesh->getAttribData(buff), buff, mesh->getNAttribData(buff), m_meshAttributeOffsets[i][buff]);
     }
-    m_meshVBO.writeIndices(mesh.getIndicesData(), mesh.getNIndicesData(), m_meshIndexStartPoints[i]);
+    m_meshVBO.writeIndices(mesh->getIndicesData(), mesh->getNIndicesData(), m_meshIndexStartPoints[i]);
   }
 }
 //-----------------------------------------------------------------------------------------------------
@@ -61,17 +61,20 @@ void DemoScene::initGeo()
   m_meshBaseVert.resize(size);
   m_numIndicesPerMesh.reserve(size);
 
+  for (auto& meshPtr : m_meshes) meshPtr = std::make_shared<csb::SimulatedMesh>();
+
   // Load some meshes and apply constraints
-  m_meshes[0].load("models/hdxPlane.obj");
-  m_meshes[1].load("models/Sphere.obj");
-  m_meshes[1].translate({0.0f, -0.7f, 0.f});
+  m_meshes[0]->load("models/hdxPlane.obj");
+  m_meshes[1]->load("models/Sphere.obj");
+  m_meshes[1]->translate({0.0f, -0.7f, 0.f});
 
 //  for (auto& mesh : m_meshes)
 //  {
 //    mesh.init();
 //    m_solver.addTriangleMesh(mesh);
 //  }
-  m_meshes[0].init();
+  m_meshes[0]->initParticles();
+  m_meshes[0]->generateClothConstraints();
   m_solver.addTriangleMesh(m_meshes[0]);
 
 
@@ -82,10 +85,10 @@ void DemoScene::initGeo()
   {
     using namespace csb;
     for (const auto buff : {VERTEX, UV, NORMAL})
-      m_meshAttributeOffsets[i][buff] = m_meshes[i-1].getNAttribData(buff);
-    m_meshBaseVert[i] = static_cast<GLint>(m_meshes[i-1].getNVerts());
-    m_meshIndexStartPoints[i] = static_cast<GLsizei>(m_meshes[i-1].getNIndices());
-    m_meshIndexOffsets[i] = static_cast<char*>(nullptr) + m_meshes[i-1].getNIndices() * sizeof(GLushort);
+      m_meshAttributeOffsets[i][buff] = m_meshes[i-1]->getNAttribData(buff);
+    m_meshBaseVert[i] = static_cast<GLint>(m_meshes[i-1]->getNVerts());
+    m_meshIndexStartPoints[i] = static_cast<GLsizei>(m_meshes[i-1]->getNIndices());
+    m_meshIndexOffsets[i] = static_cast<char*>(nullptr) + m_meshes[i-1]->getNIndices() * sizeof(GLushort);
   }
 
 
@@ -93,11 +96,11 @@ void DemoScene::initGeo()
 
   for (auto& mesh : m_meshes)
   {
-    totalIndices += mesh.getNIndicesData();
-    totalVerts += mesh.getNVertData();
-    totalUVs += mesh.getNUVData();
-    totalNorms +=  mesh.getNNormData();
-    m_numIndicesPerMesh.push_back(static_cast<GLsizei>(mesh.getNIndices()));
+    totalIndices += mesh->getNIndicesData();
+    totalVerts += mesh->getNVertData();
+    totalUVs += mesh->getNUVData();
+    totalNorms +=  mesh->getNNormData();
+    m_numIndicesPerMesh.push_back(static_cast<GLsizei>(mesh->getNIndices()));
   }
   // Create and bind our Vertex Array Object
   m_vao->create();
@@ -176,7 +179,7 @@ void DemoScene::renderScene()
         m_numIndicesPerMesh.data(),
         GL_UNSIGNED_SHORT,
         m_meshIndexOffsets.data(),
-        3,
+        static_cast<GLsizei>(m_meshes.size()),
         m_meshBaseVert.data()
         );
 }

@@ -16,7 +16,7 @@ public:
   SphereCollisionConstraint(SphereCollisionConstraint&&) = default;
   SphereCollisionConstraint& operator=(SphereCollisionConstraint&&) = default;
   virtual ~SphereCollisionConstraint() override = default;
-  virtual void project(std::vector<Particle> &_positions, const std::vector<std::vector<std::pair<GLushort, GLushort>>>& _spatialHash) override;
+  virtual void project(std::vector<Particle> &_particles, const std::vector<std::vector<std::pair<GLushort, GLushort>>>& _spatialHash) override;
   virtual StaticCollisionConstraint* clone() const override;
 
 private:

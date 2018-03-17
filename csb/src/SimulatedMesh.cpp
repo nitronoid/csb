@@ -12,11 +12,11 @@
 #include "SphereCollisionConstraint.h"
 
 csb::SimulatedMesh::SimulatedMesh(const csb::SimulatedMesh &_rhs) :
-  csb::TriMesh(_rhs)
+  csb::TriMesh(_rhs),
+  m_particles(_rhs.m_particles),
+  m_shortestEdgeLength(_rhs.m_shortestEdgeLength),
+  m_totalEdgeLength(_rhs.m_totalEdgeLength)
 {
-  m_particles = _rhs.m_particles;
-  m_shortestEdgeLength = _rhs.m_shortestEdgeLength;
-  m_totalEdgeLength = _rhs.m_totalEdgeLength;
   for (const auto& constraint : _rhs.m_constraints)
     m_constraints.emplace_back(constraint->clone());
 }
@@ -56,16 +56,15 @@ std::vector<GLushort> csb::SimulatedMesh::getConnectedVertices(const GLushort _v
   return m_adjacency[_vert];
 }
 
-void csb::SimulatedMesh::init()
+void csb::SimulatedMesh::initParticles()
 {
   for (auto& vert : m_vertices)
     m_particles.emplace_back(vert, 1.f);
+}
 
-  m_particles[0].m_invMass = 0.f;
-  m_particles[m_particles.size() - 1].m_invMass = 0.f;
-
+void csb::SimulatedMesh::generateClothConstraints()
+{
   generateStructuralConstraints();
-
   generateBendingConstraints();
 }
 
@@ -133,4 +132,14 @@ void csb::SimulatedMesh::translate(const glm::vec3 &_translation)
 {
   for (auto& v : m_vertices)
     v += _translation;
+}
+
+void csb::SimulatedMesh::setParticleInverseMass(const GLushort _particleIndex, const float _inverseMass)
+{
+  m_particles[_particleIndex].m_invMass = _inverseMass;
+}
+
+void csb::SimulatedMesh::setParticleMass(const GLushort _particleIndex, const float _mass)
+{
+  m_particles[_particleIndex].m_invMass = 1.0f / _mass;
 }

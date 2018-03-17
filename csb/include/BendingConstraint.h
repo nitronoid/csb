@@ -24,7 +24,7 @@ public:
   BendingConstraint(BendingConstraint&&) = default;
   BendingConstraint& operator=(BendingConstraint&&) = default;
   virtual ~BendingConstraint() override = default;
-  virtual void project(std::vector<Particle> &_positions) override;
+  virtual void project(std::vector<Particle> &_particles) override;
   virtual PositionConstraint* clone() const override;
 
 private:

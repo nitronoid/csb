@@ -4,11 +4,11 @@
 #undef GLM_ENABLE_EXPERIMENTAL
 
 
-void csb::BendingConstraint::project(std::vector<Particle> &_positions)
+void csb::BendingConstraint::project(std::vector<Particle> &_particles)
 {
-  auto& p1 = _positions[m_p[0]];
-  auto& p2 = _positions[m_p[1]];
-  auto& p3 = _positions[m_p[2]];
+  auto& p1 = _particles[m_p[0]];
+  auto& p2 = _particles[m_p[1]];
+  auto& p3 = _particles[m_p[2]];
 
   static constexpr float third = 1.0f / 3.0f;
   auto centre = third * (*p1.m_pos + *p2.m_pos + *p3.m_pos);

@@ -3,10 +3,10 @@
 #include "glm/gtx/fast_square_root.hpp"
 #undef GLM_ENABLE_EXPERIMENTAL
 
-void csb::DistanceConstraint::project(std::vector<Particle> &_positions)
+void csb::DistanceConstraint::project(std::vector<Particle> &_particles)
 {
-  auto& p1 = _positions[m_p1];
-  auto& p2 = _positions[m_p2];
+  auto& p1 = _particles[m_p1];
+  auto& p2 = _particles[m_p2];
   auto delta = *p2.m_pos - *p1.m_pos;
   auto deltaLen = glm::fastLength(delta);
   auto diff = (deltaLen - m_rest) / (deltaLen * (p1.m_invMass + p2.m_invMass));

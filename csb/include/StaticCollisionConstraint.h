@@ -18,7 +18,7 @@ public:
   StaticCollisionConstraint& operator=(StaticCollisionConstraint&&) = default;
   virtual ~StaticCollisionConstraint();
 
-  virtual void project(std::vector<Particle> &_positions, const std::vector<std::vector<std::pair<GLushort, GLushort>>>&_spatialHash) = 0;
+  virtual void project(std::vector<Particle> &_particles, const std::vector<std::vector<std::pair<GLushort, GLushort>>>&_spatialHash) = 0;
   virtual StaticCollisionConstraint* clone() const = 0;
 };
 

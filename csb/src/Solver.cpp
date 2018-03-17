@@ -10,26 +10,220 @@
 #include <algorithm>
 #include "SpatialHash.h"
 #include "SphereCollisionConstraint.h"
+#include "Particle.h"
+#include "PositionConstraint.h"
+#include "StaticCollisionConstraint.h"
+#include "glm/common.hpp"
+#include <tuple>
+#include <unordered_map>
+#include <unordered_set>
 
-std::vector<GLushort> csb::Solver::getConnectedVertices(SimulatedMesh* io_meshRef, const GLushort _particle)
+struct csb::Solver::SolverImpl
+{
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default constructor.
+  //-----------------------------------------------------------------------------------------------------
+  SolverImpl() = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Copy constructor.
+  //-----------------------------------------------------------------------------------------------------
+  SolverImpl(const SolverImpl&_rhs);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Copy assignment operator.
+  //-----------------------------------------------------------------------------------------------------
+  SolverImpl& operator=(const SolverImpl&_rhs);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default move constructor.
+  //-----------------------------------------------------------------------------------------------------
+  SolverImpl(SolverImpl&&) = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default move assignment operator.
+  //-----------------------------------------------------------------------------------------------------
+  SolverImpl& operator=(SolverImpl&&) = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Default destructor.
+  //-----------------------------------------------------------------------------------------------------
+  ~SolverImpl() = default;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores mesh id and particle index pairs, using a spatial hashing function, this is used to
+  /// query neighbours in order to speed up collision detection.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::vector<std::pair<GLushort, GLushort>>> m_hashTable;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores a list of particle id's that neighbour a triangle, the table is indexed using triangle,
+  /// id plus an offset for the referenced mesh.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::vector<size_t>> m_triangleVertHash;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores offsets per mesh, that should be used when indexing into the triangle hash table.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<size_t> m_triHashOffset;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores shared references to meshes involved in the simulation, this means the meshes will,
+  /// be kept alive for the solvers entire lifetime.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::shared_ptr<SimulatedMesh>> m_referencedMeshes;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores the static collision constraints.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::unique_ptr<StaticCollisionConstraint>> m_staticCollisions;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The total number of particles in the simulation.
+  //-----------------------------------------------------------------------------------------------------
+  size_t m_numParticles = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The total number of triangles in the simulation.
+  //-----------------------------------------------------------------------------------------------------
+  size_t m_numTris = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The total number of mesh edges in the simulation.
+  //-----------------------------------------------------------------------------------------------------
+  size_t m_numEdges = 0;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The shortest edge length, used for sphere collision.
+  //-----------------------------------------------------------------------------------------------------
+  float m_shortestEdgeLength = std::numeric_limits<float>::max();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The combined sum of all edge lengths, used for calculating the average edge length.
+  //-----------------------------------------------------------------------------------------------------
+  float m_totalEdgeLength = 0.0f;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The average edge length, used for optimal spatial hashing cell size.
+  //-----------------------------------------------------------------------------------------------------
+  float m_averageEdgeLength = 0.0f;
+};
+
+csb::Solver::SolverImpl::SolverImpl(const SolverImpl&_rhs) :
+  m_hashTable(_rhs.m_hashTable),
+  m_triangleVertHash(_rhs.m_triangleVertHash),
+  m_triHashOffset(_rhs.m_triHashOffset),
+  m_numParticles(_rhs.m_numParticles),
+  m_numTris(_rhs.m_numTris),
+  m_numEdges(_rhs.m_numEdges),
+  m_shortestEdgeLength(_rhs.m_shortestEdgeLength),
+  m_totalEdgeLength(_rhs.m_totalEdgeLength),
+  m_averageEdgeLength(_rhs.m_averageEdgeLength)
+{
+  // Deep copy the meshes
+  for (auto& mesh : _rhs.m_referencedMeshes)
+    m_referencedMeshes.emplace_back(std::make_shared<csb::SimulatedMesh>(*mesh));
+
+  for (auto& staticCollision : _rhs.m_staticCollisions)
+    m_staticCollisions.emplace_back(staticCollision->clone());
+}
+
+csb::Solver::SolverImpl& csb::Solver::SolverImpl::operator=(const SolverImpl&_rhs)
+{
+  m_hashTable =_rhs.m_hashTable;
+  m_triangleVertHash =_rhs.m_triangleVertHash;
+  m_triHashOffset =_rhs.m_triHashOffset;
+  m_numParticles =_rhs.m_numParticles;
+  m_numTris = _rhs.m_numTris;
+  m_numEdges = _rhs.m_numEdges;
+  m_shortestEdgeLength = _rhs.m_shortestEdgeLength;
+  m_totalEdgeLength = _rhs.m_totalEdgeLength;
+  m_averageEdgeLength = _rhs.m_averageEdgeLength;
+
+  // Deep copy the meshes
+  for (auto& mesh : _rhs.m_referencedMeshes)
+    m_referencedMeshes.emplace_back(std::make_shared<csb::SimulatedMesh>(*mesh));
+
+  for (auto& staticCollision : _rhs.m_staticCollisions)
+    m_staticCollisions.emplace_back(staticCollision->clone());
+
+  return *this;
+}
+
+//-----------------------------------------------------------------------------------------------------
+/// @brief An internal timer that is used to ensure the timestep is fixed for the simulation, and that,
+/// the simulation keeps up with the app.
+//-----------------------------------------------------------------------------------------------------
+class csb::Solver::FixedTimestepManager
+{
+public:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Progresses the timer and accumulates the time we have to simulate for. This should be called,
+  /// once prior to calling step.
+  //-----------------------------------------------------------------------------------------------------
+  void progress();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Consumes a time step from our accumulated time. This should be called until the returned,
+  /// result is false, each time the simulation should be stepped forward.
+  /// @return Whether we are more than a timestep behind.
+  //-----------------------------------------------------------------------------------------------------
+  bool consume();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Read only access to the timestep.
+  /// @return The timestep that should be used to step the simulation forward.
+  //-----------------------------------------------------------------------------------------------------
+  const float& deltaTime();
+
+private:
+  //-----------------------------------------------------------------------------------------------------
+  /// @note Using declaration for readability.
+  //-----------------------------------------------------------------------------------------------------
+  using hr_clock = std::chrono::high_resolution_clock;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The time that progress was last called.
+  //-----------------------------------------------------------------------------------------------------
+  hr_clock::time_point m_lastTime;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The fixed timestep.
+  //-----------------------------------------------------------------------------------------------------
+  float m_timestep = 1.0f / 30.f;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The accumulated simulation time to be consumed.
+  //-----------------------------------------------------------------------------------------------------
+  float m_accum = 0.0f;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used for lazy initialisation of m_lastTime.
+  //-----------------------------------------------------------------------------------------------------
+  bool m_isUsed = false;
+};
+
+csb::Solver::Solver() :
+  m_impl(std::make_unique<SolverImpl>()),
+  m_timestepManager(std::make_unique<FixedTimestepManager>())
+{}
+
+csb::Solver::Solver(const Solver&_rhs) :
+  m_impl(new SolverImpl(*_rhs.m_impl)),
+  m_timestepManager(new FixedTimestepManager(*_rhs.m_timestepManager))
+{}
+
+csb::Solver& csb::Solver::operator=(const Solver&_rhs)
+{
+  m_impl.reset(new SolverImpl(*_rhs.m_impl));
+  m_timestepManager.reset(new FixedTimestepManager(*_rhs.m_timestepManager));
+  return *this;
+}
+
+csb::Solver::Solver(Solver&&) = default;
+
+csb::Solver& csb::Solver::operator=(Solver&&) = default;
+
+csb::Solver::~Solver() = default;
+
+std::vector<GLushort> csb::Solver::getConnectedVertices(const std::shared_ptr<SimulatedMesh> &io_meshRef, const GLushort _particle)
 {
   return io_meshRef->getAdjacencyInfo()[_particle];
 }
 
 void csb::Solver::hashVerts(const size_t &_meshIndex)
 {
-  const auto mesh = m_referencedMeshes[_meshIndex];
+  const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
   const auto size = mesh->getNVerts();
   for (GLushort i = 0; i < size; ++i)
   {
-    m_hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, m_hashTable.size(), m_averageEdgeLength)].emplace_back(_meshIndex, i);
+    auto& hashTable = m_impl->m_hashTable;
+    hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, hashTable.size(), m_impl->m_averageEdgeLength)].emplace_back(_meshIndex, i);
   }
 }
 
 void csb::Solver::hashTris(const size_t &_meshIndex)
 {
-  const auto mesh = m_referencedMeshes[_meshIndex];
-  const auto hashOffset = m_triHashOffset[_meshIndex];
+  const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
+  const auto hashOffset = m_impl->m_triHashOffset[_meshIndex];
   const auto size = mesh->getNIndices() / 3;
   const auto& indices = mesh->getIndices();
   for (size_t i = 0; i < size; ++i)
@@ -39,22 +233,22 @@ void csb::Solver::hashTris(const size_t &_meshIndex)
     const auto& p2 = mesh->m_particles[indices[index + 1]];
     const auto& p3 = mesh->m_particles[indices[index + 2]];
 
-    const auto min = SpatialHash::calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_averageEdgeLength);
-    const auto max = SpatialHash::calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_averageEdgeLength);
+    const auto min = SpatialHash::calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_impl->m_averageEdgeLength);
+    const auto max = SpatialHash::calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_impl->m_averageEdgeLength);
 
     // hash all cells within the bounding box of this triangle
     for (int x = min.x; x <= max.x; ++x)
       for (int y = min.y; y <= max.y; ++y)
         for (int z = min.z; z <= max.z; ++z)
         {
-          m_triangleVertHash[i + hashOffset].push_back(SpatialHash::hashCell({x,y,z}, m_hashTable.size()));
+          m_impl->m_triangleVertHash[i + hashOffset].push_back(SpatialHash::hashCell({x,y,z}, m_impl->m_hashTable.size()));
         }
   }
 }
 
 void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
 {
-  const auto mesh = m_referencedMeshes[_meshIndex];
+  const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
   const auto size = mesh->getNVerts();
   for (GLushort i = 0; i < size; ++i)
   {
@@ -63,7 +257,7 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
     ignored.push_back(i);
     std::sort(ignored.begin(), ignored.end());
 
-    auto considered = m_hashTable[SpatialHash::hashParticle(*P.m_pos, m_hashTable.size(), m_averageEdgeLength)];
+    auto considered = m_impl->m_hashTable[SpatialHash::hashParticle(*P.m_pos, m_impl->m_hashTable.size(), m_impl->m_averageEdgeLength)];
     std::sort(considered.begin(), considered.end());
 
 
@@ -86,14 +280,14 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
 
     for (const auto& pid : considered)
     {
-      const auto& Q = m_referencedMeshes[pid.first]->m_particles[pid.second];
+      const auto& Q = m_impl->m_referencedMeshes[pid.first]->m_particles[pid.second];
       const auto disp = *P.m_pos - *Q.m_pos;
       const auto dist = glm::length2(disp);
 
       // By setting the distance to be larger than the distance between particles
       // we should cover the cloth surface, however we can't set them too big,
       // otherwise conflicts with neighbours will occur and we'll see flickering
-      auto radius_sqr = (m_shortestEdgeLength * 1.5f);
+      auto radius_sqr = (m_impl->m_shortestEdgeLength * 1.5f);
       radius_sqr *= radius_sqr;
       if (dist < radius_sqr)
       {
@@ -116,8 +310,8 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
 
 void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
 {
-  const auto hashOffset = m_triHashOffset[_meshIndex];
-  const auto mesh = m_referencedMeshes[_meshIndex];
+  const auto hashOffset = m_impl->m_triHashOffset[_meshIndex];
+  const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
   const auto& indices = mesh->getIndices();
   auto& particles = mesh->m_particles;
   const auto size = mesh->getNIndices() / 3;
@@ -131,17 +325,17 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
     const auto TNorm = glm::triangleNormal(T0, T1, T2);
 
     // Loop over all hashed cells for this face
-    for (const auto& hashCell : m_triangleVertHash[i + hashOffset])
+    for (const auto& hashCell : m_impl->m_triangleVertHash[i + hashOffset])
     {
       // Loop over all particles in the cell
-      for (const auto& meshPid : m_hashTable[hashCell])
+      for (const auto& meshPid : m_impl->m_hashTable[hashCell])
       {
         const auto meshId = meshPid.first;
         const auto pid = meshPid.second;
         // skip the particles in this meshes triangle
         if (meshId == _meshIndex && ((pid == indices[index]) || (pid == indices[index + 1]) || (pid == indices[index + 2])))
           continue;
-        auto& otherMesh = m_referencedMeshes[meshId];
+        auto& otherMesh = m_impl->m_referencedMeshes[meshId];
         const auto& particle = otherMesh->m_particles[pid];
         const auto& L0 = particle.m_prevPos;
         const auto& L1 = *particle.m_pos;
@@ -169,34 +363,34 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
 
 void csb::Solver::resolveStaticCollisions(const size_t &_meshIndex)
 {
-  for (auto& collisionConstraint : m_staticCollisions)
+  for (auto& collisionConstraint : m_impl->m_staticCollisions)
   {
-    collisionConstraint->project(m_referencedMeshes[_meshIndex]->m_particles, m_hashTable);
+    collisionConstraint->project(m_impl->m_referencedMeshes[_meshIndex]->m_particles, m_impl->m_hashTable);
   }
 }
 
 
-void csb::Solver::addTriangleMesh(SimulatedMesh& io_mesh)
+void csb::Solver::addTriangleMesh(const std::shared_ptr<SimulatedMesh> &io_mesh)
 {
   // Store a reference pointer to the mesh
-  m_referencedMeshes.push_back(&io_mesh);
-  m_triHashOffset.push_back(m_numTris);
+  m_impl->m_referencedMeshes.push_back(io_mesh);
+  m_impl->m_triHashOffset.push_back(m_impl->m_numTris);
   // Update our stored counters
-  m_numParticles += io_mesh.getNVerts();
-  m_numTris += io_mesh.getNIndices() / 3;
-  m_totalEdgeLength += io_mesh.getTotalEdgeLength();
-  m_numEdges += io_mesh.getNEdges();
-  m_averageEdgeLength = (m_totalEdgeLength + io_mesh.getTotalEdgeLength()) / m_numEdges;
-  m_shortestEdgeLength = std::min(m_shortestEdgeLength, io_mesh.getShortestEdgeLength());
+  m_impl->m_numParticles += io_mesh->getNVerts();
+  m_impl->m_numTris += io_mesh->getNIndices() / 3;
+  m_impl->m_totalEdgeLength += io_mesh->getTotalEdgeLength();
+  m_impl->m_numEdges += io_mesh->getNEdges();
+  m_impl->m_averageEdgeLength = (m_impl->m_totalEdgeLength + io_mesh->getTotalEdgeLength()) / m_impl->m_numEdges;
+  m_impl->m_shortestEdgeLength = std::min(m_impl->m_shortestEdgeLength, io_mesh->getShortestEdgeLength());
 
   // Calculate optimal hash table size
-  m_triangleVertHash.resize(m_numTris);
-  const size_t multiple = static_cast<size_t>(pow10(floor(log10(m_numParticles))));
-  const auto hashTableSize = ((m_numParticles + multiple - 1) / multiple) * multiple - 1;
-  m_hashTable.resize(hashTableSize);
+  m_impl->m_triangleVertHash.resize(m_impl->m_numTris);
+  const size_t multiple = static_cast<size_t>(pow10(floor(log10(m_impl->m_numParticles))));
+  const auto hashTableSize = ((m_impl->m_numParticles + multiple - 1) / multiple) * multiple - 1;
+  m_impl->m_hashTable.resize(hashTableSize);
 
 
-  m_staticCollisions.emplace_back(new SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f, m_averageEdgeLength, m_hashTable.size()));
+  m_impl->m_staticCollisions.emplace_back(new SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f, m_impl->m_averageEdgeLength, m_impl->m_hashTable.size()));
 
 }
 
@@ -231,23 +425,23 @@ const float& csb::Solver::FixedTimestepManager::deltaTime()
 
 void csb::Solver::update()
 {
-  m_timestepManager.progress();
-  while (m_timestepManager.consume())
+  m_timestepManager->progress();
+  while (m_timestepManager->consume())
   {
-    step(m_timestepManager.deltaTime());
+    step(m_timestepManager->deltaTime());
   }
 }
 
 void csb::Solver::step(const float _time)
 {
-  for (auto mesh : m_referencedMeshes)
+  for (auto mesh : m_impl->m_referencedMeshes)
     mesh->projectConstraints();
 
 
-  for (auto& hash : m_triangleVertHash) hash.clear();
-  for (auto& cell : m_hashTable) cell.clear();
+  for (auto& hash : m_impl->m_triangleVertHash) hash.clear();
+  for (auto& cell : m_impl->m_hashTable) cell.clear();
 
-  const auto numMeshes = m_referencedMeshes.size();
+  const auto numMeshes = m_impl->m_referencedMeshes.size();
   for (size_t i = 0; i < numMeshes; ++i)
   {
     hashVerts(i);
@@ -266,7 +460,7 @@ void csb::Solver::step(const float _time)
   const auto force = glm::vec3(0.f, -5.f, 0.f);
   static constexpr auto damping = 0.9f;
 
-  for (auto mesh : m_referencedMeshes)
+  for (auto mesh : m_impl->m_referencedMeshes)
   {
     for (auto& particle : mesh->m_particles)
     {
