@@ -11,7 +11,7 @@ glm::ivec3 csb::SpatialHash::calcCell(const glm::vec3& _coord, const float _cell
         );
 }
 
-size_t csb::SpatialHash::hashCell (const glm::ivec3& _cell, const size_t &_tableSize)
+size_t csb::SpatialHash::hashCell(const glm::ivec3& _cell, const size_t &_tableSize)
 {
   // C++ modulo doesn't always produce a positive output
   static constexpr auto posMod = [](const auto _x, const auto _m)
@@ -24,7 +24,7 @@ size_t csb::SpatialHash::hashCell (const glm::ivec3& _cell, const size_t &_table
   return posMod((_cell.x * primes[0]) ^ (_cell.y * primes[1]) ^ (_cell.z * primes[2]), _tableSize);
 }
 
-size_t csb::SpatialHash::hashParticle (const glm::vec3& _coord, const size_t &_tableSize, const float _cellSize)
+size_t csb::SpatialHash::hashParticle(const glm::vec3& _coord, const size_t &_tableSize, const float _cellSize)
 {
   return csb::SpatialHash::hashCell(calcCell(_coord, _cellSize), _tableSize);
 }

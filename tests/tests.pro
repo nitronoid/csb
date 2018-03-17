@@ -9,7 +9,9 @@ SOURCES += \
     src/SimulatedMeshTests.cpp \
     src/DistanceConstraintTests.cpp \
     src/BendingConstraintTests.cpp \
-    src/PinConstraintTests.cpp
+    src/PinConstraintTests.cpp \
+    src/EdgeTests.cpp \
+    src/SpatialHashTests.cpp
 
 DEPENDPATH += . ../csb
 INCLUDEPATH = ../csb/include

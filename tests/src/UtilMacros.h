@@ -6,4 +6,9 @@
   EXPECT_FLOAT_EQ((A).y, (B).y); \
   EXPECT_FLOAT_EQ((A).z, (B).z);
 
+#define EXPECT_VEC3_NE(A, B) \
+  EXPECT_NE((A).x, (B).x); \
+  EXPECT_NE((A).y, (B).y); \
+  EXPECT_NE((A).z, (B).z);
+
 #endif // UTILMACROS_H
