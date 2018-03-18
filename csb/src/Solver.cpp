@@ -97,7 +97,7 @@ struct csb::Solver::SolverImpl
   //-----------------------------------------------------------------------------------------------------
   /// @brief The amount of velocity damping to apply during the integration step.
   //-----------------------------------------------------------------------------------------------------
-  float m_damping = 0.f;
+  float m_dampingComplement = 1.f;
 };
 
 csb::Solver::SolverImpl::SolverImpl(const SolverImpl&_rhs) :
@@ -107,9 +107,11 @@ csb::Solver::SolverImpl::SolverImpl(const SolverImpl&_rhs) :
   m_numParticles(_rhs.m_numParticles),
   m_numTris(_rhs.m_numTris),
   m_numEdges(_rhs.m_numEdges),
+  m_totalForce(_rhs.m_totalForce),
   m_shortestEdgeLength(_rhs.m_shortestEdgeLength),
   m_totalEdgeLength(_rhs.m_totalEdgeLength),
-  m_averageEdgeLength(_rhs.m_averageEdgeLength)
+  m_averageEdgeLength(_rhs.m_averageEdgeLength),
+  m_dampingComplement(_rhs.m_dampingComplement)
 {
   // Deep copy the meshes
   for (auto& mesh : _rhs.m_referencedMeshes)
@@ -127,9 +129,11 @@ csb::Solver::SolverImpl& csb::Solver::SolverImpl::operator=(const SolverImpl&_rh
   m_numParticles =_rhs.m_numParticles;
   m_numTris = _rhs.m_numTris;
   m_numEdges = _rhs.m_numEdges;
+  m_totalForce = _rhs.m_totalForce;
   m_shortestEdgeLength = _rhs.m_shortestEdgeLength;
   m_totalEdgeLength = _rhs.m_totalEdgeLength;
   m_averageEdgeLength = _rhs.m_averageEdgeLength;
+  m_dampingComplement = _rhs.m_dampingComplement;
 
   // Deep copy the meshes
   for (auto& mesh : _rhs.m_referencedMeshes)
@@ -294,7 +298,8 @@ void csb::Solver::resolveContinuousCollision_spheres(const size_t &_meshIndex)
       // By setting the distance to be larger than the distance between particles
       // we should cover the cloth surface, however we can't set them too big,
       // otherwise conflicts with neighbours will occur and we'll see flickering
-      auto radius_sqr = (m_impl->m_shortestEdgeLength * 1.5f);
+      static constexpr auto root2ep = 1.4f;
+      auto radius_sqr = (m_impl->m_shortestEdgeLength * root2ep);
       radius_sqr *= radius_sqr;
       if (dist < radius_sqr)
       {
@@ -344,9 +349,9 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
           continue;
         auto& otherMesh = m_impl->m_referencedMeshes[meshId];
         const auto& particle = otherMesh->m_particles[pid];
-        const auto& L0 = particle.m_prevPos;
-        const auto& L1 = *particle.m_pos;
-        const auto dir = L1 - L0;
+        const auto dir = *particle.m_pos - particle.m_prevPos;
+        const auto& L0 = *particle.m_pos;
+        const auto& L1 = L0 + dir;
 
         // Use these vectors to determine whether the line is entirely on one side of the tri
         const auto distStart = glm::dot(T0 - L0, TNorm);
@@ -357,11 +362,15 @@ void csb::Solver::resolveContinuousCollision_rays(const size_t &_meshIndex)
         if (glm::intersectLineTriangle(L0, dir, T0, T1, T2, bary) && (distStart * distEnd < 0.0f))
         {
           // We swap the past and current positions to reverse velocity giving a slight bounce to the cloth
-          std::swap(*particles[indices[index]].m_pos, particles[indices[index]].m_prevPos);
-          std::swap(*particles[indices[index + 1]].m_pos, particles[indices[index + 1]].m_prevPos);
-          std::swap(*particles[indices[index + 2]].m_pos, particles[indices[index + 2]].m_prevPos);
-          // this one belongs to the other mesh
-          std::swap(*otherMesh->m_particles[pid].m_pos, otherMesh->m_particles[pid].m_prevPos);
+//          std::swap(*particles[indices[index]].m_pos, particles[indices[index]].m_prevPos);
+//          std::swap(*particles[indices[index + 1]].m_pos, particles[indices[index + 1]].m_prevPos);
+//          std::swap(*particles[indices[index + 2]].m_pos, particles[indices[index + 2]].m_prevPos);
+//          // this one belongs to the other mesh
+//          std::swap(*otherMesh->m_particles[pid].m_pos, otherMesh->m_particles[pid].m_prevPos);
+          particles[indices[index]].m_prevPos = *particles[indices[index]].m_pos;
+          particles[indices[index + 1]].m_prevPos = *particles[indices[index + 1]].m_pos;
+          particles[indices[index + 2]].m_prevPos = *particles[indices[index + 2]].m_pos;
+          otherMesh->m_particles[pid].m_prevPos = *otherMesh->m_particles[pid].m_pos;
         }
       }
     }
@@ -472,8 +481,9 @@ void csb::Solver::step(const float _time)
   {
     for (auto& particle : mesh->m_particles)
     {
-      const auto vel = (*particle.m_pos - particle.m_prevPos) * (1.f - m_impl->m_damping);
-      const auto newPos = *particle.m_pos + vel + (particle.m_invMass * m_impl->m_totalForce * _time * _time);
+      const auto accel = particle.m_invMass * m_impl->m_totalForce;
+      const auto vel = (*particle.m_pos - particle.m_prevPos) * m_impl->m_dampingComplement;
+      const auto newPos = *particle.m_pos + vel + (accel * _time * _time);
       particle.m_prevPos = *particle.m_pos;
       *particle.m_pos = newPos;
     }
@@ -496,11 +506,11 @@ void csb::Solver::setTotalForce(const glm::vec3 &_force)
 
 void csb::Solver::setDamping(const float _damping)
 {
-  m_impl->m_damping = glm::clamp(0.0f, 1.f, _damping);
+  m_impl->m_dampingComplement = glm::clamp(0.0f, 1.f, 1.f - _damping);
 }
 
 float csb::Solver::getDamping() const noexcept
 {
-  return m_impl->m_damping;
+  return 1.f - m_impl->m_dampingComplement;
 }
 

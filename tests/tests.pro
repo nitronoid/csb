@@ -11,7 +11,9 @@ SOURCES += \
     src/BendingConstraintTests.cpp \
     src/PinConstraintTests.cpp \
     src/EdgeTests.cpp \
-    src/SpatialHashTests.cpp
+    src/SpatialHashTests.cpp \
+    src/SphereCollisionConstraintTests.cpp \
+    src/SolverTests.cpp
 
 DEPENDPATH += . ../csb
 INCLUDEPATH = ../csb/include

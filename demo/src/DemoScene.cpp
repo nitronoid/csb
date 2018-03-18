@@ -71,7 +71,8 @@ void DemoScene::initGeo()
 
 //  for (auto& mesh : m_meshes)
 //  {
-//    mesh.init();
+//    mesh->init();
+//    mesh->generateClothConstraints(0.02f);
 //    m_solver.addTriangleMesh(mesh);
 //  }
   m_meshes[0]->init();
@@ -123,6 +124,7 @@ void DemoScene::initGeo()
 
   m_solver.addStaticCollision(new csb::SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f));
   m_solver.addForce({0.f, -5.f, 0.f});
+  m_solver.setDamping(0.1f);
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::keyPress(QKeyEvent* io_event)

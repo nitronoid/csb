@@ -14,8 +14,8 @@ TEST(Particle, constructor)
   EXPECT_EQ(0.f, pCopy.m_invMass);
 
   csb::Particle pMove(std::move(p));
-  EXPECT_EQ(*p.m_pos, *pMove.m_pos);
-  EXPECT_EQ(p.m_invMass, pMove.m_invMass);
+  EXPECT_EQ(*pCopy.m_pos, *pMove.m_pos);
+  EXPECT_EQ(pCopy.m_invMass, pMove.m_invMass);
 }
 
 TEST(Particle, assignment)
@@ -28,13 +28,13 @@ TEST(Particle, assignment)
 
   csb::Particle pCopy;
   pCopy = p;
-  EXPECT_EQ(position, *pCopy.m_pos);
-  EXPECT_EQ(0.f, pCopy.m_invMass);
+  EXPECT_EQ(*p.m_pos, *pCopy.m_pos);
+  EXPECT_EQ(p.m_invMass, pCopy.m_invMass);
 
   csb::Particle pMove;
   pMove = std::move(p);
-  EXPECT_EQ(*p.m_pos, *pMove.m_pos);
-  EXPECT_EQ(p.m_invMass, pMove.m_invMass);
+  EXPECT_EQ(*pCopy.m_pos, *pMove.m_pos);
+  EXPECT_EQ(pCopy.m_invMass, pMove.m_invMass);
 }
 
 TEST(Particle, manipulation)

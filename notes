@@ -4,3 +4,5 @@ TEST
 Add static collision planes
 smooth shading
 configurable self collision
+configurable particle mass
+and solver iterations

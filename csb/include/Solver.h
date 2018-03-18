@@ -60,6 +60,7 @@ public:
   void setTotalForce(const glm::vec3 &_force);
 
   void setDamping(const float _damping);
+
   float getDamping() const noexcept;
 
 
@@ -103,7 +104,6 @@ private:
   /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
   //-----------------------------------------------------------------------------------------------------
   void resolveStaticCollisions(const size_t &_meshIndex);
-
 
 private:
   //-----------------------------------------------------------------------------------------------------

@@ -72,7 +72,6 @@ linux:{
     LIBS += -lGL -lGLU -lGLEW -L../csb -lcsb
 }
 
-
 DISTFILES += \
     shaders/WireframeGeometry.glsl \
     shaders/WireframeVertex.glsl \

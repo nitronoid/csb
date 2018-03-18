@@ -13,8 +13,8 @@ TEST(Edge, constructor)
   EXPECT_EQ(e.p.second, eCopy.p.second);
 
   csb::Edge eMove(std::move(e));
-  EXPECT_EQ(e.p.first,  eMove.p.first);
-  EXPECT_EQ(e.p.second, eMove.p.second);
+  EXPECT_EQ(eCopy.p.first,  eMove.p.first);
+  EXPECT_EQ(eCopy.p.second, eMove.p.second);
 }
 
 TEST(Edge, assignment)
@@ -30,8 +30,8 @@ TEST(Edge, assignment)
 
   csb::Edge eMove;
   eMove = std::move(e);
-  EXPECT_EQ(e.p.first,  eMove.p.first);
-  EXPECT_EQ(e.p.second, eMove.p.second);
+  EXPECT_EQ(eCopy.p.first,  eMove.p.first);
+  EXPECT_EQ(eCopy.p.second, eMove.p.second);
 }
 
 TEST(Edge, sorted)

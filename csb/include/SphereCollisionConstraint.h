@@ -57,6 +57,20 @@ public:
   /// solver, so any calculations involving them for spatial hashing should take place here.
   //-----------------------------------------------------------------------------------------------------
   virtual void init() override;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief This.
+  //-----------------------------------------------------------------------------------------------------
+  void updateBoundingBoxCells();
+
+  const std::vector<size_t> cells() const noexcept;
+
+  glm::vec3 getCentre() const noexcept;
+
+  float getRadius() const noexcept;
+
+  void setCentre(const glm::vec3 &_centre);
+
+  void setRadius(const float _radius);
 
 private:
   //-----------------------------------------------------------------------------------------------------
