@@ -61,13 +61,13 @@ void csb::SphereCollisionConstraint::setRadius(const float _radius)
   m_radius = _radius;
 }
 
-void csb::SphereCollisionConstraint::project(std::vector<Particle> &io_particles, const std::vector<std::vector<std::pair<GLushort, GLushort>>> &_spatialHash)
+void csb::SphereCollisionConstraint::project(std::vector<Particle> &io_particles, const SpatialHash::SpatialHashTable &_spatialHash)
 {
   // Get the particles within the spheres bounding box
   std::vector<size_t> intersectingParticles;
   for (const auto& cell : m_cells)
   {
-    const auto& contained = _spatialHash[cell];
+    const auto& contained = _spatialHash.m_hashTable[cell];
     intersectingParticles.reserve(intersectingParticles.size() + contained.size());
     for (const auto& particleId : contained)
       intersectingParticles.push_back(particleId.second);

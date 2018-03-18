@@ -128,11 +128,10 @@ void csb::SimulatedMesh::addConstraint(PositionConstraint* _newConstraint)
 
 void csb::SimulatedMesh::projectConstraints()
 {
-  for (int i = 0; i < 30; ++i)
-    for (auto& constraint : m_constraints)
-    {
-      constraint->project(m_particles);
-    }
+  for (auto& constraint : m_constraints)
+  {
+    constraint->project(m_particles);
+  }
 }
 
 void csb::SimulatedMesh::translate(const glm::vec3 &_translation)

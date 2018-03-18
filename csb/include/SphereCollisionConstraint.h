@@ -46,7 +46,7 @@ public:
   /// @param _spatialHash is a reference to the solver's hash table which can be used to make the collision,
   /// test more efficient.
   //-----------------------------------------------------------------------------------------------------
-  virtual void project(std::vector<Particle> &io_particles, const std::vector<std::vector<std::pair<GLushort, GLushort>>>& _spatialHash) override;
+  virtual void project(std::vector<Particle> &io_particles, const SpatialHash::SpatialHashTable &_spatialHash) override;
   //-----------------------------------------------------------------------------------------------------
   /// @brief This is used by classes that contain constraints to implement copy constructors.
   /// @return A raw pointer to a newly allocated clone of the derived class.

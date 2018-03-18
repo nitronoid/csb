@@ -3,6 +3,8 @@
 #include "MaterialCSBpbr.h"
 #include "MaterialFractal.h"
 #include "SphereCollisionConstraint.h"
+#include "SelfCollisionSpheresConstraint.h"
+#include "SelfCollisionRaysConstraint.h"
 #include <QOpenGLContext>
 
 //-----------------------------------------------------------------------------------------------------
@@ -40,7 +42,9 @@ void DemoScene::init()
   m_qogl_funcs = context()->versionFunctions<QOpenGLFunctions_4_1_Core>();
 
   initMaterials();
-  initGeo();
+  initSimMeshes();
+  prepMeshesGL();
+  initSolver();
 
   // Scope the using declaration
   {
@@ -50,10 +54,35 @@ void DemoScene::init()
   }
 }
 //-----------------------------------------------------------------------------------------------------
-void DemoScene::initGeo()
+void DemoScene::initSimMeshes()
 {
-  // Resize for the amount of objects
-  m_meshes.resize(2);
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  // Load some meshes and apply constraints
+  m_meshes[0]->load("models/hdxPlane.obj");
+  m_meshes[0]->init();
+  m_meshes[0]->setParticleInverseMass(0, 0.f);
+  m_meshes[0]->setParticleInverseMass(90, 0.f);
+  m_meshes[0]->generateClothConstraints(0.02f);
+  m_solver.addSimulatedMesh(m_meshes[0]);
+
+
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  m_meshes[1]->load("models/Sphere.obj");
+  m_meshes[1]->translate({0.0f, -0.7f, 0.f});
+  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f));
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initSolver()
+{
+  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getShortestEdgeLength() * 1.4f));
+  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+  m_solver.addForce({0.f, -5.f, 0.f});
+  m_solver.setDamping(0.1f);
+  m_solver.setPositionConstraintIterations(20);
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::prepMeshesGL()
+{
   // Resize all of our offset counters to the same size
   const auto size = m_meshes.size();
   m_meshAttributeOffsets.resize(size);
@@ -61,24 +90,6 @@ void DemoScene::initGeo()
   m_meshIndexOffsets.resize(size);
   m_meshBaseVert.resize(size);
   m_numIndicesPerMesh.reserve(size);
-
-  for (auto& meshPtr : m_meshes) meshPtr = std::make_shared<csb::SimulatedMesh>();
-
-  // Load some meshes and apply constraints
-  m_meshes[0]->load("models/hdxPlane.obj");
-  m_meshes[1]->load("models/Sphere.obj");
-  m_meshes[1]->translate({0.0f, -0.7f, 0.f});
-
-//  for (auto& mesh : m_meshes)
-//  {
-//    mesh->init();
-//    mesh->generateClothConstraints(0.02f);
-//    m_solver.addTriangleMesh(mesh);
-//  }
-  m_meshes[0]->init();
-  m_meshes[0]->generateClothConstraints(0.02f);
-  m_solver.addTriangleMesh(m_meshes[0]);
-
 
   m_meshIndexStartPoints[0] = 0;
   m_meshAttributeOffsets[0] = {{0,0,0}};
@@ -121,10 +132,6 @@ void DemoScene::initGeo()
 
   writeMeshAttributes();
   setAttributeBuffers();
-
-  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f));
-  m_solver.addForce({0.f, -5.f, 0.f});
-  m_solver.setDamping(0.1f);
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::keyPress(QKeyEvent* io_event)

@@ -5,6 +5,7 @@
 #include <memory>
 #include "SimulatedMesh.h"
 #include "StaticCollisionConstraint.h"
+#include "ContinuousCollisionConstraint.h"
 
 namespace csb
 {
@@ -40,7 +41,7 @@ public:
   /// @brief Adds the given mesh to our simulation.
   /// @param io_mesh is the mesh to add.
   //-----------------------------------------------------------------------------------------------------
-  void addTriangleMesh(const std::shared_ptr<SimulatedMesh> &io_mesh);
+  void addSimulatedMesh(const std::shared_ptr<SimulatedMesh> &io_mesh);
   //-----------------------------------------------------------------------------------------------------
   /// @brief Progresses the simulation forwards by the given timestep.
   /// @param _time is the timestep to advance by
@@ -50,18 +51,46 @@ public:
   /// @brief Uses the internal timer to advance the simulation by a fixed timestep.
   //-----------------------------------------------------------------------------------------------------
   void update();
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Adds a static collision constraint to the simulation.
+  /// @param _newConstraint is a raw pointer to the constraint to be added, it is given to an internal,
+  /// smart pointer.
+  //-----------------------------------------------------------------------------------------------------
   void addStaticCollision(StaticCollisionConstraint* _newConstraint);
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Adds a continuous collision constraint to the simulation.
+  /// @param _newConstraint is a raw pointer to the constraint to be added, it is given to an internal,
+  /// smart pointer.
+  //-----------------------------------------------------------------------------------------------------
+  void addContinuousCollision(ContinuousCollisionConstraint* _newConstraint);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Adds a force to the simulation, which is added to the current total force.
+  /// @param _force is the force to add.
+  //-----------------------------------------------------------------------------------------------------
   void addForce(const glm::vec3 &_force);
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to access the force being applied to all particles in the sim.
+  /// @return the current total force being applied in the sim.
+  //-----------------------------------------------------------------------------------------------------
   glm::vec3 getTotalForce() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set the total force being applied to all particles in the sim.
+  /// @return _force is the force to set.
+  //-----------------------------------------------------------------------------------------------------
   void setTotalForce(const glm::vec3 &_force);
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set the velocity damping in the simulation.
+  /// @return _damping is the new damping to apply.
+  //-----------------------------------------------------------------------------------------------------
   void setDamping(const float _damping);
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to retrieve the velocity damping in the simulation.
+  /// @return the current velocity damping.
+  //-----------------------------------------------------------------------------------------------------
   float getDamping() const noexcept;
+
+  void setPositionConstraintIterations(const unsigned int _iterations);
+  unsigned int getPositionConstraintIterations() const noexcept;
 
 
 private:
@@ -86,24 +115,15 @@ private:
   //-----------------------------------------------------------------------------------------------------
   std::vector<GLushort> getConnectedVertices(const std::shared_ptr<SimulatedMesh> &io_meshRef, const GLushort _particle);
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Attempts to resolve cloth on cloth collisions by calculating line, triangle intersections.
-  /// The intersecting points will have their velocities reversed, and their positions reverted to the,
-  /// previous ones to simulate a bounce.
-  /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
-  //-----------------------------------------------------------------------------------------------------
-  void resolveContinuousCollision_rays(const size_t &_meshIndex);
-  //-----------------------------------------------------------------------------------------------------
-  /// @brief Attempts to resolve cloth on cloth collisions by representing particles as connected spheres,
-  /// and checking whether these spheres intersect. Particles that are too close are projected away from,
-  /// eachother.
-  /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
-  //-----------------------------------------------------------------------------------------------------
-  void resolveContinuousCollision_spheres(const size_t &_meshIndex);
-  //-----------------------------------------------------------------------------------------------------
   /// @brief Attempts to resolve static collision constraints such as spheres an planes that have been set.
   /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
   //-----------------------------------------------------------------------------------------------------
   void resolveStaticCollisions(const size_t &_meshIndex);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Attempts to resolve continuous collision constraints such as self collisions.
+  /// @param _meshIndex is the index of the referenced mesh, who's collisions we will resolve.
+  //-----------------------------------------------------------------------------------------------------
+  void resolveContinuousCollisions(const size_t &_meshIndex);
 
 private:
   //-----------------------------------------------------------------------------------------------------

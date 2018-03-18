@@ -12,7 +12,10 @@ SOURCES += \
     src/PositionConstraint.cpp \
     src/StaticCollisionConstraint.cpp \
     src/SphereCollisionConstraint.cpp \
-    src/SpatialHash.cpp
+    src/SpatialHash.cpp \
+    src/ContinuousCollisionConstraint.cpp \
+    src/SelfCollisionSpheresConstraint.cpp \
+    src/SelfCollisionRaysConstraint.cpp
 
 HEADERS += \
     include/TriMesh.h \
@@ -26,7 +29,10 @@ HEADERS += \
     include/PositionConstraint.h \
     include/StaticCollisionConstraint.h \
     include/SphereCollisionConstraint.h \
-    include/SpatialHash.h
+    include/SpatialHash.h \
+    include/ContinuousCollisionConstraint.h \
+    include/SelfCollisionSpheresConstraint.h \
+    include/SelfCollisionRaysConstraint.h
 
 INCLUDEPATH += \
     /usr/local/include/glm/glm \

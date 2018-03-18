@@ -2,12 +2,32 @@
 #define SPATIALHASH_H
 
 #include "vec3.hpp"
+#include "vector"
+#include <QOpenGLFunctions>
 
 namespace csb
 {
 
 namespace SpatialHash
 {
+
+struct SpatialHashTable
+{
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores mesh id and particle index pairs, using a spatial hashing function, this is used to
+  /// query neighbours in order to speed up collision detection.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::vector<std::pair<GLushort, GLushort>>> m_hashTable;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores a list of particle id's that are within a triangle's bounding box the table is,
+  /// indexed using triangle, id plus an offset for the referenced mesh.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<std::vector<size_t>> m_triangleBoundingBoxHash;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Stores offsets per mesh, that should be used when indexing into the triangle hash table.
+  //-----------------------------------------------------------------------------------------------------
+  std::vector<size_t> m_triHashOffset;
+};
 
 //-----------------------------------------------------------------------------------------------------
 /// @brief Calculates the cell that the given co-ordinate lies within, this is used for spatial hahsing.

@@ -57,7 +57,7 @@ TEST(Solver, integration)
   s.setTotalForce(gravity);
   s.setDamping(0.0f);
 
-  s.addTriangleMesh(mesh);
+  s.addSimulatedMesh(mesh);
   s.step(0.1f);
 
   // reduced to y axis, -10 * 0.1 * 0.1 = -0.1
@@ -80,7 +80,7 @@ TEST(Solver, integration2)
   s.setTotalForce(gravity);
   s.setDamping(0.0f);
 
-  s.addTriangleMesh(mesh);
+  s.addSimulatedMesh(mesh);
   s.step(0.1f);
   s.step(0.1f);
   s.step(0.1f);
@@ -105,7 +105,7 @@ TEST(Solver, damping)
   s.setTotalForce(gravity);
   s.setDamping(1.f);
 
-  s.addTriangleMesh(mesh);
+  s.addSimulatedMesh(mesh);
   s.step(0.1f);
   s.step(0.1f);
   s.step(0.1f);

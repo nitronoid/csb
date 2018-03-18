@@ -107,6 +107,7 @@ private:
   /// @brief Friend declaration allows the solver to manipulate particles.
   //-----------------------------------------------------------------------------------------------------
   friend class Solver;
+  friend class ContinuousCollisionConstraint;
   //-----------------------------------------------------------------------------------------------------
   /// @brief The constraints on this mesh.
   //-----------------------------------------------------------------------------------------------------
