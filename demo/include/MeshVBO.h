@@ -7,6 +7,7 @@
 #include <vector>
 #include <memory>
 #include "TriMesh.h"
+#include <array>
 
 class MeshVBO
 {

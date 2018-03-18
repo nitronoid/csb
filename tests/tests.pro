@@ -13,7 +13,8 @@ SOURCES += \
     src/EdgeTests.cpp \
     src/SpatialHashTests.cpp \
     src/SphereCollisionConstraintTests.cpp \
-    src/SolverTests.cpp
+    src/SolverTests.cpp \
+    src/SelfCollisionSpheresTests.cpp
 
 DEPENDPATH += . ../csb
 INCLUDEPATH = ../csb/include
@@ -21,7 +22,9 @@ INCLUDEPATH += \
     /usr/local/include/glm/glm \
     /usr/local/include/glm
 
-LIBS += -lgtest -pthread -L../csb -lcsb
+linux:LIBS += -lgtest -pthread -lassimp -L../csb -lcsb
+
+mac:LIBS+= -L/usr/local/lib -lassimp -L../csb -lcsb
 
 QMAKE_CXXFLAGS += -O3 -std=c++14
 

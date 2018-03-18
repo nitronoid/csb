@@ -204,10 +204,11 @@ void csb::Solver::hashVerts(const size_t &_meshIndex)
 {
   const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
   const auto size = mesh->getNVerts();
+  auto& hashTable = m_impl->m_spatialHash.m_hashTable;
+  const auto tableSize = hashTable.size();
   for (GLushort i = 0; i < size; ++i)
   {
-    auto& hashTable = m_impl->m_spatialHash.m_hashTable;
-    hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, hashTable.size(), m_impl->m_averageEdgeLength)].emplace_back(_meshIndex, i);
+    hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, tableSize, m_impl->m_averageEdgeLength)].emplace_back(_meshIndex, i);
   }
 }
 

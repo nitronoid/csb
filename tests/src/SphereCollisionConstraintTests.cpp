@@ -61,4 +61,29 @@ TEST(SphereCollisionConstraint, boundingCells)
   EXPECT_EQ(512, highCells.size());
 }
 
+TEST(SphereCollisionConstraint, resolution)
+{
+  std::vector<glm::vec3> testVertices {
+    {0.f, 0.5f, 0.f}
+  };
+  std::vector<csb::Particle> testParticles {
+    csb::Particle{testVertices[0], 1.f}
+  };
+
+  static constexpr auto cellSize = 1.f;
+  csb::SpatialHash::SpatialHashTable hashTable;
+  hashTable.m_hashTable.resize(9);
+  hashTable.m_hashTable[csb::SpatialHash::hashParticle(testVertices[0], 9, cellSize)].emplace_back(0,0);
+
+  csb::SphereCollisionConstraint s({0.f, 0.f, 0.f}, 1.f);
+  s.setCellSize(cellSize);
+  s.setHashTableSize(hashTable.m_hashTable.size());
+  s.init();
+
+  // This should push the particle up until it is outside of the sphere
+  s.project(testParticles, hashTable);
+
+  const glm::vec3 expectedPos(0.f, 1.f, 0.f);
+  EXPECT_VEC3_EQ(testVertices[0], expectedPos);
+}
 

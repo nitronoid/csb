@@ -88,8 +88,15 @@ public:
   /// @return the current velocity damping.
   //-----------------------------------------------------------------------------------------------------
   float getDamping() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set the number of solver iterations.
+  /// @param _iterations the amount of times position constraints will be projected every step.
+  //-----------------------------------------------------------------------------------------------------
   void setPositionConstraintIterations(const unsigned int _iterations);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to retrieve the current number of solver iterations.
+  /// @return the amount of times position constraints will be projected every step.
+  //-----------------------------------------------------------------------------------------------------
   unsigned int getPositionConstraintIterations() const noexcept;
 
 

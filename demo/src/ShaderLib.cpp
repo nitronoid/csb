@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <array>
 
 std::string ShaderLib::loadShaderProg(const QString &_jsonFileName)
 {

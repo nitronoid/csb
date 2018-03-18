@@ -55,3 +55,5 @@ QMAKE_CXXFLAGS += -O3
 linux:{
     LIBS += -lGL -lGLU -lGLEW -lassimp
 }
+
+mac:LIBS+= -L/usr/local/lib -lassimp -L../csb -lcsb

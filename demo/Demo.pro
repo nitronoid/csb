@@ -71,6 +71,7 @@ FORMS += ui/mainwindow.ui
 linux:{
     LIBS += -lGL -lGLU -lGLEW -L../csb -lcsb
 }
+mac:LIBS+= -L/usr/local/lib -lassimp -L../csb -lcsb
 
 DISTFILES += \
     shaders/WireframeGeometry.glsl \
