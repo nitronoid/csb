@@ -42,7 +42,7 @@ void DemoScene::init()
   m_qogl_funcs = context()->versionFunctions<QOpenGLFunctions_4_1_Core>();
 
   initMaterials();
-  initDemo4();
+  initDemo1();
   prepMeshesGL();
 
   m_camera->setOrigin(0.f, -1.f, 0.f);
