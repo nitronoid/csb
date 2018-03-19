@@ -4,7 +4,8 @@
 #include "gtx/fast_square_root.hpp"
 
 
-void csb::SelfCollisionSpheresConstraint::project(const size_t &_meshIndex,
+void csb::SelfCollisionSpheresConstraint::project(
+    const size_t &_meshIndex,
     std::vector<std::shared_ptr<SimulatedMesh> > &_meshes,
     const SpatialHash::SpatialHashTable &_spatialHash
     )
@@ -20,7 +21,7 @@ void csb::SelfCollisionSpheresConstraint::project(const size_t &_meshIndex,
     ignored.push_back(i);
     std::sort(ignored.begin(), ignored.end());
 
-    auto considered = _spatialHash.m_hashTable[SpatialHash::hashParticle(*P.m_pos, _spatialHash.m_hashTable.size(), m_sphereRadius)];
+    auto considered = _spatialHash.m_hashTable[SpatialHash::hashParticle(*P.m_pos, _spatialHash.m_hashTable.size(), m_sphereDiameter, _spatialHash.m_cellOffset)];
     std::sort(considered.begin(), considered.end());
 
 
@@ -51,11 +52,11 @@ void csb::SelfCollisionSpheresConstraint::project(const size_t &_meshIndex,
       // By setting the distance to be larger than the distance between particles
       // we should cover the cloth surface, however we can't set them too big,
       // otherwise conflicts with neighbours will occur and we'll see flickering
-      auto radius_sqr = (m_sphereRadius);
-      radius_sqr *= radius_sqr;
-      if (dist < radius_sqr)
+      auto radius2_sqr = (m_sphereDiameter);
+      radius2_sqr *= radius2_sqr;
+      if (dist < radius2_sqr)
       {
-        const auto move = (glm::fastSqrt(radius_sqr) - glm::fastSqrt(dist)) * 0.5f;
+        const auto move = (m_sphereDiameter - glm::fastSqrt(dist));
         offset += (glm::fastNormalize(disp) * move);
         ++count;
       }
@@ -68,6 +69,7 @@ void csb::SelfCollisionSpheresConstraint::project(const size_t &_meshIndex,
       (*P.m_pos) += offset/static_cast<float>(count);
       // zero the velocity
       P.m_prevPos = *P.m_pos;
+
     }
   }
 }
@@ -78,13 +80,13 @@ csb::ContinuousCollisionConstraint* csb::SelfCollisionSpheresConstraint::clone()
   return new SelfCollisionSpheresConstraint(*this);
 }
 
-void csb::SelfCollisionSpheresConstraint::setSphereRadius(const float _radius)
+void csb::SelfCollisionSpheresConstraint::setSphereDiameter(const float _radius)
 {
-  m_sphereRadius = _radius;
+  m_sphereDiameter = _radius;
 }
 
-float csb::SelfCollisionSpheresConstraint::getSphereRadius() const noexcept
+float csb::SelfCollisionSpheresConstraint::getSphereDiameter() const noexcept
 {
-  return m_sphereRadius;
+  return m_sphereDiameter;
 }
 

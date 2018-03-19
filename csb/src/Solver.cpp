@@ -208,7 +208,7 @@ void csb::Solver::hashVerts(const size_t &_meshIndex)
   const auto tableSize = hashTable.size();
   for (GLushort i = 0; i < size; ++i)
   {
-    hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, tableSize, m_impl->m_averageEdgeLength)].emplace_back(_meshIndex, i);
+    hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, tableSize, m_impl->m_averageEdgeLength, m_impl->m_spatialHash.m_cellOffset)].emplace_back(_meshIndex, i);
   }
 }
 
@@ -225,8 +225,8 @@ void csb::Solver::hashTris(const size_t &_meshIndex)
     const auto& p2 = mesh->m_particles[indices[index + 1]];
     const auto& p3 = mesh->m_particles[indices[index + 2]];
 
-    const auto min = SpatialHash::calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_impl->m_averageEdgeLength);
-    const auto max = SpatialHash::calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_impl->m_averageEdgeLength);
+    const auto min = SpatialHash::calcCell(glm::min(glm::min(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_impl->m_averageEdgeLength, m_impl->m_spatialHash.m_cellOffset);
+    const auto max = SpatialHash::calcCell(glm::max(glm::max(*p1.m_pos, *p2.m_pos), *p3.m_pos), m_impl->m_averageEdgeLength, m_impl->m_spatialHash.m_cellOffset);
 
     // hash all cells within the bounding box of this triangle
     for (int x = min.x; x <= max.x; ++x)
@@ -259,6 +259,7 @@ void csb::Solver::addStaticCollision(StaticCollisionConstraint* _newConstraint)
 {
   _newConstraint->setCellSize(m_impl->m_averageEdgeLength);
   _newConstraint->setHashTableSize(m_impl->m_spatialHash.m_hashTable.size());
+  _newConstraint->setCellOffset(m_impl->m_spatialHash.m_cellOffset);
   _newConstraint->init();
   m_impl->m_staticCollisions.emplace_back(_newConstraint);
 }
@@ -362,6 +363,7 @@ void csb::Solver::step(const float _time)
       *particle.m_pos = newPos;
     }
   }
+
 }
 
 void csb::Solver::addForce(const glm::vec3 &_force)
@@ -380,7 +382,7 @@ void csb::Solver::setTotalForce(const glm::vec3 &_force)
 
 void csb::Solver::setDamping(const float _damping)
 {
-  m_impl->m_dampingComplement = glm::clamp(0.0f, 1.f, 1.f - _damping);
+  m_impl->m_dampingComplement = glm::clamp(1.f - _damping, 0.0f, 1.f);
 }
 
 float csb::Solver::getDamping() const noexcept
@@ -398,3 +400,12 @@ unsigned int csb::Solver::getPositionConstraintIterations() const noexcept
   return m_impl->m_positionConstraintIterations;
 }
 
+void csb::Solver::setCellOffset(const float _offset)
+{
+  m_impl->m_spatialHash.m_cellOffset = _offset;
+}
+
+float csb::Solver::getCellOffset() const noexcept
+{
+  return m_impl->m_spatialHash.m_cellOffset;
+}

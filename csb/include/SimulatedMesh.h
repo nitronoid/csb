@@ -97,6 +97,11 @@ public:
   //-----------------------------------------------------------------------------------------------------
   float getShortestEdgeLength() const noexcept;
   //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets the average edge length, which is used during self collision with sphere resolution.
+  /// @return Returns the average edge length of all simulated meshes combined.
+  //-----------------------------------------------------------------------------------------------------
+  float getAverageEdgeLength() const noexcept;
+  //-----------------------------------------------------------------------------------------------------
   /// @brief Gets the shortest edge length, which is used during self collision with sphere resolution.
   /// @return Returns the shortest edge length of all simulated meshes combined.
   //-----------------------------------------------------------------------------------------------------

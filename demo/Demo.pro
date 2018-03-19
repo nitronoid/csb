@@ -1,5 +1,5 @@
 TEMPLATE = app
-TARGET = Project
+TARGET = Demo
 
 UI_HEADERS_DIR = ui
 OBJECTS_DIR = obj
@@ -10,23 +10,13 @@ QT += opengl core gui
 CONFIG += console c++14
 CONFIG -= app_bundle
 
-QMAKE_CXXFLAGS += -O3
-
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which has been marked as deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
-DEFINES += QT_DEPRECATED_WARNINGS
-
-DEPENDPATH += . ../csb
+DEPENDPATH += . ../csb/lib
 INCLUDEPATH += ../csb/include
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
 INCLUDEPATH += \
     /usr/local/include/glm/glm \
     /usr/local/include/glm \
+    /usr/local/include \
     $$PWD/include \
     $$PWD/ui \
     $$PWD/shaders
@@ -60,23 +50,29 @@ SOURCES += \
     src/MaterialFractal.cpp \
     src/MaterialCSBpbr.cpp 
 
+DISTFILES += $$files(shaders/*, true)
 
 OTHER_FILES += \
-    $$files(shaders/*, true) \
     $$files(shaderPrograms/*, true) \
     $$files(models/*, true)
 
 FORMS += ui/mainwindow.ui
 
-linux:{
-    LIBS += -lGL -lGLU -lGLEW -L../csb -lcsb
-}
-mac:LIBS+= -L/usr/local/lib -lassimp -L../csb -lcsb
+QMAKE_CXXFLAGS += -O3 -std=c++14 -msse -msse2 -msse3
 
-DISTFILES += \
-    shaders/WireframeGeometry.glsl \
-    shaders/WireframeVertex.glsl \
-    shaders/WireframeFragment.glsl \
-    shaders/csb_hard_normals.glsl \
-    shaders/csb_pbr_vertex.glsl \
-    shaders/csb_pbr_frag.glsl
+LIBS += -L../csb/lib -lcsb
+
+linux:{
+    LIBS += -lGL -lGLU -lGLEW -lassimp
+}
+
+mac:{
+  LIBS+= -L/usr/local/lib -lassimp
+  QMAKE_CXXFLAGS += -arch x86_64
+}
+
+unix:{
+    # add the lib to rpath so it can be dynamically loaded
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../csb/lib\'"
+}
+

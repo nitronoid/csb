@@ -27,14 +27,20 @@ struct SpatialHashTable
   /// @brief Stores offsets per mesh, that should be used when indexing into the triangle hash table.
   //-----------------------------------------------------------------------------------------------------
   std::vector<size_t> m_triHashOffset;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The offset to be added to particle positions before hashing.
+  //-----------------------------------------------------------------------------------------------------
+  float m_cellOffset = 10000.0f;
 };
 
 //-----------------------------------------------------------------------------------------------------
 /// @brief Calculates the cell that the given co-ordinate lies within, this is used for spatial hahsing.
 /// @param _coord is the 3D co-ordinate who's cell we want to calculate.
+/// @param _cellOffset is added to the 3D co-ordinate to avoid issues around the origin, negative,
+/// co-ordinates will be hashed differently to positive ones, even if the difference is small.
 /// @return a 3D integer co-ordinate that represents a 3D cell in our simulation space.
 //-----------------------------------------------------------------------------------------------------
-glm::ivec3 calcCell(const glm::vec3& _coord, const float _cellSize);
+glm::ivec3 calcCell(const glm::vec3& _coord, const float _cellSize, const float _cellOffset);
 //-----------------------------------------------------------------------------------------------------
 /// @brief Calculates the hash id for a given 3D cell, used for spatial hahsing.
 /// @param _cell is the 3D cell that we want to hash.
@@ -45,10 +51,12 @@ size_t hashCell (const glm::ivec3& _cell, const size_t& _tableSize);
 //-----------------------------------------------------------------------------------------------------
 /// @brief Wraps the calcCell and hashCell functions, to hash a particle.
 /// @param _coord is the 3D co-ordinate of the particle we want to hash.
+/// @param _cellOffset is added to the 3D co-ordinate to avoid issues around the origin, negative,
+/// co-ordinates will be hashed differently to positive ones, even if the difference is small.
 /// @return a hash id for the given particle, that can be used to query all particles in this cell from,
 /// the hash table.
 //-----------------------------------------------------------------------------------------------------
-size_t hashParticle(const glm::vec3& _coord, const size_t &_tableSize, const float _cellSize);
+size_t hashParticle(const glm::vec3& _coord, const size_t &_tableSize, const float _cellSize, const float _cellOffset);
 
 }
 

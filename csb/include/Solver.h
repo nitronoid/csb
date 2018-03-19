@@ -98,7 +98,17 @@ public:
   /// @return the amount of times position constraints will be projected every step.
   //-----------------------------------------------------------------------------------------------------
   unsigned int getPositionConstraintIterations() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to set the cell offset that is applied when hashing, can be though of as the simulation,
+  /// size.
+  /// @param _offset is the new cell offset to apply.
+  //-----------------------------------------------------------------------------------------------------
+  void setCellOffset(const float _offset);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to retrieve the current cell offset.
+  /// @return the offset that is applied when hashing, can be though of as the simulation size.
+  //-----------------------------------------------------------------------------------------------------
+  float getCellOffset() const noexcept;
 
 private:
   //-----------------------------------------------------------------------------------------------------

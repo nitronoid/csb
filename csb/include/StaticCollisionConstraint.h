@@ -63,6 +63,11 @@ public:
   /// @param _newSize is the cell size.
   //-----------------------------------------------------------------------------------------------------
   void setCellSize(const float _newSize);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the member that tracks the spatial cell offset, used for spatial hashing.
+  /// @param _newOffset is the cell offset.
+  //-----------------------------------------------------------------------------------------------------
+  void setCellOffset(const float _newOffset);
 
 protected:
   //-----------------------------------------------------------------------------------------------------
@@ -73,6 +78,10 @@ protected:
   /// @brief Tracks the spatial cell size, used for spatial hashing.
   //-----------------------------------------------------------------------------------------------------
   float m_cellSize = 0.f;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The offset to be added to particle positions before hashing.
+  //-----------------------------------------------------------------------------------------------------
+  float m_cellOffset = 0.0f;
 
 };
 

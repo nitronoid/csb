@@ -71,9 +71,11 @@ TEST(SphereCollisionConstraint, resolution)
   };
 
   static constexpr auto cellSize = 1.f;
+  static constexpr auto celloffset = 10000.f;
+
   csb::SpatialHash::SpatialHashTable hashTable;
   hashTable.m_hashTable.resize(9);
-  hashTable.m_hashTable[csb::SpatialHash::hashParticle(testVertices[0], 9, cellSize)].emplace_back(0,0);
+  hashTable.m_hashTable[csb::SpatialHash::hashParticle(testVertices[0], 9, cellSize, celloffset)].emplace_back(0,0);
 
   csb::SphereCollisionConstraint s({0.f, 0.f, 0.f}, 1.f);
   s.setCellSize(cellSize);

@@ -46,6 +46,11 @@ float csb::SimulatedMesh::getTotalEdgeLength() const noexcept
   return m_totalEdgeLength;
 }
 
+float csb::SimulatedMesh::getAverageEdgeLength() const noexcept
+{
+  return m_totalEdgeLength / m_edges.size();
+}
+
 float csb::SimulatedMesh::getShortestEdgeLength() const noexcept
 {
   return m_shortestEdgeLength;

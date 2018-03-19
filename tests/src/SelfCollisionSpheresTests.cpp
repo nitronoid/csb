@@ -9,34 +9,33 @@
 TEST(SelfCollisionSpheresConstraint, constructor)
 {
   csb::SelfCollisionSpheresConstraint s(1.f);
-  EXPECT_EQ(1.f, s.getSphereRadius());
+  EXPECT_EQ(1.f, s.getSphereDiameter());
 
   csb::SelfCollisionSpheresConstraint sCopy(s);
-  EXPECT_EQ(s.getSphereRadius(), sCopy.getSphereRadius());
+  EXPECT_EQ(s.getSphereDiameter(), sCopy.getSphereDiameter());
 
   csb::SelfCollisionSpheresConstraint sMove(std::move(s));
-  EXPECT_EQ(sCopy.getSphereRadius(), sMove.getSphereRadius());
+  EXPECT_EQ(sCopy.getSphereDiameter(), sMove.getSphereDiameter());
 }
 
 TEST(SelfCollisionSpheresConstraint, assignment)
 {
   csb::SelfCollisionSpheresConstraint s(1.f);
-  EXPECT_EQ(1.f, s.getSphereRadius());
+  EXPECT_EQ(1.f, s.getSphereDiameter());
 
   csb::SelfCollisionSpheresConstraint sCopy;
   sCopy = s;
-  EXPECT_EQ(s.getSphereRadius(), sCopy.getSphereRadius());
+  EXPECT_EQ(s.getSphereDiameter(), sCopy.getSphereDiameter());
 
   csb::SelfCollisionSpheresConstraint sMove;
   sMove = std::move(s);
-  EXPECT_EQ(sCopy.getSphereRadius(), sMove.getSphereRadius());
+  EXPECT_EQ(sCopy.getSphereDiameter(), sMove.getSphereDiameter());
 }
 
 TEST(SelfCollisionSpheresConstraint, resolution)
 {
 
   csb::Solver solver;
-  csb::SelfCollisionSpheresConstraint s(1.f);
 
   std::vector<std::shared_ptr<csb::SimulatedMesh>> meshes  {std::make_shared<csb::SimulatedMesh>()};
   meshes[0]->load("../demo/models/xyplane.obj");
@@ -48,32 +47,31 @@ TEST(SelfCollisionSpheresConstraint, resolution)
   // Hash the vertices
   csb::SpatialHash::SpatialHashTable hashTable;
   hashTable.m_hashTable.resize(9);
-  const auto size = meshes[0]->getNVerts();
   const auto& verts = meshes[0]->getVertices();
-  for (GLushort i = 0; i < size; ++i)
-  {
-    hashTable.m_hashTable[csb::SpatialHash::hashParticle(
-          verts[i],
-          hashTable.m_hashTable.size(),
-          meshes[0]->getTotalEdgeLength() / meshes[0]->getNEdges()
-          )].emplace_back(0, i);
-  }
 
-
+  const auto oldV1 = verts[1];
   // Make sure we are using diagonal verts
-  const auto unConstrainedDist = glm::fastDistance(verts[0], verts[2]);
+  auto unConstrainedDist = glm::fastDistance(verts[1], verts[3]);
   EXPECT_FLOAT_EQ(1.4142135f, unConstrainedDist);
 
   // Create a distance constraint that will violate our collision constraint
-  meshes[0]->addConstraint(new csb::DistanceConstraint(0, 2, 1.f));
+  meshes[0]->addConstraint(new csb::DistanceConstraint(1, 3, 1.f));
   meshes[0]->projectConstraints();
 
   // Make sure our distance constraint has violated the collision constraint
-  const auto constrainedDist = glm::fastDistance(verts[0], verts[2]);
+  const auto constrainedDist = glm::fastDistance(verts[1], verts[3]);
   EXPECT_FLOAT_EQ(1.f, constrainedDist);
 
+  // get the vel so we can acount for it
+  const auto vel = oldV1 - verts[1];
+
   // This should prevent non-neighbours from being closer than the sphereRadius
-  s.project(0, meshes, hashTable);
+  solver.step(0.1f);
+
+  // We need to account for the velocity which was added by the distance constraint
+  const auto expectedDist = sphereRadius - glm::fastLength(vel);
+  unConstrainedDist = glm::fastDistance(verts[1], verts[3]);
+  EXPECT_FLOAT_EQ(expectedDist, unConstrainedDist);
 
   const auto& adjacency = meshes[0]->getAdjacencyInfo();
   const glm::vec3 expectedPos(0.f, 1.f, 0.f);
@@ -87,7 +85,7 @@ TEST(SelfCollisionSpheresConstraint, resolution)
       if (i == j || neighbourSet.count(j)) continue;
       const auto& v2 = verts[j];
       const auto dist = glm::fastDistance(v1, v2);
-      EXPECT_GE(dist, sphereRadius);
+      EXPECT_GE(dist, expectedDist);
     }
   }
 }

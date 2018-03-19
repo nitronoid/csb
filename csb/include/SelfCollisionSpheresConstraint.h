@@ -15,7 +15,7 @@ public:
   SelfCollisionSpheresConstraint() = default;
 
   SelfCollisionSpheresConstraint(const float _radius) :
-    m_sphereRadius(_radius)
+    m_sphereDiameter(_radius)
   {}
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
@@ -61,10 +61,10 @@ public:
   //-----------------------------------------------------------------------------------------------------
   virtual ContinuousCollisionConstraint* clone() const override;
 
-  void setSphereRadius(const float _radius);
-  float getSphereRadius() const noexcept;
+  void setSphereDiameter(const float _radius);
+  float getSphereDiameter() const noexcept;
 private:
-  float m_sphereRadius = 1.f;
+  float m_sphereDiameter = 1.f;
 };
 
 }

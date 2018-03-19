@@ -1,13 +1,14 @@
 #include "SpatialHash.h"
 #include "common.hpp"
 
-glm::ivec3 csb::SpatialHash::calcCell(const glm::vec3& _coord, const float _cellSize)
+glm::ivec3 csb::SpatialHash::calcCell(const glm::vec3& _coord, const float _cellSize, const float _cellOffset)
 {
+  const auto coord = _coord + _cellOffset;
   // cellsize is equal to the average edge length for max performance
   return glm::ivec3(
-        static_cast<int>(glm::floor(_coord.x / _cellSize)),
-        static_cast<int>(glm::floor(_coord.y / _cellSize)),
-        static_cast<int>(glm::floor(_coord.z / _cellSize))
+        static_cast<int>(glm::floor(coord.x / _cellSize)),
+        static_cast<int>(glm::floor(coord.y / _cellSize)),
+        static_cast<int>(glm::floor(coord.z / _cellSize))
         );
 }
 
@@ -24,8 +25,8 @@ size_t csb::SpatialHash::hashCell(const glm::ivec3& _cell, const size_t &_tableS
   return posMod((_cell.x * primes[0]) ^ (_cell.y * primes[1]) ^ (_cell.z * primes[2]), _tableSize);
 }
 
-size_t csb::SpatialHash::hashParticle(const glm::vec3& _coord, const size_t &_tableSize, const float _cellSize)
+size_t csb::SpatialHash::hashParticle(const glm::vec3& _coord, const size_t &_tableSize, const float _cellSize, const float _cellOffset)
 {
-  return csb::SpatialHash::hashCell(calcCell(_coord, _cellSize), _tableSize);
+  return csb::SpatialHash::hashCell(calcCell(_coord, _cellSize, _cellOffset), _tableSize);
 }
 

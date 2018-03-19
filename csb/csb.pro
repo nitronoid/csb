@@ -1,6 +1,15 @@
 TEMPLATE = lib
 TARGET = csb
 
+DEFINES += CSB
+
+OBJECTS_DIR = obj
+UI_DIR = ui
+
+QT += opengl core gui
+CONFIG += console c++14
+CONFIG -= app_bundle
+DESTDIR = $$PWD/lib
 
 SOURCES += \
     src/TriMesh.cpp \
@@ -37,23 +46,18 @@ HEADERS += \
 INCLUDEPATH += \
     /usr/local/include/glm/glm \
     /usr/local/include/glm \
+    /usr/local/include \
     $$PWD/include 
 
-DEFINES += CSB
 
-UI_HEADERS_DIR = ui
-OBJECTS_DIR = obj
-MOC_DIR = moc
-UI_DIR = ui
 
-QT += opengl core gui
-CONFIG += console c++14
-CONFIG -= app_bundle
-
-QMAKE_CXXFLAGS += -O3
+QMAKE_CXXFLAGS += -O3 -std=c++14 -msse -msse2 -msse3
 
 linux:{
     LIBS += -lGL -lGLU -lGLEW -lassimp
 }
 
-mac:LIBS+= -L/usr/local/lib -lassimp -L../csb -lcsb
+mac:{
+  LIBS+= -L/usr/local/lib -lassimp
+  QMAKE_CXXFLAGS += -arch x86_64
+}

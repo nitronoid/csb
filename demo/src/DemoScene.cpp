@@ -58,27 +58,29 @@ void DemoScene::initSimMeshes()
 {
   m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
   // Load some meshes and apply constraints
-  m_meshes[0]->load("models/hdxPlane.obj");
+  m_meshes[0]->load("models/uhdPlane.obj");
   m_meshes[0]->init();
   m_meshes[0]->setParticleInverseMass(0, 0.f);
   m_meshes[0]->setParticleInverseMass(90, 0.f);
-  m_meshes[0]->generateClothConstraints(0.02f);
+//  m_meshes[0]->setParticleInverseMass(m_meshes[0]->getNVerts() - 3, 0.f);
+//  m_meshes[0]->generateStructuralConstraints();
+  m_meshes[0]->generateClothConstraints(0.05f);
   m_solver.addSimulatedMesh(m_meshes[0]);
 
 
   m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
   m_meshes[1]->load("models/Sphere.obj");
-  m_meshes[1]->translate({0.0f, -0.7f, 0.f});
-  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({0.f,-0.7f,0.f}, 0.45f));
+  m_meshes[1]->translate({-0.1f, -0.8f, 0.f});
+  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({-0.1f,-0.8f,0.f}, 0.455f));
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::initSolver()
 {
-  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getShortestEdgeLength() * 1.4f));
   m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
   m_solver.addForce({0.f, -5.f, 0.f});
   m_solver.setDamping(0.1f);
-  m_solver.setPositionConstraintIterations(20);
+  m_solver.setPositionConstraintIterations(30);
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::prepMeshesGL()
@@ -145,8 +147,8 @@ void DemoScene::initMaterials()
 {
   m_materials.reserve(5);
 
-  m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialCSBpbr(m_camera, m_shaderLib, &m_matrices, {0.5f, 0.0f, 0.0f}, 1.0f, 1.0f, 0.5f, 1.0f));
+  m_materials.emplace_back(new MaterialWireframe(m_camera, m_shaderLib, &m_matrices));
   m_materials.emplace_back(new MaterialFractal(m_camera, m_shaderLib, &m_matrices));
   for (size_t i = 0; i < m_materials.size(); ++i)
   {

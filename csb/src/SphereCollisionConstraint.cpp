@@ -22,8 +22,8 @@ void csb::SphereCollisionConstraint::updateBoundingBoxCells()
   const auto bbMin = m_centre - glm::vec3(m_radius);
   const auto bbMax = m_centre + glm::vec3(m_radius);
 
-  const auto min = SpatialHash::calcCell(bbMin, m_cellSize);
-  const auto max = SpatialHash::calcCell(bbMax, m_cellSize);
+  const auto min = SpatialHash::calcCell(bbMin, m_cellSize, m_cellOffset);
+  const auto max = SpatialHash::calcCell(bbMax, m_cellSize, m_cellOffset);
 
   m_cells.clear();
   m_cells.reserve(static_cast<size_t>((max.x - min.x) * (max.y - min.y) * (max.z - min.z)));

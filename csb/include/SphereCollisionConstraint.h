@@ -58,18 +58,36 @@ public:
   //-----------------------------------------------------------------------------------------------------
   virtual void init() override;
   //-----------------------------------------------------------------------------------------------------
-  /// @brief This.
+  /// @brief This updates the list of cells that are within the spheres bounding box.
   //-----------------------------------------------------------------------------------------------------
   void updateBoundingBoxCells();
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Allows read only access to the list of cells within the spheres bounding box. You should,
+  /// call updateBoundingBoxCells prior to this, if the sphere's centre or radius is changing.
+  /// @return a constant reference to the list of cells withing the spheres bounding box.
+  //-----------------------------------------------------------------------------------------------------
   const std::vector<size_t> cells() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a copy of the sphere's centre.
+  /// @return a 3D co-ordinate representing the centre of this sphere constraint.
+  //-----------------------------------------------------------------------------------------------------
   glm::vec3 getCentre() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets a copy of the sphere's radius.
+  /// @return the radius of this sphere constraint.
+  //-----------------------------------------------------------------------------------------------------
   float getRadius() const noexcept;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the centre of the sphere constraint. Update bounding box cells should be called after,
+  /// this.
+  /// @param _centre is the new centre for the sphere constraint
+  //-----------------------------------------------------------------------------------------------------
   void setCentre(const glm::vec3 &_centre);
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the radius of the sphere constraint. Update bounding box cells should be called after,
+  /// this.
+  /// @param _radius is the new radius for the sphere constraint
+  //-----------------------------------------------------------------------------------------------------
   void setRadius(const float _radius);
 
 private:

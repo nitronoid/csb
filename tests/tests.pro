@@ -1,6 +1,14 @@
 TEMPLATE = app
+TARGET = CSBTests
+
+OBJECTS_DIR = obj
+
+QT += opengl core gui
 CONFIG += console c++14
 CONFIG -= app_bundle
+
+HEADERS += \
+    src/UtilMacros.h
 
 SOURCES += \
     src/main.cpp \
@@ -14,21 +22,33 @@ SOURCES += \
     src/SpatialHashTests.cpp \
     src/SphereCollisionConstraintTests.cpp \
     src/SolverTests.cpp \
-    src/SelfCollisionSpheresTests.cpp
+    src/SelfCollisionSpheresTests.cpp \
+    src/SelfCollisionRaysTests.cpp
 
 DEPENDPATH += . ../csb
 INCLUDEPATH = ../csb/include
 INCLUDEPATH += \
     /usr/local/include/glm/glm \
-    /usr/local/include/glm
+    /usr/local/include/glm \
+    /usr/local/include
 
-linux:LIBS += -lgtest -pthread -lassimp -L../csb -lcsb
 
-mac:LIBS+= -L/usr/local/lib -lassimp -L../csb -lcsb
+QMAKE_CXXFLAGS += -O3 -std=c++14 -msse -msse2 -msse3
 
-QMAKE_CXXFLAGS += -O3 -std=c++14
+LIBS += -L../csb/lib -lcsb -lgtest -pthread
 
-HEADERS += \
-    src/UtilMacros.h
+linux:{
+    LIBS += -lGL -lGLU -lGLEW -lassimp
+}
 
-DISTFILES +=
+mac:{
+  LIBS+= -L/usr/local/lib -lassimp
+  QMAKE_CXXFLAGS += -arch x86_64
+}
+
+unix:{
+    # add the lib to rpath so it can be dynamically loaded
+    QMAKE_LFLAGS += "-Wl,-rpath,\'\$$ORIGIN/../csb/lib\'"
+}
+
+
