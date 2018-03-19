@@ -149,6 +149,11 @@ public:
   /// @return The timestep that should be used to step the simulation forward.
   //-----------------------------------------------------------------------------------------------------
   const float& deltaTime();
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the timer to paused/ not paused based on the param.
+  /// @param _isPaused is the new state of the timer.
+  //-----------------------------------------------------------------------------------------------------
+  void setPaused(const bool _isPaused);
 
 private:
   //-----------------------------------------------------------------------------------------------------
@@ -171,7 +176,47 @@ private:
   /// @brief Used for lazy initialisation of m_lastTime.
   //-----------------------------------------------------------------------------------------------------
   bool m_isUsed = false;
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to pause time.
+  //-----------------------------------------------------------------------------------------------------
+  bool m_isPaused = false;
 };
+//----------------------------------------------------------------------------------------------------------------------------
+void csb::Solver::FixedTimestepManager::progress()
+{
+  const auto currentTime = hr_clock::now();
+
+  // Lazy initialise current time to avoid a spike when the sim begins
+  if (!m_isUsed)
+  {
+    m_lastTime = currentTime;
+    m_isUsed = true;
+  }
+
+  using namespace std::chrono;
+  float ft = duration_cast<milliseconds>(currentTime - m_lastTime).count() / 1000.0f;
+  m_lastTime = currentTime;
+
+  if (!m_isPaused)
+    m_accum += ft;
+}
+//----------------------------------------------------------------------------------------------------------------------------
+bool csb::Solver::FixedTimestepManager::consume()
+{
+  const auto isBehind = m_accum >= m_timestep;
+  if (isBehind) m_accum -= m_timestep;
+  return isBehind;
+}
+//----------------------------------------------------------------------------------------------------------------------------
+const float& csb::Solver::FixedTimestepManager::deltaTime()
+{
+  return m_timestep;
+}
+//----------------------------------------------------------------------------------------------------------------------------
+void csb::Solver::FixedTimestepManager::setPaused(const bool _isPaused)
+{
+  m_isPaused = _isPaused;
+}
 //----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::Solver() :
   m_impl(std::make_unique<SolverImpl>()),
@@ -289,33 +334,9 @@ void csb::Solver::addSimulatedMesh(const std::shared_ptr<SimulatedMesh> &io_mesh
   m_impl->m_spatialHash.m_hashTable.resize(hashTableSize);
 }
 //----------------------------------------------------------------------------------------------------------------------------
-void csb::Solver::FixedTimestepManager::progress()
+void csb::Solver::setPaused(const bool _isPaused)
 {
-  const auto currentTime = hr_clock::now();
-
-  // Lazy initialise current time to avoid a spike when the sim begins
-  if (!m_isUsed)
-  {
-    m_lastTime = currentTime;
-    m_isUsed = true;
-  }
-
-  using namespace std::chrono;
-  float ft = duration_cast<milliseconds>(currentTime - m_lastTime).count() / 1000.0f;
-  m_lastTime = currentTime;
-  m_accum += ft;
-}
-//----------------------------------------------------------------------------------------------------------------------------
-bool csb::Solver::FixedTimestepManager::consume()
-{
-  const auto isBehind = m_accum >= m_timestep;
-  if (isBehind) m_accum -= m_timestep;
-  return isBehind;
-}
-//----------------------------------------------------------------------------------------------------------------------------
-const float& csb::Solver::FixedTimestepManager::deltaTime()
-{
-  return m_timestep;
+  m_timestepManager->setPaused(_isPaused);
 }
 //----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::update()

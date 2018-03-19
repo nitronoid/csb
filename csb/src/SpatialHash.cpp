@@ -33,4 +33,4 @@ size_t csb::SpatialHash::hashParticle(const glm::vec3& _coord, const size_t &_ta
   // Convenience function
   return csb::SpatialHash::hashCell(calcCell(_coord, _cellSize, _cellOffset), _tableSize);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------

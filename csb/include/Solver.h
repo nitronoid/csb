@@ -52,6 +52,11 @@ public:
   //-----------------------------------------------------------------------------------------------------
   void update();
   //-----------------------------------------------------------------------------------------------------
+  /// @brief Forwards to the timer function, will either pause or unpause the simulation based on the param.
+  /// @param _isPaused is the new state of the timer.
+  //-----------------------------------------------------------------------------------------------------
+  void setPaused(const bool _isPaused);
+  //-----------------------------------------------------------------------------------------------------
   /// @brief Adds a static collision constraint to the simulation.
   /// @param _newConstraint is a raw pointer to the constraint to be added, it is given to an internal,
   /// smart pointer.

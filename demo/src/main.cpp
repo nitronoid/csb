@@ -38,11 +38,11 @@ int main(int argc, char *argv[])
   // Create a new MainWindow
   MainWindow window;
   // Create a camera
-  std::shared_ptr<Camera> cam(new TrackballCamera);
+  std::shared_ptr<Camera> cam(std::make_shared<TrackballCamera>());
   // Create a shader library
-  std::shared_ptr<ShaderLib> lib(new ShaderLib);
+  std::shared_ptr<ShaderLib> lib(std::make_shared<ShaderLib>());
   // Create a scene to place inside the window
-  std::shared_ptr<Scene> scene(new DemoScene(cam, lib, &window));
+  std::shared_ptr<Scene> scene(std::make_shared<DemoScene>(cam, lib, &window));
   // Initialise the window using our scene
   window.init(scene);
   // show it

@@ -67,18 +67,25 @@ public slots:
   //-----------------------------------------------------------------------------------------------------
   void rotating(const bool _rotating);
   //-----------------------------------------------------------------------------------------------------
+  /// @brief Used to link a Qt button to the scene, to allow pausing the timer.
+  /// @param [in] _isPaused tells the solver whether or not it should step.
+  //-----------------------------------------------------------------------------------------------------
+  void paused(const bool _isPaused);
+  //-----------------------------------------------------------------------------------------------------
   /// @brief Used to link a Qt button to the scene, to cycle through the materials and apply them to
   /// the current Mesh.
   //-----------------------------------------------------------------------------------------------------
   void nextMaterial();
 
 private:
+
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to intialise the models, vbo and vao.
   //-----------------------------------------------------------------------------------------------------
-  void initSimMeshes();
-
-  void initSolver();
+  void initDemo1();
+  void initDemo2();
+  void initDemo3();
+  void initDemo4();
   void prepMeshesGL();
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to write our mesh data into the vbo.

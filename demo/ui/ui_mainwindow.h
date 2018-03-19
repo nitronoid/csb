@@ -36,10 +36,11 @@ public:
     QSpacerItem *horizontalSpacer_2;
     QGroupBox *s_drawGB;
     QGridLayout *gridLayout_2;
+    QPushButton *material;
     QCheckBox *m_rotating;
     QSpacerItem *verticalSpacer;
     QSpacerItem *horizontalSpacer_3;
-    QPushButton *material;
+    QCheckBox *m_isPaused;
     QMenuBar *menubar;
 
     void setupUi(QMainWindow *MainWindow)
@@ -71,6 +72,11 @@ public:
         s_drawGB->setObjectName(QStringLiteral("s_drawGB"));
         gridLayout_2 = new QGridLayout(s_drawGB);
         gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
+        material = new QPushButton(s_drawGB);
+        material->setObjectName(QStringLiteral("material"));
+
+        gridLayout_2->addWidget(material, 0, 1, 1, 1);
+
         m_rotating = new QCheckBox(s_drawGB);
         m_rotating->setObjectName(QStringLiteral("m_rotating"));
         m_rotating->setEnabled(true);
@@ -80,16 +86,16 @@ public:
 
         verticalSpacer = new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding);
 
-        gridLayout_2->addItem(verticalSpacer, 3, 1, 1, 1);
+        gridLayout_2->addItem(verticalSpacer, 4, 1, 1, 1);
 
         horizontalSpacer_3 = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
 
         gridLayout_2->addItem(horizontalSpacer_3, 0, 2, 1, 1);
 
-        material = new QPushButton(s_drawGB);
-        material->setObjectName(QStringLiteral("material"));
+        m_isPaused = new QCheckBox(s_drawGB);
+        m_isPaused->setObjectName(QStringLiteral("m_isPaused"));
 
-        gridLayout_2->addWidget(material, 0, 1, 1, 1);
+        gridLayout_2->addWidget(m_isPaused, 3, 1, 1, 1);
 
 
         s_mainWindowGridLayout->addWidget(s_drawGB, 2, 5, 1, 1);
@@ -109,8 +115,9 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Template", Q_NULLPTR));
         s_drawGB->setTitle(QString());
-        m_rotating->setText(QApplication::translate("MainWindow", "Rotating", Q_NULLPTR));
         material->setText(QApplication::translate("MainWindow", "Material", Q_NULLPTR));
+        m_rotating->setText(QApplication::translate("MainWindow", "Rotating", Q_NULLPTR));
+        m_isPaused->setText(QApplication::translate("MainWindow", "Pause", Q_NULLPTR));
     } // retranslateUi
 
 };
