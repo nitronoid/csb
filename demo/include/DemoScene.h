@@ -86,6 +86,10 @@ private:
   void initDemo2();
   void initDemo3();
   void initDemo4();
+  void initDemo5();
+  void initDemo6();
+  void initDemo7();
+  void initDemo8();
   void prepMeshesGL();
   //-----------------------------------------------------------------------------------------------------
   /// @brief Used to write our mesh data into the vbo.

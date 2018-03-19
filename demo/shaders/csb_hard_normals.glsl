@@ -18,13 +18,13 @@ out FragData
   vec2 uv;
 } outData;
 
+uniform mat4 MVP;
+uniform vec3 camPos;
+
 void main(void)
 {
   vec3 norm = normalize(cross(gl_in[2].gl_Position.xyz - gl_in[0].gl_Position.xyz,
       gl_in[1].gl_Position.xyz - gl_in[0].gl_Position.xyz));
-
-//  vec3 norm = vec3(M*vec4(normal, 1.0));
-//  vec3 norm = normalize(cross((gl_in[2].gl_Position - gl_in[0].gl_Position).xyz, (gl_in[1].gl_Position - gl_in[0].gl_Position).xyz));
 
   for (int i = 0; i < 3; ++i)
   {

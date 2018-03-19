@@ -1,5 +1,0 @@
-{
-    "Name" : "RedPBR",
-    "Vertex" : "shaders/PBRVertex.glsl",
-    "Fragment" : "shaders/PBRFragment.glsl"
-}

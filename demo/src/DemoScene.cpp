@@ -42,11 +42,11 @@ void DemoScene::init()
   m_qogl_funcs = context()->versionFunctions<QOpenGLFunctions_4_1_Core>();
 
   initMaterials();
-  initDemo1();
+  initDemo8();
   prepMeshesGL();
 
-  m_camera->setOrigin(0.f, -1.f, 0.f);
-  m_camera->setTarget(0.f, -1.f, -2.f);
+//  m_camera->setOrigin(0.f, -1.f, 0.f);
+//  m_camera->setTarget(0.f, -1.f, -2.f);
 
 
   // Scope the using declaration
@@ -115,7 +115,7 @@ void DemoScene::initDemo3()
   m_solver.addSimulatedMesh(m_meshes[0]);
 
 
-  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+//  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
   m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength() * 1.25f));
   m_solver.addForce({0.f, -5.f, 0.f});
   m_solver.setDamping(0.1f);
@@ -132,17 +132,95 @@ void DemoScene::initDemo4()
   m_meshes[0]->generateClothConstraints(0.05f);
   m_solver.addSimulatedMesh(m_meshes[0]);
 
+  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
+  m_solver.addForce({0.f, -5.f, 0.f});
+  m_solver.setDamping(0.1f);
+  m_solver.setPositionConstraintIterations(30);
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initDemo5()
+{
   m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
-  m_meshes[1]->load("models/Sphere.obj");
-  m_meshes[1]->init();
-  m_meshes[1]->translate({-0.0f, -0.8f, 0.f});
-  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({-0.0f,-0.8f,0.f}, 0.455f));
+  // Load some meshes and apply constraints
+  m_meshes[0]->load("models/hdCube.obj");
+  m_meshes[0]->init();
+  m_meshes[0]->setParticleInverseMass(0, 0.f);
+  m_meshes[0]->setParticleInverseMass(100, 0.f);
+  m_meshes[0]->generateClothConstraints(0.05f);
+  m_solver.addSimulatedMesh(m_meshes[0]);
 
   m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
   m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
   m_solver.addForce({0.f, -5.f, 0.f});
   m_solver.setDamping(0.1f);
   m_solver.setPositionConstraintIterations(60);
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initDemo6()
+{
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  // Load some meshes and apply constraints
+  m_meshes[0]->load("models/hdCube.obj");
+  m_meshes[0]->init();
+  m_meshes[0]->generateClothConstraints(0.05f);
+  m_solver.addSimulatedMesh(m_meshes[0]);
+
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  m_meshes[1]->load("models/bigSphere.obj");
+  m_meshes[1]->init();
+  m_meshes[1]->translate({-0.0f, -2.f, 0.f});
+  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({-0.0f,-2.f,0.f}, 1.0f));
+
+  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
+  m_solver.addForce({0.f, -5.f, 0.f});
+  m_solver.setDamping(0.1f);
+  m_solver.setPositionConstraintIterations(60);
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initDemo7()
+{
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  // Load some meshes and apply constraints
+  m_meshes[0]->load("models/uhdPlane.obj");
+  m_meshes[0]->init();
+  m_meshes[0]->generateClothConstraints(0.05f);
+  m_solver.addSimulatedMesh(m_meshes[0]);
+
+
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  m_meshes[1]->load("models/smallSphere.obj");
+  m_meshes[1]->init();
+  m_meshes[1]->translate({-0.0f, -0.05f, 0.f});
+  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({-0.0f,-0.05f,0.f}, 0.251f));
+
+  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
+  m_solver.addForce({0.f, -2.f, 0.f});
+  m_solver.setDamping(0.1f);
+  m_solver.setPositionConstraintIterations(30);
+}
+//-----------------------------------------------------------------------------------------------------
+void DemoScene::initDemo8()
+{
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  // Load some meshes and apply constraints
+  m_meshes[0]->load("models/Suzanne.obj");
+  m_meshes[0]->init();
+  m_meshes[0]->generateClothConstraints(0.05f);
+  m_solver.addSimulatedMesh(m_meshes[0]);
+
+  m_meshes.emplace_back(std::make_shared<csb::SimulatedMesh>());
+  m_meshes[1]->load("models/bigSphere.obj");
+  m_meshes[1]->init();
+  m_meshes[1]->translate({-0.0f, -2.f, 0.f});
+  m_solver.addStaticCollision(new csb::SphereCollisionConstraint({-0.0f,-2.f,0.f}, 1.0f));
+
+//  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+//  m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
+  m_solver.addForce({0.f, -2.f, 0.f});
+  m_solver.setDamping(0.1f);
+  m_solver.setPositionConstraintIterations(30);
 }
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::prepMeshesGL()

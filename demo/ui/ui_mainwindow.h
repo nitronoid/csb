@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created by: Qt User Interface Compiler version 5.9.4
+** Created by: Qt User Interface Compiler version 5.9.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -103,7 +103,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QStringLiteral("menubar"));
-        menubar->setGeometry(QRect(0, 0, 800, 25));
+        menubar->setGeometry(QRect(0, 0, 800, 26));
         MainWindow->setMenuBar(menubar);
 
         retranslateUi(MainWindow);
@@ -113,7 +113,7 @@ public:
 
     void retranslateUi(QMainWindow *MainWindow)
     {
-        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "Template", Q_NULLPTR));
+        MainWindow->setWindowTitle(QApplication::translate("MainWindow", "CSB", Q_NULLPTR));
         s_drawGB->setTitle(QString());
         material->setText(QApplication::translate("MainWindow", "Material", Q_NULLPTR));
         m_rotating->setText(QApplication::translate("MainWindow", "Rotating", Q_NULLPTR));

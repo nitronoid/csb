@@ -1,5 +1,0 @@
-{
-    "Name" : "Phong",
-    "Vertex" : "shaders/phong_vert.glsl",
-    "Fragment" : "shaders/phong_frag.glsl"
-}
