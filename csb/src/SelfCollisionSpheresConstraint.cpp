@@ -4,6 +4,7 @@
 #include "gtx/fast_square_root.hpp"
 
 
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SelfCollisionSpheresConstraint::project(
     const size_t &_meshIndex,
     std::vector<std::shared_ptr<SimulatedMesh> > &_meshes,
@@ -17,76 +18,80 @@ void csb::SelfCollisionSpheresConstraint::project(
   for (GLushort i = 0; i < size; ++i)
   {
     auto& P = particles[i];
+    // Build a list of ignored particles, consiting of itself and it's first ring neighbours.
     auto ignored = adjacency[i];
     ignored.push_back(i);
     std::sort(ignored.begin(), ignored.end());
 
-    auto considered = _spatialHash.m_hashTable[SpatialHash::hashParticle(*P.m_pos, _spatialHash.m_hashTable.size(), m_sphereDiameter, _spatialHash.m_cellOffset)];
+    const auto& hashTable = _spatialHash.m_hashTable;
+    // Get all of the particles in this cell
+    auto considered = hashTable[SpatialHash::hashParticle(*P.m_pos, hashTable.size(), m_sphereDiameter, _spatialHash.m_cellOffset)];
     std::sort(considered.begin(), considered.end());
 
 
     // Scope the using declaration
     {
-      // I think this is more readable
+      // I think this is more readable, we erase the ignored particles from the list of considered ones
       using namespace std;
       considered.erase(
-            remove_if(begin(considered), end(considered),
-                      [&ignored, &_meshIndex](const auto x)
+            remove_if(begin(considered), end(considered), [&ignored, &_meshIndex](const auto x)
       {
         return (x.first == _meshIndex) && binary_search(begin(ignored), end(ignored),x.second);
-      }),
-            end(considered)
-            );
+      }
+      ), end(considered));
     }
 
+    // We'll accumulate all the collision responses here
     glm::vec3 offset(0.f);
-    int count = 0;
+    int intersectionCount = 0;
 
     for (const auto& pid : considered)
     {
+      // Get the particle we are checking against
       auto& otherParticles = getParticles(*_meshes[pid.first]);
       const auto& Q = otherParticles[pid.second];
+      // Get the displacement vector and squared distance between the particles
       const auto disp = *P.m_pos - *Q.m_pos;
       const auto dist = glm::length2(disp);
 
       // By setting the distance to be larger than the distance between particles
       // we should cover the cloth surface, however we can't set them too big,
-      // otherwise conflicts with neighbours will occur and we'll see flickering
-      auto radius2_sqr = (m_sphereDiameter);
-      radius2_sqr *= radius2_sqr;
-      if (dist < radius2_sqr)
+      // otherwise conflicts with neighbours will occur and we'll see flickering.
+      // We check the squared distances to avoid expensive length calculations.
+      if (dist < m_sphereDiameter * m_sphereDiameter)
       {
+        // Get the correction vector (2R - D)
         const auto move = (m_sphereDiameter - glm::fastSqrt(dist));
         offset += (glm::fastNormalize(disp) * move);
-        ++count;
+        ++intersectionCount;
       }
     }
 
-    if (count)
+    // If an intersection took place
+    if (intersectionCount)
     {
       // Set a lower bound for the offset to reduce flickering
       offset *= glm::step(0.001f, offset);
-      (*P.m_pos) += offset/static_cast<float>(count);
+      // Average the correction
+      (*P.m_pos) += offset/static_cast<float>(intersectionCount);
       // zero the velocity
       P.m_prevPos = *P.m_pos;
-
     }
   }
 }
-
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::ContinuousCollisionConstraint* csb::SelfCollisionSpheresConstraint::clone() const
 {
   return new SelfCollisionSpheresConstraint(*this);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SelfCollisionSpheresConstraint::setSphereDiameter(const float _radius)
 {
   m_sphereDiameter = _radius;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 float csb::SelfCollisionSpheresConstraint::getSphereDiameter() const noexcept
 {
   return m_sphereDiameter;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------

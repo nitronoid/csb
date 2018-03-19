@@ -7,6 +7,8 @@
 #include "gtx/intersect.hpp"
 #undef GLM_ENABLE_EXPERIMENTAL
 
+
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SelfCollisionRaysConstraint::project(
     const size_t &_meshIndex,
     std::vector<std::shared_ptr<SimulatedMesh> > &_meshes,
@@ -43,10 +45,10 @@ void csb::SelfCollisionRaysConstraint::project(
         auto& otherParticles = getParticles(*_meshes[meshId]);
         const auto& particle = otherParticles[pid];
 
+        // Calculate the start and end points of the line, and get the direction vector
         const auto& L0 = particle.m_prevPos;
         const auto& L1 = *particle.m_pos;
-
-        const auto dir = *particle.m_pos - particle.m_prevPos;
+        const auto dir = L1 - L0;
 
         // Use these vectors to determine whether the line is entirely on one side of the tri
         const auto distStart = glm::dot(T0 - L0, TNorm);
@@ -56,13 +58,7 @@ void csb::SelfCollisionRaysConstraint::project(
         // Check not same side of triangle, and an intersection is present
         if (glm::intersectLineTriangle(L0, dir, T0, T1, T2, intersection) && (distStart * distEnd < 0.0f))
         {
-          // We swap the past and current positions to reverse velocity giving a slight bounce to the cloth
-//          std::swap(*particles[indices[index]].m_pos, particles[indices[index]].m_prevPos);
-//          std::swap(*particles[indices[index + 1]].m_pos, particles[indices[index + 1]].m_prevPos);
-//          std::swap(*particles[indices[index + 2]].m_pos, particles[indices[index + 2]].m_prevPos);
-//          // this one belongs to the other mesh
-//          std::swap(*otherParticles[pid].m_pos, otherParticles[pid].m_prevPos);
-
+          // Rewind the positions and kill the velocity
           *particles[indices[index]].m_pos = particles[indices[index]].m_prevPos;
           *particles[indices[index+1]].m_pos = particles[indices[index+1]].m_prevPos;
           *particles[indices[index+2]].m_pos = particles[indices[index+2]].m_prevPos;
@@ -72,9 +68,9 @@ void csb::SelfCollisionRaysConstraint::project(
     }
   }
 }
-
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::ContinuousCollisionConstraint* csb::SelfCollisionRaysConstraint::clone() const
 {
   return new SelfCollisionRaysConstraint(*this);
 }
+//----------------------------------------------------------------------------------------------------------------------------

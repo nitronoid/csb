@@ -67,8 +67,7 @@ public:
   //-----------------------------------------------------------------------------------------------------
   void projectConstraints();
   //-----------------------------------------------------------------------------------------------------
-  /// @brief Adds the translation to every vertex, this doesn't modify previous position so can affect,
-  /// acceleration if performed mid simulation.
+  /// @brief Adds the translation to every particle. Doesn't affect velocity.
   /// @param _translation is the translation to add to the vertices.
   //-----------------------------------------------------------------------------------------------------
   void translate(const glm::vec3 &_translation);

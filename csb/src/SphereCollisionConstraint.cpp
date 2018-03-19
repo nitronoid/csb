@@ -6,26 +6,29 @@
 #undef GLM_ENABLE_EXPERIMENTAL
 
 
+//----------------------------------------------------------------------------------------------------------------------------
 csb::SphereCollisionConstraint::SphereCollisionConstraint(const glm::vec3 &_centre, const float _radius) :
   m_centre(_centre),
   m_radius(_radius)
 {}
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SphereCollisionConstraint::init()
 {
   updateBoundingBoxCells();
 }
-
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SphereCollisionConstraint::updateBoundingBoxCells()
 {
+  // Minimum and maximum corners of the bounding box
   const auto bbMin = m_centre - glm::vec3(m_radius);
   const auto bbMax = m_centre + glm::vec3(m_radius);
 
+  // Get the min and max cells in the spatial hash
   const auto min = SpatialHash::calcCell(bbMin, m_cellSize, m_cellOffset);
   const auto max = SpatialHash::calcCell(bbMax, m_cellSize, m_cellOffset);
 
   m_cells.clear();
+  // Reserve the number of cells
   m_cells.reserve(static_cast<size_t>((max.x - min.x) * (max.y - min.y) * (max.z - min.z)));
   // hash all cells within the bounding box of this sphere
   for (int x = min.x; x <= max.x; ++x)
@@ -35,32 +38,32 @@ void csb::SphereCollisionConstraint::updateBoundingBoxCells()
         m_cells.push_back(SpatialHash::hashCell({x,y,z}, m_hashTableSize));
       }
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const std::vector<size_t> csb::SphereCollisionConstraint::cells() const noexcept
 {
   return m_cells;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 glm::vec3 csb::SphereCollisionConstraint::getCentre() const noexcept
 {
   return m_centre;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 float csb::SphereCollisionConstraint::getRadius() const noexcept
 {
   return m_radius;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SphereCollisionConstraint::setCentre(const glm::vec3 &_centre)
 {
   m_centre = _centre;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SphereCollisionConstraint::setRadius(const float _radius)
 {
   m_radius = _radius;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::SphereCollisionConstraint::project(std::vector<Particle> &io_particles, const SpatialHash::SpatialHashTable &_spatialHash)
 {
   // Get the particles within the spheres bounding box
@@ -72,8 +75,7 @@ void csb::SphereCollisionConstraint::project(std::vector<Particle> &io_particles
     for (const auto& particleId : contained)
       intersectingParticles.push_back(particleId.second);
   }
-
-
+  // Project all particles within the sphere, onto the nearest surface point
   for (const auto& p : intersectingParticles)
   {
     const auto disp = *io_particles[p].m_pos - m_centre;
@@ -84,8 +86,9 @@ void csb::SphereCollisionConstraint::project(std::vector<Particle> &io_particles
     }
   }
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::StaticCollisionConstraint* csb::SphereCollisionConstraint::clone() const
 {
   return new SphereCollisionConstraint(*this);
 }
+//----------------------------------------------------------------------------------------------------------------------------

@@ -2,6 +2,8 @@
 #include "SpatialHash.h"
 #include "PositionConstraint.h"
 
+
+//----------------------------------------------------------------------------------------------------------------------------
 struct csb::Solver::SolverImpl
 {
   //-----------------------------------------------------------------------------------------------------
@@ -83,7 +85,7 @@ struct csb::Solver::SolverImpl
   //-----------------------------------------------------------------------------------------------------
   float m_dampingComplement = 1.f;
 };
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::SolverImpl::SolverImpl(const SolverImpl&_rhs) :
   m_spatialHash(_rhs.m_spatialHash),
   m_numParticles(_rhs.m_numParticles),
@@ -102,7 +104,7 @@ csb::Solver::SolverImpl::SolverImpl(const SolverImpl&_rhs) :
   for (auto& staticCollision : _rhs.m_staticCollisions)
     m_staticCollisions.emplace_back(staticCollision->clone());
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::SolverImpl& csb::Solver::SolverImpl::operator=(const SolverImpl&_rhs)
 {
   m_spatialHash =_rhs.m_spatialHash;
@@ -124,7 +126,6 @@ csb::Solver::SolverImpl& csb::Solver::SolverImpl::operator=(const SolverImpl&_rh
 
   return *this;
 }
-
 //-----------------------------------------------------------------------------------------------------
 /// @brief An internal timer that is used to ensure the timestep is fixed for the simulation, and that,
 /// the simulation keeps up with the app.
@@ -171,35 +172,35 @@ private:
   //-----------------------------------------------------------------------------------------------------
   bool m_isUsed = false;
 };
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::Solver() :
   m_impl(std::make_unique<SolverImpl>()),
   m_timestepManager(std::make_unique<FixedTimestepManager>())
 {}
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::Solver(const Solver&_rhs) :
   m_impl(new SolverImpl(*_rhs.m_impl)),
   m_timestepManager(new FixedTimestepManager(*_rhs.m_timestepManager))
 {}
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver& csb::Solver::operator=(const Solver&_rhs)
 {
   m_impl.reset(new SolverImpl(*_rhs.m_impl));
   m_timestepManager.reset(new FixedTimestepManager(*_rhs.m_timestepManager));
   return *this;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::Solver(Solver&&) = default;
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver& csb::Solver::operator=(Solver&&) = default;
-
+//----------------------------------------------------------------------------------------------------------------------------
 csb::Solver::~Solver() = default;
-
+//----------------------------------------------------------------------------------------------------------------------------
 std::vector<GLushort> csb::Solver::getConnectedVertices(const std::shared_ptr<SimulatedMesh> &io_meshRef, const GLushort _particle)
 {
   return io_meshRef->getAdjacencyInfo()[_particle];
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::hashVerts(const size_t &_meshIndex)
 {
   const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
@@ -211,7 +212,7 @@ void csb::Solver::hashVerts(const size_t &_meshIndex)
     hashTable[SpatialHash::hashParticle(*mesh->m_particles[i].m_pos, tableSize, m_impl->m_averageEdgeLength, m_impl->m_spatialHash.m_cellOffset)].emplace_back(_meshIndex, i);
   }
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::hashTris(const size_t &_meshIndex)
 {
   const auto mesh = m_impl->m_referencedMeshes[_meshIndex];
@@ -237,7 +238,7 @@ void csb::Solver::hashTris(const size_t &_meshIndex)
         }
   }
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::resolveStaticCollisions(const size_t &_meshIndex)
 {
   for (auto& collisionConstraint : m_impl->m_staticCollisions)
@@ -245,7 +246,7 @@ void csb::Solver::resolveStaticCollisions(const size_t &_meshIndex)
     collisionConstraint->project(m_impl->m_referencedMeshes[_meshIndex]->m_particles, m_impl->m_spatialHash);
   }
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::resolveContinuousCollisions(const size_t &_meshIndex)
 {
   for (auto& collisionConstraint : m_impl->m_continuousCollisions)
@@ -253,8 +254,7 @@ void csb::Solver::resolveContinuousCollisions(const size_t &_meshIndex)
     collisionConstraint->project(_meshIndex, m_impl->m_referencedMeshes, m_impl->m_spatialHash);
   }
 }
-
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::addStaticCollision(StaticCollisionConstraint* _newConstraint)
 {
   _newConstraint->setCellSize(m_impl->m_averageEdgeLength);
@@ -263,12 +263,12 @@ void csb::Solver::addStaticCollision(StaticCollisionConstraint* _newConstraint)
   _newConstraint->init();
   m_impl->m_staticCollisions.emplace_back(_newConstraint);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::addContinuousCollision(ContinuousCollisionConstraint* _newConstraint)
 {
   m_impl->m_continuousCollisions.emplace_back(_newConstraint);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::addSimulatedMesh(const std::shared_ptr<SimulatedMesh> &io_mesh)
 {
   // Store a reference pointer to the mesh
@@ -287,9 +287,8 @@ void csb::Solver::addSimulatedMesh(const std::shared_ptr<SimulatedMesh> &io_mesh
   const size_t multiple = static_cast<size_t>(pow10(floor(log10(m_impl->m_numParticles))));
   const auto hashTableSize = ((m_impl->m_numParticles + multiple - 1) / multiple) * multiple - 1;
   m_impl->m_spatialHash.m_hashTable.resize(hashTableSize);
-
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::FixedTimestepManager::progress()
 {
   const auto currentTime = hr_clock::now();
@@ -306,19 +305,19 @@ void csb::Solver::FixedTimestepManager::progress()
   m_lastTime = currentTime;
   m_accum += ft;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 bool csb::Solver::FixedTimestepManager::consume()
 {
   const auto isBehind = m_accum >= m_timestep;
   if (isBehind) m_accum -= m_timestep;
   return isBehind;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const float& csb::Solver::FixedTimestepManager::deltaTime()
 {
   return m_timestep;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::update()
 {
   m_timestepManager->progress();
@@ -327,7 +326,7 @@ void csb::Solver::update()
     step(m_timestepManager->deltaTime());
   }
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::step(const float _time)
 {
 
@@ -365,47 +364,49 @@ void csb::Solver::step(const float _time)
   }
 
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::addForce(const glm::vec3 &_force)
 {
   m_impl->m_totalForce += _force;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 glm::vec3 csb::Solver::getTotalForce() const noexcept
 {
   return m_impl->m_totalForce;
 }
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::setTotalForce(const glm::vec3 &_force)
 {
   m_impl->m_totalForce = _force;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::setDamping(const float _damping)
 {
   m_impl->m_dampingComplement = glm::clamp(1.f - _damping, 0.0f, 1.f);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 float csb::Solver::getDamping() const noexcept
 {
   return 1.f - m_impl->m_dampingComplement;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::setPositionConstraintIterations(const unsigned int _iterations)
 {
   m_impl->m_positionConstraintIterations = _iterations;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 unsigned int csb::Solver::getPositionConstraintIterations() const noexcept
 {
   return m_impl->m_positionConstraintIterations;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::Solver::setCellOffset(const float _offset)
 {
   m_impl->m_spatialHash.m_cellOffset = _offset;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 float csb::Solver::getCellOffset() const noexcept
 {
   return m_impl->m_spatialHash.m_cellOffset;
 }
+//----------------------------------------------------------------------------------------------------------------------------

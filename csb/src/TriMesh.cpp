@@ -5,6 +5,7 @@
 #include <assimp/postprocess.h>
 
 
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::TriMesh::load(const std::string &_fname, const size_t &_meshId)
 {
   Assimp::Importer importer;
@@ -34,15 +35,16 @@ void csb::TriMesh::load(const std::string &_fname, const size_t &_meshId)
   auto& vertices = mesh->mVertices;
   auto& normals = mesh->mNormals;
   auto& texCoords = mesh->mTextureCoords[0];
-  // Some meshes don't have UV's
-  bool hasTexCoords = mesh->HasTextureCoords(0);
-  bool hasNormals = mesh->HasNormals();
+  // Some meshes don't have UV's or normals, but we need positions
+  const bool hasTexCoords = mesh->HasTextureCoords(0);
+  const bool hasNormals = mesh->HasNormals();
 
   for (size_t i = 0; i < numVerts; ++i)
   {
     auto& vert = vertices[i];
     m_vertices.insert(m_vertices.end(), {vert.x,vert.y,vert.z});
 
+    // Branch prediction fixes these
     if (hasNormals)
     {
       auto& norm = normals[i];
@@ -74,8 +76,10 @@ void csb::TriMesh::load(const std::string &_fname, const size_t &_meshId)
     }
   }
 
+  // get the edges
   calcEdges();
 
+  // Use the edges to build our adjacency table
   m_adjacency.resize(numVerts);
   std::vector<std::unordered_set<GLushort>> adjacencySets(numVerts);
   for (const auto& edge : m_edges)
@@ -89,7 +93,7 @@ void csb::TriMesh::load(const std::string &_fname, const size_t &_meshId)
     m_adjacency[i].insert(m_adjacency[i].end(), adjacencySets[i].begin(), adjacencySets[i].end());
 
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::TriMesh::reset()
 {
   m_indices.clear();
@@ -98,27 +102,27 @@ void csb::TriMesh::reset()
   m_uvs.clear();
   m_edges.clear();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const GLushort *csb::TriMesh::getIndicesData() const noexcept
 {
   return &m_indices[0];
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const GLfloat* csb::TriMesh::getVertexData() const noexcept
 {
   return &m_vertices[0].x;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const GLfloat* csb::TriMesh::getNormalsData() const noexcept
 {
   return &m_normals[0].x;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const GLfloat *csb::TriMesh::getUVsData() const noexcept
 {
   return &m_uvs[0].x;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const GLfloat *csb::TriMesh::getAttribData(const csb::MeshAttribute _attrib) const noexcept
 {
   using namespace csb;
@@ -132,8 +136,7 @@ const GLfloat *csb::TriMesh::getAttribData(const csb::MeshAttribute _attrib) con
   }
   return data;
 }
-
-
+//----------------------------------------------------------------------------------------------------------------------------
 int csb::TriMesh::getNAttribData(const csb::MeshAttribute _attrib) const noexcept
 {
   using namespace csb;
@@ -147,89 +150,89 @@ int csb::TriMesh::getNAttribData(const csb::MeshAttribute _attrib) const noexcep
   }
   return data;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 size_t csb::TriMesh::getNVerts() const noexcept
 {
   return m_vertices.size();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 size_t csb::TriMesh::getNUVs() const noexcept
 {
   return m_uvs.size();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 size_t csb::TriMesh::getNNorms() const noexcept
 {
   return m_normals.size();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 size_t csb::TriMesh::getNIndices() const noexcept
 {
   return m_indices.size();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 size_t csb::TriMesh::getNEdges() const noexcept
 {
   return m_edges.size();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 int csb::TriMesh::getNIndicesData() const noexcept
 {
   return static_cast<int>(m_indices.size());
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 int csb::TriMesh::getNVertData() const noexcept
 {
   return static_cast<int>(m_vertices.size() * 3);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 int csb::TriMesh::getNNormData() const noexcept
 {
   return static_cast<int>(m_normals.size() * 3);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 int csb::TriMesh::getNUVData() const noexcept
 {
   return static_cast<int>(m_uvs.size() * 2);
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 int csb::TriMesh::getNData() const noexcept
 {
   return getNVertData() + getNNormData() + getNUVData();
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const std::vector<std::vector<GLushort>>& csb::TriMesh::getAdjacencyInfo() const noexcept
 {
   return m_adjacency;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const std::vector<GLushort>& csb::TriMesh::getIndices() const noexcept
 {
   return m_indices;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const std::vector<glm::vec3> &csb::TriMesh::getVertices() const noexcept
 {
   return m_vertices;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const std::vector<glm::vec2> &csb::TriMesh::getUVs() const noexcept
 {
   return m_uvs;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 const std::vector<glm::vec3> &csb::TriMesh::getNormals() const noexcept
 {
   return m_normals;
 }
-
+//----------------------------------------------------------------------------------------------------------------------------
 void csb::TriMesh::calcEdges()
 {
   std::unordered_set<Edge> edgeSet;
   // Roughly
   auto numEdges = static_cast<size_t>(std::abs(static_cast<long>(m_vertices.size()) + (static_cast<long>(m_indices.size()) / 3l) - 2l));
   edgeSet.reserve(numEdges);
-
+  // Add all edges to the set, our Edge class is ordered so will eliminate reversed edges
   const auto last = m_indices.size() - 2;
   for (size_t i = 0; i < last; i+=3)
   {
@@ -242,3 +245,4 @@ void csb::TriMesh::calcEdges()
   }
   std::copy(edgeSet.begin(), edgeSet.end(), std::back_inserter(m_edges));
 }
+//----------------------------------------------------------------------------------------------------------------------------

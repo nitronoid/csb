@@ -76,7 +76,7 @@ void DemoScene::initSimMeshes()
 //-----------------------------------------------------------------------------------------------------
 void DemoScene::initSolver()
 {
-  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
+//  m_solver.addContinuousCollision(new csb::SelfCollisionRaysConstraint);
   m_solver.addContinuousCollision(new csb::SelfCollisionSpheresConstraint(m_meshes[0]->getAverageEdgeLength()));
   m_solver.addForce({0.f, -5.f, 0.f});
   m_solver.setDamping(0.1f);
