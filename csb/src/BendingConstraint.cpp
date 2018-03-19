@@ -73,9 +73,9 @@ void csb::BendingConstraint::setParticleIndex(const unsigned short _index, const
   m_p[_index] = _p;
 }
 
-void csb::BendingConstraint::setParticleWeight(const unsigned short _index, const float _invMass)
+void csb::BendingConstraint::setParticleWeight(const unsigned short _index, const float _weight)
 {
-  m_w[_index] = _invMass;
+  m_w[_index] = _weight;
 }
 
 void csb::BendingConstraint::setRest(const float _rest)

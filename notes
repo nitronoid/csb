@@ -5,6 +5,7 @@ Add static collision planes
 smooth shading
 energy test for solver
 clone test
+move constructor lists to .cpp
 
 FIXESS
 currently masses must be set before constraints are generated

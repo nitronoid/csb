@@ -54,6 +54,9 @@ public:
   virtual ContinuousCollisionConstraint* clone() const = 0;
 
 protected:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief This gives derived classes access to a meshes particles.
+  //-----------------------------------------------------------------------------------------------------
   std::vector<csb::Particle>& getParticles(SimulatedMesh&_mesh) const noexcept;
 };
 

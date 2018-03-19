@@ -13,9 +13,13 @@ public:
   /// @brief Default constructor.
   //-----------------------------------------------------------------------------------------------------
   SelfCollisionSpheresConstraint() = default;
-
-  SelfCollisionSpheresConstraint(const float _radius) :
-    m_sphereDiameter(_radius)
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Constructor.
+  /// @param _diameter is size of the spheres that should be placed around all particles to prevent,
+  ///  intersection.
+  //-----------------------------------------------------------------------------------------------------
+  SelfCollisionSpheresConstraint(const float _diameter) :
+    m_sphereDiameter(_diameter)
   {}
   //-----------------------------------------------------------------------------------------------------
   /// @brief Default copy constructor.
@@ -60,10 +64,21 @@ public:
   /// @return A raw pointer to a newly allocated clone of the derived class.
   //-----------------------------------------------------------------------------------------------------
   virtual ContinuousCollisionConstraint* clone() const override;
-
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Sets the sphere diameter for each particle.
+  /// @param _diameter is the new diameter of the collision spheres.
+  //-----------------------------------------------------------------------------------------------------
   void setSphereDiameter(const float _radius);
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief Gets the sphere diameter for each particle.
+  /// @return The size of the collision spheres.
+  //-----------------------------------------------------------------------------------------------------
   float getSphereDiameter() const noexcept;
+
 private:
+  //-----------------------------------------------------------------------------------------------------
+  /// @brief The size of the collision spheres.
+  //-----------------------------------------------------------------------------------------------------
   float m_sphereDiameter = 1.f;
 };
 
